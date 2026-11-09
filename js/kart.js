@@ -22,6 +22,7 @@ export class Kart {
     this.track = track;
     this.proj = {};
     this.events = [];
+    this.topMul = 1; // 極速倍率（電腦車手的強弱、追趕機制用；玩家固定 1）
     this.place(0, 0);
   }
 
@@ -186,7 +187,7 @@ export class Kart {
     }
 
     // ---------------------------------------------------------- 速度
-    let top = P.maxSpeed;
+    let top = P.maxSpeed * this.topMul;
     if (this.boostT > 0) { top += this.boostAdd; this.boostT -= dt; }
     if (this.nitroT > 0) { top += P.nitroSpeed; this.nitroT -= dt; }
     if (this.onGrass) top *= P.grassTop;

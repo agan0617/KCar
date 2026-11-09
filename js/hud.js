@@ -105,7 +105,17 @@ export class Hud {
     this.miniTrack = new Graphics();
     this.miniDot = new Graphics();
     this.mini.addChild(this.miniTrack, this.miniDot);
-    r.addChild(this.panel, this.mini, this.tLap, this.tTime, this.tSub, this.gauge, this.tSpeed, this.tKmh, this.meter, this.tMeter, this.tCount, this.tWarn, this.pauseBtn);
+    // 競賽：名次、排行、對手名牌
+    this.tPlace = new Text({ text: '', style: style(58, '#ffffff') });
+    this.tPlaceOf = new Text({ text: '/4', style: style(24, '#cfe6ff') });
+    this.tPlaceOf.anchor.set(0, 1);
+    this.board = new Container();
+    this.boardBg = new Graphics();
+    this.boardRows = [0, 1, 2, 3].map(() => new Text({ text: '', style: style(17, '#ffffff') }));
+    this.board.addChild(this.boardBg, ...this.boardRows);
+    this.tags = new Container();
+    this.tagPool = [];
+    r.addChild(this.tags, this.panel, this.mini, this.tPlace, this.tPlaceOf, this.board, this.tLap, this.tTime, this.tSub, this.gauge, this.tSpeed, this.tKmh, this.meter, this.tMeter, this.tCount, this.tWarn, this.pauseBtn);
     r.visible = false;
   }
 
@@ -151,16 +161,20 @@ export class Hud {
     g.moveTo(sx - nx * L, sy - nz * L).lineTo(sx + nx * L, sy + nz * L).stroke({ width: 3 * mp.s, color: 0xffd23f });
   }
 
-  drawMiniDot(k) {
+  drawMiniDot(k, others = []) {
     if (!this.miniMap) return;
     const s = this.miniPos.s;
+    const g = this.miniDot;
+    g.clear();
+    for (const o of others) {
+      const [ox, oy] = this.miniMap(o.x, o.z);
+      g.circle(ox, oy, 4.5 * s).fill(o.color).stroke({ width: 1.5, color: 0xffffff });
+    }
     const [x, y] = this.miniMap(k.x, k.z);
     // 前方 = (sin h, cos h)，畫成指向前方的三角形
     const fx = Math.sin(k.h), fy = Math.cos(k.h);
     const rx = -fy, ry = fx;
     const a = 8 * s, w = 5.5 * s;
-    const g = this.miniDot;
-    g.clear();
     g.poly([x + fx * a, y + fy * a, x - fx * a * 0.6 + rx * w, y - fy * a * 0.6 + ry * w, x - fx * a * 0.6 - rx * w, y - fy * a * 0.6 - ry * w])
       .fill(0xff3b30).stroke({ width: 2, color: 0xffffff });
   }
@@ -243,6 +257,10 @@ export class Hud {
     this.tLap.position.set(26 * s, 18 * s);
     this.tTime.position.set(26 * s, 58 * s);
     this.tSub.position.set(26 * s, 92 * s);
+    this.tPlace.scale.set(s);
+    this.tPlace.position.set(22 * s, 128 * s);
+    this.tPlaceOf.scale.set(s);
+    this.boardPos = { x: 12, y: 206 * s, w: 170 * s, row: 24 * s, s };
     // 下方中央：速度、集氣條
     this.tSpeed.scale.set(s);
     this.tKmh.scale.set(s);
@@ -349,7 +367,45 @@ export class Hud {
     if (jb && jb.glow !== glow) { jb.glow = glow; this.drawTouch(jb); }
 
     this.tWarn.visible = !!st.wrongWay;
-    this.drawMiniDot(k);
+    this.drawMiniDot(k, st.others || []);
+
+    // 名次與排行（只有競賽模式）
+    const racing = !!st.standings;
+    this.tPlace.visible = this.tPlaceOf.visible = this.board.visible = racing;
+    if (racing) {
+      const place = st.place;
+      this.tPlace.text = String(place);
+      this.tPlace.style.fill = ['#ffd23f', '#e0e6ee', '#ffb26b', '#ffffff'][place - 1];
+      this.tPlaceOf.position.set(this.tPlace.x + this.tPlace.width + 4 * s, this.tPlace.y + this.tPlace.height - 8 * s);
+      const bp = this.boardPos;
+      this.boardBg.clear().roundRect(bp.x, bp.y, bp.w, bp.row * 4 + 10 * s, 12 * s).fill({ color: 0x0b1733, alpha: 0.42 });
+      st.standings.forEach((row, i) => {
+        const t = this.boardRows[i];
+        t.text = `${i + 1}  ${row.name}`;
+        t.style.fill = row.isPlayer ? '#ffd23f' : '#ffffff';
+        t.scale.set(s);
+        t.position.set(bp.x + 26 * s, bp.y + 5 * s + i * bp.row);
+        this.boardBg.circle(bp.x + 14 * s, bp.y + 5 * s + i * bp.row + 11 * s, 6 * s).fill(row.color);
+      });
+    }
+    // 對手名牌
+    const tags = st.tags || [];
+    while (this.tagPool.length < tags.length) {
+      const t = new Text({ text: '', style: style(16, '#ffffff') });
+      t.anchor.set(0.5, 1);
+      this.tags.addChild(t);
+      this.tagPool.push(t);
+    }
+    this.tagPool.forEach((t, i) => {
+      const g = tags[i];
+      t.visible = !!g;
+      if (!g) return;
+      t.text = g.name;
+      t.style.fill = g.color;
+      t.alpha = g.a;
+      t.scale.set(s);
+      t.position.set(g.x, g.y);
+    });
 
     // 速度線
     const ln = this.lines;
@@ -414,43 +470,86 @@ export class Hud {
     this.loadText.text = `載入賽道中… ${Math.round(p * 100)}%`;
   }
 
-  showTitle({ version, best, touch, onStart }) {
+  /** 首頁：賽道卡片（點了就換賽道，背景跟著換）＋三種模式 */
+  showTitle({ version, tracks, selected, best, touch, loading, onSelect, onStart }) {
     this.clearOverlay();
     this.loadText = null;
     const o = this.overlay;
     const shade = new Graphics();
-    const logo = new Text({ text: 'KCar', style: style(118, '#ffd23f', { letterSpacing: 6 }) });
+    const logo = new Text({ text: 'KCar', style: style(104, '#ffd23f', { letterSpacing: 6 }) });
     logo.anchor.set(0.5);
-    const sub = new Text({ text: '甩尾 ‧ 小噴 ‧ 氮氣', style: style(24, '#ffffff', { letterSpacing: 2 }) });
+    const sub = new Text({ text: '甩尾 ‧ 小噴 ‧ 氮氣', style: style(22, '#ffffff', { letterSpacing: 2 }) });
     sub.anchor.set(0.5);
-    const b1 = button('計時賽（3 圈）', 330, 66, 0xff5a3d, () => onStart('race'));
-    const b2 = button('自由練習', 330, 66, 0x2a9df4, () => onStart('free'));
-    const bestT = new Text({ text: `最佳單圈 ${fmtTime(best.lap)}　最佳總時間 ${fmtTime(best.total)}`, style: style(18, '#e8f4ff') });
+    const cards = tracks.map((tr) => {
+      const c = new Container();
+      const g = new Graphics();
+      const sel = tr.id === selected;
+      const W = 150, H = 92;
+      g.roundRect(-W / 2, -H / 2 + 4, W, H, 14).fill({ color: 0x0b1733, alpha: 0.45 });
+      g.roundRect(-W / 2, -H / 2, W, H, 14).fill({ color: sel ? 0xffd23f : 0x14244a, alpha: sel ? 1 : 0.78 })
+        .stroke({ width: sel ? 4 : 2, color: sel ? 0xffffff : 0x8fb3ff, alpha: sel ? 1 : 0.6 });
+      const name = new Text({ text: tr.name, style: style(21, sel ? '#14244a' : '#ffffff', { stroke: { width: sel ? 0 : 3, color: '#14244a' }, dropShadow: false }) });
+      name.anchor.set(0.5);
+      name.y = -20;
+      const stars = new Text({ text: '★'.repeat(tr.difficulty) + '☆'.repeat(5 - tr.difficulty), style: style(17, sel ? '#c0392b' : '#ffd23f', { stroke: { width: 0 }, dropShadow: false }) });
+      stars.anchor.set(0.5);
+      stars.y = 6;
+      const b = best[tr.id] || {};
+      const rec = new Text({ text: b.lap ? `最佳 ${fmtTime(b.lap)}` : '尚無紀錄', style: style(13, sel ? '#14244a' : '#cfe6ff', { stroke: { width: 0 }, dropShadow: false }) });
+      rec.anchor.set(0.5);
+      rec.y = 29;
+      c.addChild(g, name, stars, rec);
+      c.eventMode = 'static';
+      c.cursor = 'pointer';
+      c.on('pointertap', (e) => { e.stopPropagation(); onSelect(tr.id); });
+      return c;
+    });
+    const modes = [
+      button('競賽（對 3 位電腦）', 300, 62, 0xff5a3d, () => onStart('race')),
+      button('計時賽', 200, 62, 0x7b61ff, () => onStart('time')),
+      button('自由練習', 200, 62, 0x2a9df4, () => onStart('free')),
+    ];
+    const loadT = new Text({ text: loading ? '載入賽道中…' : '', style: style(20, '#ffffff') });
+    loadT.anchor.set(0.5);
+    this.titleLoadText = loadT;
+    for (const m of modes) m.alpha = loading ? 0.45 : 1;
+    const cur = best[selected] || {};
+    const bestT = new Text({ text: `這條賽道　最佳單圈 ${fmtTime(cur.lap)}　計時賽最佳 ${fmtTime(cur.total)}`, style: style(16, '#e8f4ff') });
     bestT.anchor.set(0.5);
     const help = new Text({
       text: touch
         ? '◀ ▶ 轉向（自動油門）．按住「甩尾」＋方向起甩．放開回正時按「噴」＝小噴，再按一次＝雙噴．集滿氣按「氮氣」'
         : '← → 轉向．↑ 油門．↓ 煞車．Shift＋方向 甩尾．甩尾時鬆 ↑，回正時再按 ↑＝小噴，再按一次＝雙噴．Ctrl／Space 氮氣．T 調參',
-      style: style(16, '#ffffff', { wordWrap: true, wordWrapWidth: 900, align: 'center' }),
+      style: style(14, '#ffffff', { wordWrap: true, wordWrapWidth: 900, align: 'center' }),
     });
-    help.anchor.set(0.5, 0);
+    help.anchor.set(0.5, 1);
     const ver = new Text({ text: `v${version}`, style: style(18, '#ffffff') });
     ver.anchor.set(1, 1);
-    o.addChild(shade, logo, sub, b1, b2, bestT, help, ver);
+    o.addChild(shade, logo, sub, ...cards, ...modes, loadT, bestT, help, ver);
     this.overlayLayout = () => {
       const W = this.W, H = this.H;
-      const s = Math.min(1.1, Math.max(0.55, Math.min(W / 1000, H / 640)));
-      shade.clear().rect(0, 0, W, H).fill({ color: 0x0b1733, alpha: 0.18 });
-      logo.scale.set(s); logo.position.set(W / 2, H * 0.22);
-      sub.scale.set(s); sub.position.set(W / 2, H * 0.22 + 78 * s);
-      b1.scale.set(s); b1.position.set(W / 2, H * 0.5);
-      b2.scale.set(s); b2.position.set(W / 2, H * 0.5 + 84 * s);
-      bestT.scale.set(s); bestT.position.set(W / 2, H * 0.5 + 150 * s);
+      const s = Math.min(1.1, Math.max(0.45, Math.min(W / 1060, H / 640)));
+      shade.clear().rect(0, 0, W, H).fill({ color: 0x0b1733, alpha: 0.22 });
+      logo.scale.set(s); logo.position.set(W / 2, H * 0.13);
+      sub.scale.set(s); sub.position.set(W / 2, H * 0.13 + 62 * s);
+      const cw = 162 * s, cy = H * 0.13 + 140 * s;
+      cards.forEach((c, i) => { c.scale.set(s); c.position.set(W / 2 + (i - 2.5) * cw, cy); });
+      const my = cy + 104 * s;
+      // 三顆寬 300／200／200、間隔 20，整排置中
+      const xs = [-220, 50, 270].map((x) => x * s);
+      modes.forEach((m, i) => { m.scale.set(s); m.position.set(W / 2 + xs[i], my); });
+      loadT.scale.set(s); loadT.position.set(W / 2, my + 48 * s);
+      bestT.scale.set(s); bestT.position.set(W / 2, my + 52 * s);
+      bestT.visible = !loading;
       help.style.wordWrapWidth = Math.min(900, (W - 40) / s);
-      help.scale.set(s); help.position.set(W / 2, H * 0.5 + 180 * s);
-      ver.scale.set(s); ver.position.set(W - 14, H - 10);
+      help.scale.set(s); help.position.set(W / 2, H - 10);
+      ver.scale.set(s); ver.position.set(W - 14, H - 10 - help.height - 4);
     };
     this.overlayLayout();
+  }
+
+  setTitleLoading(p) {
+    if (this.titleLoadText) this.titleLoadText.text = `載入賽道中… ${Math.round(p * 100)}%`;
   }
 
   showPause({ onResume, onRestart, onTuning, onHome }) {
@@ -476,26 +575,37 @@ export class Hud {
     this.overlayLayout();
   }
 
-  showResult({ mode, total, laps, bestLap, newLap, newTotal, onRetry, onHome }) {
+  showResult({ mode, track, total, laps, bestLap, newLap, newTotal, order, onRetry, onHome }) {
     this.clearOverlay();
     const o = this.overlay;
     const shade = new Graphics();
-    const title = new Text({ text: mode === 'race' ? '完賽！' : '練習結束', style: style(70, '#ffd23f') });
+    const place = order ? order.findIndex((r) => r.isPlayer) + 1 : 0;
+    const titleText = mode === 'race' ? ['冠軍！', '第 2 名', '第 3 名', '第 4 名'][place - 1] : mode === 'time' ? '完賽！' : '練習結束';
+    const title = new Text({ text: `${titleText}`, style: style(70, place === 1 || mode !== 'race' ? '#ffd23f' : '#ffffff') });
     title.anchor.set(0.5);
+    const sub = new Text({ text: track || '', style: style(22, '#cfe6ff') });
+    sub.anchor.set(0.5);
     const lines = [];
-    if (mode === 'race') lines.push(`總時間 ${fmtTime(total)}${newTotal ? '  ★新紀錄' : ''}`);
-    laps.forEach((t, i) => lines.push(`第 ${i + 1} 圈  ${fmtTime(t)}${t === bestLap && newLap ? '  ★最佳單圈' : ''}`));
+    if (mode === 'race') {
+      order.forEach((r, i) => lines.push(`${i + 1}　${r.name.padEnd(7, ' ')}　${r.done ? '' : '≈'}${fmtTime(r.t)}${r.isPlayer ? '　◀ 你' : ''}`));
+      lines.push('');
+      lines.push(`最快單圈 ${fmtTime(bestLap)}${newLap ? '  ★新紀錄' : ''}`);
+    } else {
+      if (mode === 'time') lines.push(`總時間 ${fmtTime(total)}${newTotal ? '  ★新紀錄' : ''}`);
+      laps.forEach((t, i) => lines.push(`第 ${i + 1} 圈  ${fmtTime(t)}${t === bestLap && newLap ? '  ★最佳單圈' : ''}`));
+    }
     const body = new Text({ text: lines.join('\n'), style: style(26, '#ffffff', { align: 'center', lineHeight: 40 }) });
     body.anchor.set(0.5, 0);
     const b1 = button('再跑一次', 260, 60, 0xff5a3d, onRetry);
     const b2 = button('回首頁', 260, 60, 0x4a5a7a, onHome);
-    o.addChild(shade, title, body, b1, b2);
+    o.addChild(shade, title, sub, body, b1, b2);
     this.overlayLayout = () => {
       const W = this.W, H = this.H;
-      const s = Math.min(1, Math.max(0.55, Math.min(W / 1000, H / 640)));
+      const s = Math.min(1, Math.max(0.5, Math.min(W / 1000, H / 680)));
       shade.clear().rect(0, 0, W, H).fill({ color: 0x0b1733, alpha: 0.55 });
-      title.scale.set(s); title.position.set(W / 2, H * 0.16);
-      body.scale.set(s); body.position.set(W / 2, H * 0.27);
+      title.scale.set(s); title.position.set(W / 2, H * 0.12);
+      sub.scale.set(s); sub.position.set(W / 2, H * 0.12 + 56 * s);
+      body.scale.set(s); body.position.set(W / 2, H * 0.12 + 86 * s);
       b1.scale.set(s); b1.position.set(W / 2 - 140 * s, H * 0.84);
       b2.scale.set(s); b2.position.set(W / 2 + 140 * s, H * 0.84);
     };
