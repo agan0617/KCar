@@ -101,8 +101,68 @@ export class Hud {
     this.pauseBtn.eventMode = 'static';
     this.pauseBtn.cursor = 'pointer';
     this.pauseBtn.on('pointertap', () => this.onPause && this.onPause());
-    r.addChild(this.panel, this.tLap, this.tTime, this.tSub, this.gauge, this.tSpeed, this.tKmh, this.meter, this.tMeter, this.tCount, this.tWarn, this.pauseBtn);
+    this.mini = new Container();
+    this.miniTrack = new Graphics();
+    this.miniDot = new Graphics();
+    this.mini.addChild(this.miniTrack, this.miniDot);
+    r.addChild(this.panel, this.mini, this.tLap, this.tTime, this.tSub, this.gauge, this.tSpeed, this.tKmh, this.meter, this.tMeter, this.tCount, this.tWarn, this.pauseBtn);
     r.visible = false;
+  }
+
+  // ------------------------------------------------------------ 小地圖（北朝上，右上角）
+  setTrack(track) {
+    this.track = track;
+    let minx = Infinity, maxx = -Infinity, minz = Infinity, maxz = -Infinity;
+    for (let i = 0; i < track.n; i++) {
+      minx = Math.min(minx, track.x[i]); maxx = Math.max(maxx, track.x[i]);
+      minz = Math.min(minz, track.z[i]); maxz = Math.max(maxz, track.z[i]);
+    }
+    this.miniBounds = { minx, maxx, minz, maxz };
+    this.drawMiniTrack();
+  }
+
+  drawMiniTrack() {
+    const t = this.track;
+    if (!t || !this.miniPos) return;
+    const b = this.miniBounds, mp = this.miniPos;
+    const span = Math.max(b.maxx - b.minx, b.maxz - b.minz);
+    const k = (mp.size - mp.pad * 2) / span;
+    const ox = mp.pad + ((mp.size - mp.pad * 2) - (b.maxx - b.minx) * k) / 2;
+    const oz = mp.pad + ((mp.size - mp.pad * 2) - (b.maxz - b.minz) * k) / 2;
+    this.miniMap = (x, z) => [ox + (x - b.minx) * k, oz + (z - b.minz) * k];
+    const g = this.miniTrack;
+    g.clear();
+    g.roundRect(0, 0, mp.size, mp.size, 14 * mp.s).fill({ color: 0x0b1733, alpha: 0.42 });
+    const path = (gg) => {
+      for (let i = 0; i <= t.n; i += 2) {
+        const [px, py] = this.miniMap(t.x[i % t.n], t.z[i % t.n]);
+        if (i === 0) gg.moveTo(px, py); else gg.lineTo(px, py);
+      }
+      gg.closePath();
+    };
+    path(g);
+    g.stroke({ width: 7 * mp.s, color: 0xffffff, alpha: 0.9, join: 'round' });
+    path(g);
+    g.stroke({ width: 3.5 * mp.s, color: 0x5b6170, join: 'round' });
+    // 起終點線
+    const [sx, sy] = this.miniMap(t.x[0], t.z[0]);
+    const nx = -t.tz[0], nz = t.tx[0];
+    const L = 6 * mp.s;
+    g.moveTo(sx - nx * L, sy - nz * L).lineTo(sx + nx * L, sy + nz * L).stroke({ width: 3 * mp.s, color: 0xffd23f });
+  }
+
+  drawMiniDot(k) {
+    if (!this.miniMap) return;
+    const s = this.miniPos.s;
+    const [x, y] = this.miniMap(k.x, k.z);
+    // 前方 = (sin h, cos h)，畫成指向前方的三角形
+    const fx = Math.sin(k.h), fy = Math.cos(k.h);
+    const rx = -fy, ry = fx;
+    const a = 8 * s, w = 5.5 * s;
+    const g = this.miniDot;
+    g.clear();
+    g.poly([x + fx * a, y + fy * a, x - fx * a * 0.6 + rx * w, y - fy * a * 0.6 + ry * w, x - fx * a * 0.6 - rx * w, y - fy * a * 0.6 - ry * w])
+      .fill(0xff3b30).stroke({ width: 2, color: 0xffffff });
   }
 
   // ------------------------------------------------------------ 觸控按鈕（自己做多點觸控判定，手指可以在 ◀ ▶ 之間滑）
@@ -197,6 +257,11 @@ export class Hud {
     this.tWarn.position.set(W / 2, H * 0.28);
     this.pauseBtn.scale.set(s);
     this.pauseBtn.position.set(W - 40 * s, 40 * s);
+    // 小地圖：暫停鈕下方；矮螢幕縮小，免得壓到觸控的氮氣鈕
+    const size = Math.round(Math.min(190 * s, H * 0.36));
+    this.miniPos = { size, pad: 12 * s, s };
+    this.mini.position.set(W - 12 - size, 74 * s);
+    this.drawMiniTrack();
     // 觸控按鈕
     const r = Math.max(36, Math.min(H * 0.105, 70));
     const pos = {
@@ -284,6 +349,7 @@ export class Hud {
     if (jb && jb.glow !== glow) { jb.glow = glow; this.drawTouch(jb); }
 
     this.tWarn.visible = !!st.wrongWay;
+    this.drawMiniDot(k);
 
     // 速度線
     const ln = this.lines;

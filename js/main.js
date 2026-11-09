@@ -53,6 +53,7 @@ async function main() {
   const world = await createWorld(renderer, (p) => { hud.showLoading(p); hud.render(); });
   const track = new Track(world.path);
   const kart = new Kart(track);
+  hud.setTrack(track);
   const fx = new Fx(world.scene, world.kart, world.parts);
 
   // ------------------------------------------------------------ 狀態
