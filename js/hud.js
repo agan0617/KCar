@@ -3,6 +3,7 @@
 
 import { Application, Container, Graphics, Text, TextStyle } from 'pixi.js';
 import { P } from './tuning.js';
+import { keysOf } from './controls.js';
 
 const FONT = ['"Noto Sans TC"', '"Microsoft JhengHei"', '"PingFang TC"', '"Heiti TC"', 'sans-serif'];
 const style = (size, fill = '#ffffff', extra = {}) => new TextStyle({
@@ -350,7 +351,7 @@ export class Hud {
         m.roundRect(cx - 3, my - 7, 6, mh + 14, 3).fill(0xffffff).stroke({ width: 2, color: 0x14244a });
         const left = 1 - w.t / P.jetWindow;
         m.rect(mx, my + mh + 6, mw * Math.max(0, left), 4 * s).fill({ color: 0xffffff, alpha: 0.8 });
-        this.tMeter.text = `按 ${this.input.isTouch ? '噴' : '↑'}：小噴（車身回正到綠區最完美）`;
+        this.tMeter.text = `按 ${this.input.autoThrottle ? '噴' : keysOf('up')}：小噴（車身回正到綠區最完美）`;
       } else {
         const span = P.djMax + 0.1;
         const xp = (t) => mx + mw * Math.min(1, t / span);
@@ -471,7 +472,7 @@ export class Hud {
   }
 
   /** 首頁：賽道卡片（點了就換賽道，背景跟著換）＋三種模式 */
-  showTitle({ version, tracks, selected, best, touch, loading, onSelect, onStart }) {
+  showTitle({ version, tracks, selected, best, touch, loading, onSelect, onStart, onHelp, onSettings }) {
     this.clearOverlay();
     this.loadText = null;
     const o = this.overlay;
@@ -519,13 +520,18 @@ export class Hud {
     const help = new Text({
       text: touch
         ? '◀ ▶ 轉向（自動油門）．按住「甩尾」＋方向起甩．放開回正時按「噴」＝小噴，再按一次＝雙噴．集滿氣按「氮氣」'
-        : '← → 轉向．↑ 油門．↓ 煞車．Shift＋方向 甩尾．甩尾時鬆 ↑，回正時再按 ↑＝小噴，再按一次＝雙噴．Ctrl／Space 氮氣．T 調參',
+        : `${keysOf('left')} ${keysOf('right')} 轉向．${keysOf('up')} 油門．${keysOf('down')} 煞車．${keysOf('drift')}＋方向 甩尾．`
+          + `甩尾時鬆 ${keysOf('up')}，回正時再按 ${keysOf('up')}＝小噴，再按一次＝雙噴．${keysOf('nitro')} 氮氣`,
       style: style(14, '#ffffff', { wordWrap: true, wordWrapWidth: 900, align: 'center' }),
     });
     help.anchor.set(0.5, 1);
     const ver = new Text({ text: `v${version}`, style: style(18, '#ffffff') });
     ver.anchor.set(1, 1);
-    o.addChild(shade, logo, sub, ...cards, ...modes, loadT, bestT, help, ver);
+    // 右上角：操作說明、設定
+    const small = (label, color, fn) => button(label, 150, 46, color, fn);
+    const bHelp = small('操作說明', 0x2a9df4, () => onHelp && onHelp());
+    const bSet = small('設定', 0x4a5a7a, () => onSettings && onSettings());
+    o.addChild(shade, logo, sub, ...cards, ...modes, loadT, bestT, help, ver, bHelp, bSet);
     this.overlayLayout = () => {
       const W = this.W, H = this.H;
       const s = Math.min(1.1, Math.max(0.45, Math.min(W / 1060, H / 640)));
@@ -544,6 +550,8 @@ export class Hud {
       help.style.wordWrapWidth = Math.min(900, (W - 40) / s);
       help.scale.set(s); help.position.set(W / 2, H - 10);
       ver.scale.set(s); ver.position.set(W - 14, H - 10 - help.height - 4);
+      bSet.scale.set(s); bSet.position.set(W - 16 - 75 * s, 14 + 23 * s);
+      bHelp.scale.set(s); bHelp.position.set(W - 16 - 75 * s - 160 * s, 14 + 23 * s);
     };
     this.overlayLayout();
   }
@@ -552,25 +560,26 @@ export class Hud {
     if (this.titleLoadText) this.titleLoadText.text = `載入賽道中… ${Math.round(p * 100)}%`;
   }
 
-  showPause({ onResume, onRestart, onTuning, onHome }) {
+  showPause({ onResume, onRestart, onHelp, onSettings, onHome }) {
     this.clearOverlay();
     const o = this.overlay;
     const shade = new Graphics();
     const title = new Text({ text: '暫停', style: style(64, '#ffd23f') });
     title.anchor.set(0.5);
     const bs = [
-      button('繼續', 280, 60, 0x2a9df4, onResume),
-      button('重新開始', 280, 60, 0xff5a3d, onRestart),
-      button('操控調參', 280, 60, 0x7b61ff, onTuning),
-      button('回首頁', 280, 60, 0x4a5a7a, onHome),
+      button('繼續', 280, 58, 0x2a9df4, onResume),
+      button('重新開始', 280, 58, 0xff5a3d, onRestart),
+      button('操作說明', 280, 58, 0x16a085, onHelp),
+      button('設定（按鍵／調參）', 280, 58, 0x7b61ff, onSettings),
+      button('回首頁', 280, 58, 0x4a5a7a, onHome),
     ];
     o.addChild(shade, title, ...bs);
     this.overlayLayout = () => {
       const W = this.W, H = this.H;
-      const s = Math.min(1, Math.max(0.55, Math.min(W / 1000, H / 640)));
+      const s = Math.min(1, Math.max(0.5, Math.min(W / 1000, H / 680)));
       shade.clear().rect(0, 0, W, H).fill({ color: 0x0b1733, alpha: 0.55 });
-      title.scale.set(s); title.position.set(W / 2, H * 0.2);
-      bs.forEach((b, i) => { b.scale.set(s); b.position.set(W / 2, H * 0.36 + i * 76 * s); });
+      title.scale.set(s); title.position.set(W / 2, H * 0.13);
+      bs.forEach((b, i) => { b.scale.set(s); b.position.set(W / 2, H * 0.13 + 82 * s + i * 70 * s); });
     };
     this.overlayLayout();
   }

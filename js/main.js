@@ -9,6 +9,7 @@ import { createWorld } from './world.js';
 import { Fx } from './fx.js';
 import { Hud, fmtTime } from './hud.js';
 import { Sfx } from './audio.js';
+import { openHelp, openKeySettings, closeDialog, onKeysChange } from './controls.js';
 
 const STEP = 1 / 120;
 const BEST_KEY = 'kcar.best.v2'; // { [賽道 id]: { lap, total } }
@@ -38,7 +39,7 @@ async function main() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NoToneMapping;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
 
   const camera = new THREE.PerspectiveCamera(P.fov, innerWidth / innerHeight, 0.3, 5000);
   addEventListener('resize', () => {
@@ -101,8 +102,15 @@ async function main() {
       version: VERSION, tracks: TRACKS, selected: G.trackId, best: G.best, touch: input.isTouch, loading,
       onSelect: (id) => { if (id !== G.trackId) selectTrack(id); },
       onStart: (mode) => { if (G.state === 'title') startRace(mode); },
+      onHelp: help,
+      onSettings: settings,
     });
   }
+
+  const help = () => openHelp({ touch: input.isTouch });
+  const settings = () => openKeySettings({ onTuning: () => togglePanel(true) });
+  // 改了按鍵：首頁底下那行說明跟著換
+  onKeysChange(() => { if (G.state === 'title') showTitle(false); });
 
   function syncLooks() {
     for (const v of looks) v.group.visible = false;
@@ -110,6 +118,7 @@ async function main() {
   }
 
   function startRace(mode) {
+    closeDialog();
     sfx.start();
     G.mode = mode;
     G.race = new Race(G.track, { mode, laps: G.meta.laps, difficulty: G.meta.difficulty });
@@ -141,9 +150,10 @@ async function main() {
     G.prevState = G.state;
     G.state = 'paused';
     hud.setRaceVisible(false, false);
-    hud.showPause({ onResume: resume, onRestart: () => startRace(G.mode), onTuning: () => togglePanel(true), onHome: goTitle });
+    hud.showPause({ onResume: resume, onRestart: () => { closeDialog(); startRace(G.mode); }, onHelp: help, onSettings: settings, onHome: () => { closeDialog(); goTitle(); } });
   }
   function resume() {
+    closeDialog();
     togglePanel(false);
     hud.clearOverlay();
     hud.setRaceVisible(true, input.isTouch);
