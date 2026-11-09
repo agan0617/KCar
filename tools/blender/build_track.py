@@ -457,8 +457,8 @@ def text_prim(body, size):
 
 
 # 文字的局部座標：x 往右、y 往上、z 朝讀者；gm 的 z 正好朝向開過來的車
-props.add(text_prim('K RACER', 1.9), m_text, gm @ M((0, -0.05, 0.42)))
-props.add(text_prim('K RACER', 1.9), m_text, gm @ M((0, -0.05, -0.42), rot=(0, math.pi, 0)))
+props.add(text_prim('KCAR', 1.9), m_text, gm @ M((0, -0.05, 0.42)))
+props.add(text_prim('KCAR', 1.9), m_text, gm @ M((0, -0.05, -0.42), rot=(0, math.pi, 0)))
 
 # 看台：起跑直線右手邊
 for k in range(-18, 19):

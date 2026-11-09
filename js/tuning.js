@@ -58,7 +58,7 @@ export const DEFS = [
   ]],
 ];
 
-const KEY = 'kracer.tuning.v1';
+const KEY = 'kcar.tuning.v1';
 export const P = {};
 export const DEFAULTS = {};
 for (const [, items] of DEFS) for (const [k, , , , , d] of items) { P[k] = d; DEFAULTS[k] = d; }

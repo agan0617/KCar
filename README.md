@@ -1,6 +1,6 @@
-# K飛車 K RACER
+# KCar
 
-甩尾集氣、抓小噴時機的卡丁車競速遊戲。網頁版：<https://agan0617.github.io/KRacer/>（Android App 外殼在 [KRacerApp](https://github.com/agan0617/KRacerApp)）
+甩尾集氣、抓小噴時機的卡丁車競速遊戲。網頁版：<https://agan0617.github.io/KCar/>（Android App 外殼在 [KCarApp](https://github.com/agan0617/KCarApp)）
 
 目前一條賽道〈陽光山丘賽道〉（約 1.85 公里，含上下坡、髮夾彎、S 彎），計時賽 3 圈或自由練習。
 

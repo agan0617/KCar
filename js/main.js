@@ -11,7 +11,7 @@ import { Sfx } from './audio.js';
 
 const LAPS = 3;
 const STEP = 1 / 120;
-const BEST_KEY = 'kracer.best.v1';
+const BEST_KEY = 'kcar.best.v1';
 
 const lerpAngle = (a, b, t) => {
   let d = b - a;

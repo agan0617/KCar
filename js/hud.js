@@ -419,9 +419,9 @@ export class Hud {
     this.loadText = null;
     const o = this.overlay;
     const shade = new Graphics();
-    const logo = new Text({ text: 'K飛車', style: style(118, '#ffd23f', { letterSpacing: 6 }) });
+    const logo = new Text({ text: 'KCar', style: style(118, '#ffd23f', { letterSpacing: 6 }) });
     logo.anchor.set(0.5);
-    const sub = new Text({ text: 'K RACER ‧ 甩尾 ‧ 小噴 ‧ 氮氣', style: style(24, '#ffffff', { letterSpacing: 2 }) });
+    const sub = new Text({ text: '甩尾 ‧ 小噴 ‧ 氮氣', style: style(24, '#ffffff', { letterSpacing: 2 }) });
     sub.anchor.set(0.5);
     const b1 = button('計時賽（3 圈）', 330, 66, 0xff5a3d, () => onStart('race'));
     const b2 = button('自由練習', 330, 66, 0x2a9df4, () => onStart('free'));
