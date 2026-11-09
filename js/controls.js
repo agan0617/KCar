@@ -13,13 +13,15 @@ export const ACTIONS = [
   ['tuning', '操控調參面板', ''],
 ];
 
+// 左手 A D 轉向、Space 甩尾；右手 J 油門（小噴）、K 煞車、L 氮氣（2026-11-09 Ken 指定）
 export const DEFAULT_KEYS = {
-  up: ['KeyW', ''], down: ['KeyS', ''], left: ['KeyA', ''], right: ['KeyD', ''],
-  drift: ['KeyJ', ''], nitro: ['KeyK', ''],
+  up: ['KeyJ', ''], down: ['KeyK', ''], left: ['KeyA', ''], right: ['KeyD', ''],
+  drift: ['Space', ''], nitro: ['KeyL', ''],
   reset: ['KeyR', ''], pause: ['Escape', 'KeyP'], tuning: ['KeyT', ''],
 };
 
-const STORE = 'kcar.keys.v1';
+// 預設鍵位換過就換存檔名，舊設定（WASD 版）不沿用
+const STORE = 'kcar.keys.v2';
 export const KEYS = load();
 const listeners = new Set();
 
@@ -161,7 +163,7 @@ export function openKeySettings({ onTuning } = {}) {
   render('');
   body.append(note, table);
   bar.append(
-    btn('恢復預設（WASD＋JK）', () => { for (const a in DEFAULT_KEYS) KEYS[a] = [...DEFAULT_KEYS[a]]; save(); render(''); }),
+    btn('恢復預設', () => { for (const a in DEFAULT_KEYS) KEYS[a] = [...DEFAULT_KEYS[a]]; save(); render(''); }),
     ...(onTuning ? [btn('操控調參', () => { closeDialog(); onTuning(); })] : []),
     btn('完成', closeDialog, 'primary'),
   );
