@@ -56,6 +56,7 @@ export class Sfx {
     this.squeal = mk('bandpass', 1500, 6);
     this.rush = mk('bandpass', 600, 0.8);
     this.rumble = mk('lowpass', 180, 1);
+    this.wind = mk('highpass', 900, 0.7); // 風切聲：隨車速變大、變尖
   }
 
   set(g, v, t = 0.06) {
@@ -65,8 +66,9 @@ export class Sfx {
 
   update(k, active) {
     if (!this.ctx) return;
-    const sp = Math.min(1.6, Math.abs(k.spd) / 30);
-    const f = 55 + sp * 120 + (k.boosting ? 25 : 0);
+    const sp = Math.min(1.6, Math.abs(k.spd) / 34);
+    // 引擎：高速段音高拉得更陡（聽起來更「催」）
+    const f = 55 + sp * 110 + Math.max(0, sp - 0.6) * 90 + (k.boosting ? 30 : 0);
     const now = this.ctx.currentTime;
     this.osc1.frequency.setTargetAtTime(f, now, 0.05);
     this.osc2.frequency.setTargetAtTime(f * 0.5, now, 0.05);
@@ -77,6 +79,8 @@ export class Sfx {
     this.squeal.bp.frequency.setTargetAtTime(1200 + slip * 700, now, 0.05);
     this.set(this.rush.g, active && k.boosting ? 0.18 : 0, 0.08);
     this.set(this.rumble.g, active && (k.onGrass || k.onCurb) && Math.abs(k.spd) > 3 ? 0.35 : 0, 0.05);
+    this.set(this.wind.g, active ? Math.pow(Math.min(1.3, sp), 2.2) * 0.22 + (k.boosting ? 0.06 : 0) : 0, 0.15);
+    this.wind.bp.frequency.setTargetAtTime(700 + sp * 1300, now, 0.2);
   }
 
   beep(freq, dur = 0.15, type = 'square', vol = 0.25) {

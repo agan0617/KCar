@@ -117,6 +117,57 @@ class Skid {
   }
 }
 
+/**
+ * 風線：一根根短白線散在車子前方的空中，車開過去時從旁邊刷過（給速度感）。
+ * 線是靜止在世界裡的，所以越快刷得越快；長度也跟車速成正比。只給玩家的車用。
+ */
+export class Wind {
+  constructor(scene, n = 80) {
+    this.n = n;
+    this.pos = new Float32Array(n * 6);
+    this.col = new Float32Array(n * 6);
+    this.items = Array.from({ length: n }, () => ({ x: 0, y: -999, z: 0, b: 0 }));
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(this.pos, 3).setUsage(THREE.DynamicDrawUsage));
+    g.setAttribute('color', new THREE.BufferAttribute(this.col, 3).setUsage(THREE.DynamicDrawUsage));
+    this.geo = g;
+    this.lines = new THREE.LineSegments(g, new THREE.LineBasicMaterial({
+      vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+    }));
+    this.lines.frustumCulled = false;
+    scene.add(this.lines);
+  }
+
+  update(dt, k, intensity) {
+    const fx = Math.sin(k.phi), fz = Math.cos(k.phi);
+    const rx = -fz, rz = fx;
+    const L = 0.6 + Math.abs(k.spd) * 0.13;
+    for (let i = 0; i < this.n; i++) {
+      const it = this.items[i];
+      const ox = it.x - k.x, oz = it.z - k.z;
+      const ahead = ox * fx + oz * fz, side = ox * rx + oz * rz;
+      if (it.y < -900 || ahead < -4 || ahead > 80 || Math.abs(side) > 16) {
+        // 重生在前方：左右兩側、不擋正前方視線
+        const a = 15 + Math.random() * 55;
+        const s = (Math.random() < 0.5 ? -1 : 1) * (2.5 + Math.random() * 10);
+        it.x = k.x + fx * a + rx * s;
+        it.z = k.z + fz * a + rz * s;
+        it.y = k.y + 0.3 + Math.random() * 3.5;
+        it.b = 0.4 + Math.random() * 0.6;
+      }
+      const c = Math.max(0, intensity) * it.b * 0.55;
+      const j = i * 6;
+      this.pos[j] = it.x; this.pos[j + 1] = it.y; this.pos[j + 2] = it.z;
+      this.pos[j + 3] = it.x - fx * L; this.pos[j + 4] = it.y; this.pos[j + 5] = it.z - fz * L;
+      this.col[j] = this.col[j + 1] = this.col[j + 2] = c;
+      this.col[j + 3] = this.col[j + 4] = this.col[j + 5] = 0;
+    }
+    this.lines.visible = intensity > 0.01;
+    this.geo.attributes.position.needsUpdate = true;
+    this.geo.attributes.color.needsUpdate = true;
+  }
+}
+
 const C_SPARK = new THREE.Color('#ffb03a');
 const C_READY = new THREE.Color('#7fe0ff');
 const C_SMOKE = new THREE.Color('#e9ecef');

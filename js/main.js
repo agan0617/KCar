@@ -10,7 +10,7 @@ import { Track } from './track.js';
 import { Race, RIVALS } from './race.js';
 import { TRACKS, trackById } from './tracks.js';
 import { createWorld } from './world.js';
-import { Fx } from './fx.js';
+import { Fx, Wind } from './fx.js';
 import { Hud, fmtTime } from './hud.js';
 import { Sfx } from './audio.js';
 import { openHelp, openKeySettings, closeDialog, onKeysChange } from './controls.js';
@@ -113,6 +113,7 @@ async function main() {
     return v;
   });
   const playerLook = looks[0];
+  const wind = new Wind(world.scene);
   const lookOf = (r) => (r.isPlayer ? playerLook : looks[1 + RIVALS.findIndex((x) => x.name === r.name)]);
 
   // ------------------------------------------------------------ 狀態
@@ -335,7 +336,12 @@ async function main() {
     const target = lerpAngle(k.phi, k.h, mix);
     G.camYaw = snap ? target : lerpAngle(G.camYaw, target, 1 - Math.exp(-P.camFollow * dt));
     const boost = k.nitroT > 0 ? 1 : k.boostT > 0 ? 0.6 : 0;
-    const dist = P.camDist + boost * 0.9;
+    // 加速感：速度往上衝時鏡頭被甩開一點（拉遠），之後慢慢追回來；噴射期間也拉遠
+    const dv = snap ? 0 : (k.spd - (G.lastSpd ?? k.spd)) / Math.max(dt, 1e-3);
+    G.lastSpd = k.spd;
+    const kickT = Math.max(0, Math.min(1, dv / 30)) * P.camKick + boost * P.camKick;
+    G.kick = snap ? 0 : (G.kick || 0) + (kickT - (G.kick || 0)) * (1 - Math.exp(-(kickT > G.kick ? 6 : 1.8) * dt));
+    const dist = P.camDist + G.kick;
     const fx = Math.sin(G.camYaw), fz = Math.cos(G.camYaw);
     tmpV.set(k.x - fx * dist, k.y + P.camHeight, k.z - fz * dist);
     if (snap) G.camPos.copy(tmpV);
@@ -351,10 +357,17 @@ async function main() {
       camera.position.y += (Math.random() - 0.5) * G.shake;
       G.shake = Math.max(0, G.shake - dt * 1.8);
     }
-    look.set(k.x + fx * 4, k.y + 1.1, k.z + fz * 4);
-    camera.lookAt(look);
     const spd01 = Math.min(1.4, Math.abs(k.spd) / P.maxSpeed);
-    const fov = P.fov + spd01 * 4 + boost * P.fovBoost;
+    // 高速細微震動（越接近極速越明顯，噴射時更強）
+    const sh = P.camShake * (Math.pow(Math.min(1.2, spd01), 3) + boost * 0.8);
+    if (sh > 0 && !snap) {
+      camera.position.x += (Math.random() - 0.5) * sh;
+      camera.position.y += (Math.random() - 0.5) * sh;
+    }
+    look.set(k.x + fx * 4.5, k.y + 0.9, k.z + fz * 4.5);
+    camera.lookAt(look);
+    // 視角隨車速放大（低速 P.fov，極速多 fovSpeed 度），噴射再加 fovBoost
+    const fov = P.fov + Math.pow(Math.min(1, spd01), 1.5) * P.fovSpeed + boost * P.fovBoost;
     camera.fov += (fov - camera.fov) * (1 - Math.exp(-5 * dt));
     camera.updateProjectionMatrix();
   }
@@ -443,6 +456,11 @@ async function main() {
     } else if (G.state !== 'paused') {
       placeCamera(dt);
       for (const r of race.racers) lookOf(r).fx.update(dt, r.kart, t);
+      // 風線：過了六成極速才出現，越快越濃；噴射時最濃
+      const f = Math.max(0, Math.min(1, (Math.abs(k.spd) / P.maxSpeed - 0.6) / 0.4));
+      wind.update(dt, k, Math.max(f, k.nitroT > 0 ? 1.3 : k.boostT > 0 ? 1 : 0) * P.speedFx);
+    } else {
+      wind.update(dt, k, 0);
     }
     if (G.state === 'race' || G.state === 'countdown') {
       const st = race.standings();

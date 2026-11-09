@@ -411,7 +411,9 @@ export class Hud {
     // 速度線
     const ln = this.lines;
     ln.clear();
-    const inten = k.nitroT > 0 ? 1 : k.boostT > 0 ? 0.55 : 0;
+    // 噴射時最濃；沒噴射但接近極速時也淡淡出現
+    const fast = Math.max(0, Math.min(1, (Math.abs(k.spd) / P.maxSpeed - 0.8) / 0.25));
+    const inten = Math.min(1.5, Math.max(k.nitroT > 0 ? 1 : k.boostT > 0 ? 0.6 : 0, fast * 0.4) * P.speedFx);
     if (inten > 0 && this.race.visible) {
       const W = this.W, H = this.H, cx = W / 2, cy = H * 0.45;
       const n = Math.round(26 * inten);

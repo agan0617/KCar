@@ -241,7 +241,7 @@ export async function createWorld(renderer, onProgress = () => {}) {
     skyU.sunCol.value.set(th.sun[0]);
     skyU.sunAmt.value = th.night ? 0.35 : 1;
     makeEnv(th);
-    carLight.intensity = th.night ? 60 : 0;
+    carLight.intensity = th.night ? 22 : 0;
     scene.environmentIntensity = th.env ?? 0.55;
     for (const k of ['road', 'ground']) if (tex[k]) tex[k].dispose();
     tex = { road: roadTexture(th), ground: groundTexture(th) };
@@ -296,7 +296,7 @@ export async function createWorld(renderer, onProgress = () => {}) {
     sun.target.position.set(fx, focus.y, fz);
     sun.position.set(fx + sunDir.x * 120, focus.y + sunDir.y * 120, fz + sunDir.z * 120);
     sky.position.copy(focus);
-    carLight.position.set(focus.x, focus.y + 4, focus.z);
+    carLight.position.set(focus.x, focus.y + 6, focus.z);
   }
 
   function setShadowSize(n) {

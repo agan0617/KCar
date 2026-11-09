@@ -919,6 +919,53 @@ for i in range(0, N, 9):
         props.add(cylinder(0.06, 4.2, 5), m_metal, M((q.x, q.y + WALL_H - 0.1, q.z)))
         fb = basis(T[i], UP, T[i].cross(UP), q + Vector((0, WALL_H + 3.6, 0)) + T[i] * 0.55)
         props.add(box(1.1, 0.7, 0.04), m_flag[(i // 9 + (side > 0)) % 4], fb)
+# 速度感：護牆頂每 12 公尺一根反光標柱（車開過時一根根刷過去）
+m_post = mat('PostWhite', '#f4f4f4', rough=0.5)
+m_band = mat('PostBand', TH['wall'][0], rough=0.5)
+m_refl = mat('Reflector', '#ffb300', emit=1.2 if THEME in ('city', 'volcano') else 0.4)
+post = variant('MarkerPost', [(cylinder(0.07, 1.3, 8), m_post, None), (cylinder(0.075, 0.22, 8), m_band, M((0, 0.75, 0))),
+                              (box(0.1, 0.18, 0.05), m_refl, M((0, 1.05, 0.07)))])
+pi_ = Instances('MarkerPosts')
+for i in range(0, N, 6):
+    for side in (-1, 1):
+        if CURV[i] * side > 0 and 1 / max(abs(CURV[i]), 1e-6) < WALL + 2:
+            continue  # 這段沒有牆
+        p = at(i, side * WALL)
+        # 反光片朝向開過來的車（面向 -T）
+        yaw = math.atan2(-T[i].x, -T[i].z)
+        pi_.put(post, (p.x, p.y + 0.95, p.z), yaw=yaw)
+
+# 速度感：直線上方的拱門（遠遠看得到、接近時從頭上掠過）
+m_arch = mat('ArchFrame', '#e8ecef', rough=0.4, metal=0.5)
+m_archb = mat('ArchBanner', TH['wall'][0], emit=0.8 if THEME == 'city' else 0)
+m_archs = mat('ArchStripe', TH['wall'][2], emit=0.8 if THEME == 'city' else 0)
+# 挑最直的幾段（前後 40 公尺內最大曲率最小者），彼此相隔 220 公尺以上；起終點門附近不要
+cand = []
+for i in range(N):
+    s = i * STEP
+    if s < 150 or s > LENGTH - 120:
+        continue
+    cand.append((max(abs(CURV[(i + k) % N]) for k in range(-20, 21, 4)), i))
+cand.sort()
+arch_spots = []
+for c, i in cand:
+    if c > 1 / 70 or len(arch_spots) >= 4:
+        break
+    if all(min(abs(i - j), N - abs(i - j)) * STEP > 220 for j in arch_spots):
+        arch_spots.append(i)
+for i in arch_spots:
+    p0 = S[i]
+    am = basis(R[i], UP, -T[i], p0 + UP * 6.2)
+    for sd in (-1, 1):
+        base = p0 + R[i] * sd * (WALL + 0.6)
+        props.add(cylinder(0.35, 7.0, 10), m_arch, M((base.x, base.y - 0.2, base.z)))
+    w = 2 * WALL + 1.2
+    props.add(box(w, 1.5, 0.5), m_archb, am)
+    props.add(box(w, 0.22, 0.55), m_archs, am @ M((0, 0.86, 0)))
+    props.add(box(w, 0.22, 0.55), m_archs, am @ M((0, -0.86, 0)))
+    for k in range(-3, 4):  # 白色箭頭飾片（往前）
+        props.add(box(0.5, 0.5, 0.56), m_post, am @ M((k * w / 8, 0, 0), rot=(0, 0, math.pi / 4)) @ M(scale=(0.6, 0.6, 1)))
+print(f'[track] arches={len(arch_spots)}')
 props.build()
 
 # 雲（城市夜景不要）
