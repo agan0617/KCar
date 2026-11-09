@@ -99,6 +99,13 @@ html, body {
 .dlg ol.tips { padding-left: 1.3em; margin: 4px 0; }
 .dlg ol.tips li { margin-bottom: 5px; }
 
+.dlg .qrow { display: flex; gap: 8px; }
+.dlg .qbtn { flex: 1; padding: 8px; border-radius: 10px; border: 2px solid #8fb3ff; background: #0b1733; color: #fff; cursor: pointer; text-align: center; }
+.dlg .qbtn b { display: block; font-size: 15px; }
+.dlg .qbtn small { opacity: 0.75; }
+.dlg .qbtn.on { border-color: #ffd23f; background: #3a3210; }
+.dlg .qbtn.on b { color: #ffd23f; }
+
 /* 調參面板 */
 #tuning {
   position: fixed;

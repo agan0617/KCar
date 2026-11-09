@@ -193,14 +193,17 @@ class Builder:
         if uv:
             self.has_uv = True
 
-    def build(self, origin=(0, 0, 0), yaw=0.0, local=False):
-        """local=True：verts 已經是相對 origin 的局部座標（要轉動的零件用）。"""
+    def build(self, origin=(0, 0, 0), yaw=0.0, local=False, bevel=None):
+        """local=True：verts 已經是相對 origin 的局部座標（要轉動的零件用）。
+        bevel=(寬度, 段數)：銳角邊導成圓角（匯出時套用），平面維持平、圓角接光，看起來比較精緻。"""
         me = self.mesh()
         ob = bpy.data.objects.new(self.name, me)
         bpy.context.scene.collection.objects.link(ob)
         if local:
             ob.location = B(origin)
             ob.rotation_euler = (0, 0, yaw)
+        if bevel:
+            add_bevel(ob, *bevel)
         return ob
 
     def mesh(self):
@@ -226,6 +229,29 @@ class Builder:
             bm.free()
         me.update()
         return me
+
+
+def add_bevel(ob, width=0.03, segments=2, angle_deg=35):
+    m = ob.modifiers.new('Bevel', 'BEVEL')
+    m.width = width
+    m.segments = segments
+    m.limit_method = 'ANGLE'
+    m.angle_limit = math.radians(angle_deg)
+    m.harden_normals = True
+    for p in ob.data.polygons:
+        p.use_smooth = True
+    return m
+
+
+def set_colors(me, fn, name='Col'):
+    """頂點色：fn(x, y, z) 回傳 (r, g, b)，x y z 是遊戲座標。匯出成 glTF 的 COLOR_0，three.js 乘在材質上。"""
+    attr = me.color_attributes.new(name, 'BYTE_COLOR', 'POINT')
+    for i, v in enumerate(me.vertices):
+        c = v.co  # Blender 座標 (x, -z, y)
+        r, g, b = fn(c.x, c.z, -c.y)
+        attr.data[i].color_srgb = (r, g, b, 1.0)
+    me.color_attributes.active_color = attr
+    return attr
 
 
 class Instances:
@@ -271,4 +297,5 @@ def export_glb(path):
         export_lights=False,
         export_animations=False,
         export_gpu_instances=True,
+        export_vertex_color='ACTIVE',
     )

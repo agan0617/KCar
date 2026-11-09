@@ -1,4 +1,8 @@
 import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { VERSION } from './version.js';
 import { P, togglePanel, panelOpen } from './tuning.js';
 import { Input } from './input.js';
@@ -14,6 +18,7 @@ import { openHelp, openKeySettings, closeDialog, onKeysChange } from './controls
 const STEP = 1 / 120;
 const BEST_KEY = 'kcar.best.v2'; // { [賽道 id]: { lap, total } }
 const TRACK_KEY = 'kcar.track';
+const QUALITY_KEY = 'kcar.quality';
 
 const lerpAngle = (a, b, t) => {
   let d = b - a;
@@ -37,7 +42,8 @@ async function main() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, input.isTouch ? 1.5 : 2));
   renderer.setSize(innerWidth, innerHeight, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.NoToneMapping;
+  // Neutral：保留原本的色相與飽和度（卡通風要鮮豔），只把過亮的地方柔和壓下來
+  renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
 
@@ -46,9 +52,60 @@ async function main() {
     renderer.setSize(innerWidth, innerHeight, false);
     camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
+    if (composer) { composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(innerWidth, innerHeight); }
   });
 
   const world = await createWorld(renderer, (p) => { hud.showLoading(p); hud.render(); });
+
+  // ------------------------------------------------------------ 畫質：高（MSAA＋泛光＋高解析陰影）／省電（直接畫）
+  let composer = null, bloom = null;
+  let quality = store.get(QUALITY_KEY, 'high');
+  function setQuality(q) {
+    quality = q;
+    store.set(QUALITY_KEY, q);
+    const dpr = window.devicePixelRatio || 1;
+    renderer.setPixelRatio(Math.min(dpr, q === 'high' ? 2 : 1.25));
+    world.setShadowSize(q === 'high' ? 2048 : 1024);
+    if (composer) { composer.dispose(); composer = null; bloom = null; }
+    if (q === 'high') {
+      const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
+      composer = new EffectComposer(renderer, rt);
+      composer.addPass(new RenderPass(world.scene, camera));
+      bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.25, 0.4, 0.9);
+      composer.addPass(bloom);
+      composer.addPass(new OutputPass());
+      composer.setPixelRatio(renderer.getPixelRatio());
+      composer.setSize(innerWidth, innerHeight);
+    }
+    applyLook();
+  }
+  /** 依主題設曝光與泛光 */
+  function applyLook() {
+    const th = world.theme;
+    renderer.toneMappingExposure = th.exposure ?? 1;
+    if (bloom && th.bloom) [bloom.strength, bloom.radius, bloom.threshold] = th.bloom;
+  }
+  function draw() {
+    if (composer) composer.render();
+    else renderer.render(world.scene, camera);
+  }
+  setQuality(quality);
+  // 高畫質跑不動就自動降到省電（比賽中連續 4 秒平均低於 40fps）
+  const perf = { t: 0, n: 0, done: false };
+  function watchFps(dt) {
+    if (perf.done || quality !== 'high' || G.state !== 'race') { perf.t = 0; perf.n = 0; return; }
+    perf.t += dt;
+    perf.n++;
+    if (perf.t >= 4) {
+      if (perf.n / perf.t < 40) {
+        perf.done = true;
+        setQuality('low');
+        hud.popup('畫面不夠順，已自動切到省電畫質（可在設定改回）', '#ffffff', 22, 3, 140);
+      }
+      perf.t = 0;
+      perf.n = 0;
+    }
+  }
   // 四台車的外觀：玩家＋三位對手（換色）；Fx 各自一份
   const looks = [null, ...RIVALS].map((c) => {
     const v = world.makeKart(c);
@@ -88,6 +145,7 @@ async function main() {
     if (seq !== G.loadSeq) return; // 載入途中又換了別條
     G.track = new Track(path);
     hud.setTrack(G.track);
+    applyLook();
     G.race = new Race(G.track, { mode: 'race', laps: G.meta.laps, difficulty: G.meta.difficulty });
     syncLooks();
     for (const v of looks) v.fx.reset();
@@ -108,7 +166,10 @@ async function main() {
   }
 
   const help = () => openHelp({ touch: input.isTouch });
-  const settings = () => openKeySettings({ onTuning: () => togglePanel(true) });
+  const settings = () => openKeySettings({
+    onTuning: () => togglePanel(true),
+    quality: { get: () => quality, set: (q) => { perf.done = true; setQuality(q); } },
+  });
   // 改了按鍵：首頁底下那行說明跟著換
   onKeysChange(() => { if (G.state === 'title') showTitle(false); });
 
@@ -395,7 +456,8 @@ async function main() {
       }, k, dt);
     }
     sfx.update(k, G.state === 'race' || G.state === 'countdown');
-    renderer.render(world.scene, camera);
+    watchFps(dt);
+    draw();
     hud.render();
   }
 

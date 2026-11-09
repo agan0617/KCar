@@ -158,8 +158,12 @@ FAR = max(maxx - minx, maxz - minz) / 2 + 160
 WATER_Y = -0.6
 
 
+_LAST_D = [0.0]  # ground() 順便記下離賽道的距離（地面上色用，免得再算一次最近點）
+
+
 def ground(x, z):
     d, h, _ = nearest(x, z)
+    _LAST_D[0] = d
     if h is None:
         h = 0.0
     base = h - 0.12
@@ -231,25 +235,37 @@ for i in range(N):
 road.weld = True
 road.build()
 
+def sweep(builder, i, side, base, profile, mats, smooth_from=1, smooth_to=None):
+    """沿著賽道第 i 段掃出一條斷面：profile 是 [(往外的距離, 高度)…]，mats[k] 是第 k 段的材質。"""
+    smooth_to = len(profile) - 2 if smooth_to is None else smooth_to
+    for k in range(len(profile) - 1):
+        (u0, h0), (u1, h1) = profile[k], profile[k + 1]
+        o0, o1 = side * (base + u0), side * (base + u1)
+        builder.quad(at(i, o0, h0), at(i + 1, o0, h0), at(i + 1, o1, h1), at(i, o1, h1), mats[k],
+                     smooth=smooth_from <= k < smooth_to)
+
+
+# 路緣石：微微隆起的圓弧斷面（不是斜板），紅白相間
+CURB_PROFILE = [(0, 0.02), (0.25 * CURB, 0.09), (0.55 * CURB, 0.125), (0.85 * CURB, 0.1), (CURB, 0.05), (CURB, -0.15)]
 curbs = Builder('Curbs')
 for i in range(N):
     m = m_curb_r if i % 2 == 0 else m_curb_w
     for side in (-1, 1):
-        a0, a1 = side * HW, side * (HW + CURB)
-        curbs.quad(at(i, a0, 0.02), at(i + 1, a0, 0.02), at(i + 1, a1, 0.1), at(i, a1, 0.1), m)
-        curbs.quad(at(i, a1, 0.1), at(i + 1, a1, 0.1), at(i + 1, a1, -0.15), at(i, a1, -0.15), m)
+        sweep(curbs, i, side, HW, CURB_PROFILE, [m] * 5, smooth_from=0, smooth_to=4)
+curbs.weld = True
 curbs.build()
 
+# 護牆：兩側垂直、頂部圓弧（頂部另一個顏色）
+r = WALL_T / 2
+WALL_PROFILE = [(-r, -0.2), (-r, 0.72), (-r * 0.85, 0.86), (-r * 0.5, 0.96), (0, 1.0), (r * 0.5, 0.96), (r * 0.85, 0.86), (r, 0.72), (r, -0.2)]
 walls = Builder('Walls')
 for i in range(N):
     m = m_wall_a if (i // 2) % 2 == 0 else m_wall_b
     for side in (-1, 1):
         if CURV[i] * side > 0 and 1 / max(abs(CURV[i]), 1e-6) < WALL + 2:
             continue  # 內彎半徑小於牆距：牆會自己打結，跳過
-        a, b = side * (WALL - WALL_T / 2), side * (WALL + WALL_T / 2)
-        walls.quad(at(i, a, -0.2), at(i + 1, a, -0.2), at(i + 1, a, WALL_H), at(i, a, WALL_H), m)
-        walls.quad(at(i, b, WALL_H), at(i + 1, b, WALL_H), at(i + 1, b, -0.2), at(i, b, -0.2), m)
-        walls.quad(at(i, a, WALL_H), at(i + 1, a, WALL_H), at(i + 1, b, WALL_H), at(i, b, WALL_H), m_wall_top)
+        sweep(walls, i, side, WALL, WALL_PROFILE, [m] + [m_wall_top] * 6 + [m], smooth_from=1, smooth_to=7)
+walls.weld = True
 walls.build()
 
 line = Builder('StartLine')
@@ -267,7 +283,14 @@ line.build()
 GS = 6.0
 nx = int((maxx - minx) / GS) + 1
 nzc = int((maxz - minz) / GS) + 1
-H = [[ground(minx + ix * GS, minz + iz * GS) for ix in range(nx)] for iz in range(nzc)]
+H, DG = [], []
+for iz in range(nzc):
+    hr, dr = [], []
+    for ix in range(nx):
+        hr.append(ground(minx + ix * GS, minz + iz * GS))
+        dr.append(_LAST_D[0])
+    H.append(hr)
+    DG.append(dr)
 terrain = Builder('Terrain')
 terrain.verts = [(minx + ix * GS, H[iz][ix], minz + iz * GS) for iz in range(nzc) for ix in range(nx)]
 mi = terrain._mi(m_ground)
@@ -278,7 +301,47 @@ for iz in range(nzc - 1):
         terrain.fmat.append(mi)
         terrain.fsmooth.append(True)
         terrain.fuv.append(None)
-terrain.build()
+t_ob = terrain.build()
+
+# 地面上色（頂點色乘在地面紋理上）：大片深淺、坡度變暗、賽道旁磨損帶、主題特色
+TINT = {  # (亮處, 暗處, 磨損帶)；sRGB 乘數，1＝原色
+    'hills': ((1.0, 1.0, 1.0), (0.74, 0.86, 0.62), (0.86, 0.8, 0.62)),
+    'beach': ((1.0, 1.0, 1.0), (0.94, 0.88, 0.78), (0.9, 0.86, 0.78)),
+    'desert': ((1.0, 1.0, 1.0), (0.86, 0.7, 0.58), (0.92, 0.84, 0.72)),
+    'snow': ((1.0, 1.0, 1.0), (0.82, 0.88, 1.0), (0.8, 0.82, 0.86)),
+    'city': ((1.0, 1.0, 1.0), (0.8, 0.82, 0.9), (0.72, 0.72, 0.76)),
+    'volcano': ((1.0, 1.0, 1.0), (0.66, 0.58, 0.6), (0.78, 0.68, 0.64)),
+}[THEME]
+
+
+def lerp3(a, b, t):
+    return tuple(a[k] + (b[k] - a[k]) * t for k in range(3))
+
+
+attr = t_ob.data.color_attributes.new('Col', 'BYTE_COLOR', 'POINT')
+for iz in range(nzc):
+    for ix in range(nx):
+        x, z, y = minx + ix * GS, minz + iz * GS, H[iz][ix]
+        d = DG[iz][ix]
+        n = noise.noise(Vector((x * 0.018, z * 0.018, 9.0))) + 0.5 * noise.noise(Vector((x * 0.06, z * 0.06, 3.0)))
+        c = lerp3(TINT[0], TINT[1], smooth(-0.35, 0.45, n))
+        # 坡度：跟鄰格的高差
+        hx = H[iz][min(nx - 1, ix + 1)] - H[iz][max(0, ix - 1)]
+        hz = H[min(nzc - 1, iz + 1)][ix] - H[max(0, iz - 1)][ix]
+        slope = math.hypot(hx, hz) / (2 * GS)
+        c = tuple(v * (1 - min(0.35, slope * 0.9)) for v in c)
+        # 賽道旁的磨損帶（路緣石到護牆外一點）
+        c = lerp3(c, TINT[2], 0.65 * (1 - smooth(HW + CURB, WALL + 4, d)))
+        if THEME == 'beach' and y < WATER_Y + 0.6:  # 靠水的濕沙
+            c = lerp3(c, (0.7, 0.64, 0.54), smooth(WATER_Y + 0.6, WATER_Y - 0.4, y))
+        if THEME == 'snow':  # 低窪處偏藍
+            c = lerp3(c, (0.78, 0.86, 1.0), smooth(0.2, -0.6, n))
+        if THEME == 'volcano':  # 熔岩池周圍發紅
+            for lx, lz, lr in LAKES:
+                rr = math.hypot(x - lx, z - lz)
+                c = lerp3(c, (1.0, 0.55, 0.38), 0.8 * (1 - smooth(lr + 2, lr + 22, rr)))
+        attr.data[iz * nx + ix].color_srgb = (*c, 1.0)
+t_ob.data.color_attributes.active_color = attr
 
 
 def gh(x, z):
@@ -734,6 +797,32 @@ def scatter_volcano():
 
 {'hills': scatter_hills, 'beach': scatter_beach, 'desert': scatter_desert,
  'snow': scatter_snow, 'city': scatter_city, 'volcano': scatter_volcano}[THEME]()
+
+
+def grass_tufts():
+    """路邊的草叢（細葉片，GPU instancing），讓護牆外不再是一片平面。城市與雪地沒有。"""
+    cols = {'hills': ('#4f9e35', '#6dbb45'), 'beach': ('#8cb85a', '#a9c96a'), 'desert': ('#b49a55', '#9c8a4e'),
+            'volcano': ('#4a3b38', '#6b3a2a')}.get(THEME)
+    if not cols:
+        return
+    mats = [mat(f'Tuft{k}', c, rough=0.9) for k, c in enumerate(cols)]
+    rnd = random.Random(21)
+    variants = []
+    for k, m in enumerate(mats):
+        parts = []
+        for b in range(9):
+            a = rnd.uniform(0, 6.28)
+            h = rnd.uniform(0.5, 0.95)
+            lean = rnd.uniform(0.15, 0.45)
+            parts.append((cone(0.07, h, 3), m, M((math.cos(a) * 0.12, 0, math.sin(a) * 0.12), rot=(0, -a, 0)) @ M(rot=(0, 0, lean)) @ M(scale=(1, 1, 0.35))))
+        variants.append(variant(f'Tuft{k}', parts))
+    inst = Instances('Tufts')
+    n = scatter(1400, WALL + 0.9, lambda x, z: bool(inst.put(random.choice(variants), (x, gh(x, z) - 0.05, z), yaw=random.uniform(0, 6.28), scale=random.uniform(0.7, 1.4))),
+                near=(WALL + 1.2, WALL + 30), tries=6000)
+    print('[track] tufts', n)
+
+
+grass_tufts()
 
 # ================================================================ 共用：輪胎牆、箭頭牌、起終點門、看台、旗子
 corner_peaks = []

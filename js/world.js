@@ -56,14 +56,6 @@ function groundTexture(th) {
   });
 }
 
-function gradientMap() {
-  const data = new Uint8Array([120, 120, 120, 255, 200, 200, 200, 255, 255, 255, 255, 255]);
-  const t = new THREE.DataTexture(data, 3, 1, THREE.RGBAFormat);
-  t.minFilter = t.magFilter = THREE.NearestFilter;
-  t.needsUpdate = true;
-  return t;
-}
-
 function disposeTree(obj) {
   obj.traverse((o) => {
     if (o.geometry) o.geometry.dispose();
@@ -78,13 +70,25 @@ const RECOLOR = { KartRed: 'kart', Hoodie: 'hoodie', ShibaFur: 'fur', ShibaCream
 
 export async function createWorld(renderer, onProgress = () => {}) {
   const scene = new THREE.Scene();
-  const skyU = { top: { value: new THREE.Color() }, bottom: { value: new THREE.Color() } };
+  const skyU = {
+    top: { value: new THREE.Color() }, bottom: { value: new THREE.Color() },
+    sunDir: { value: new THREE.Vector3(0, 1, 0) }, sunCol: { value: new THREE.Color() }, sunAmt: { value: 1 },
+  };
+  // 天空：上下漸層＋太陽（月亮）光暈；亮度超過 1 的部分會被泛光吃到
   const sky = new THREE.Mesh(
     new THREE.SphereGeometry(2400, 32, 16),
     new THREE.ShaderMaterial({
       side: THREE.BackSide, depthWrite: false, fog: false, uniforms: skyU,
       vertexShader: 'varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-      fragmentShader: 'uniform vec3 top; uniform vec3 bottom; varying vec3 vP; void main(){ float h = normalize(vP).y; float t = pow(clamp(h*1.6+0.02,0.0,1.0),0.7); gl_FragColor = vec4(mix(bottom, top, t),1.0); }',
+      fragmentShader: `uniform vec3 top; uniform vec3 bottom; uniform vec3 sunDir; uniform vec3 sunCol; uniform float sunAmt; varying vec3 vP;
+        void main(){
+          vec3 d = normalize(vP);
+          float t = pow(clamp(d.y*1.6+0.02,0.0,1.0),0.7);
+          vec3 c = mix(bottom, top, t);
+          float s = max(dot(d, sunDir), 0.0);
+          c += sunCol * (pow(s, 900.0) * 6.0 + pow(s, 24.0) * 0.35) * sunAmt;
+          gl_FragColor = vec4(c, 1.0);
+        }`,
     }),
   );
   sky.renderOrder = -1;
@@ -103,38 +107,71 @@ export async function createWorld(renderer, onProgress = () => {}) {
   sun.shadow.bias = -0.0004;
   sun.shadow.normalBias = 0.03;
   scene.add(sun, sun.target);
+  // 夜間賽道：跟著車的補光（像路燈照到車上），白天關掉
+  const carLight = new THREE.PointLight('#ffe2b8', 0, 18, 1.6);
+  scene.add(carLight);
 
   const loader = new GLTFLoader();
-  const grad = gradientMap();
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
   let tex = { road: null, ground: null };
   let cache = new Map();
 
-  function toon(m) {
+  // 環境光照（PBR 材質的反射、柔和的補光）：用這條賽道自己的天空顏色做（夜城反射夜空、火山反射紅天），
+  // 不用 three 內建的攝影棚環境——那裡面的燈板太亮，車身反射到會整片發白
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const envU = { top: { value: new THREE.Color() }, mid: { value: new THREE.Color() }, bottom: { value: new THREE.Color() }, sunDir: { value: new THREE.Vector3() }, sunCol: { value: new THREE.Color() } };
+  const envScene = new THREE.Scene();
+  envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10, 32, 16), new THREE.ShaderMaterial({
+    side: THREE.BackSide, uniforms: envU,
+    vertexShader: 'varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader: `uniform vec3 top; uniform vec3 mid; uniform vec3 bottom; uniform vec3 sunDir; uniform vec3 sunCol; varying vec3 vP;
+      void main(){ vec3 d = normalize(vP);
+        vec3 c = d.y > 0.0 ? mix(mid, top, pow(d.y, 0.6)) : mix(mid, bottom, pow(-d.y, 0.4));
+        c += sunCol * pow(max(dot(d, sunDir), 0.0), 64.0) * 1.5;
+        gl_FragColor = vec4(c, 1.0); }`,
+  })));
+  let envTex = null;
+  function makeEnv(th) {
+    envU.top.value.set(th.skyTop);
+    envU.mid.value.set(th.horizon);
+    envU.bottom.value.set(th.hemi[1]);
+    envU.sunDir.value.set(...th.sunDir).normalize();
+    envU.sunCol.value.set(th.sun[0]).multiplyScalar(th.night ? 0.2 : 1);
+    if (envTex) envTex.dispose();
+    envTex = pmrem.fromScene(envScene, 0.02).texture;
+    scene.environment = envTex;
+  }
+
+  // 車身烤漆：亮面＋透明漆層
+  const PAINT = new Set(['KartRed', 'KartWhite', 'KartYellow', 'Hoodie', 'HeadphoneAccent']);
+
+  /** Blender 匯出的材質 → 遊戲用材質（PBR；水、熔岩、雲另外做） */
+  function pbr(m) {
     if (cache.has(m)) return cache.get(m);
     let out;
     const name = m.name || '';
     if (name === 'Water') {
-      out = new THREE.MeshPhongMaterial({ color: '#46b9f2', specular: '#ffffff', shininess: 90, transparent: true, opacity: 0.88 });
+      out = new THREE.MeshStandardMaterial({ color: '#1f9be0', roughness: 0.06, metalness: 0.0, transparent: true, opacity: 0.86 });
     } else if (name === 'Ice') {
-      out = new THREE.MeshPhongMaterial({ color: '#cfeeff', specular: '#ffffff', shininess: 120 });
+      out = new THREE.MeshStandardMaterial({ color: '#d4efff', roughness: 0.04, metalness: 0.15 });
     } else if (name === 'Lava') {
       out = new THREE.MeshBasicMaterial({ color: '#ff5a1f' });
-    } else if (name === 'Cloud') {
-      out = new THREE.MeshLambertMaterial({ color: '#ffffff', emissive: '#d6e6f5', fog: false });
+    } else if (name === 'Cloud' || name === 'AshCloud') {
+      out = new THREE.MeshStandardMaterial({ color: m.color, roughness: 1, emissive: name === 'Cloud' ? '#dfe9f5' : '#000000', emissiveIntensity: 0.55, fog: false });
+    } else if (PAINT.has(name)) {
+      out = new THREE.MeshPhysicalMaterial({ color: m.color, roughness: 0.32, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.08 });
     } else {
-      out = new THREE.MeshToonMaterial({ color: m.color, gradientMap: grad, side: m.side });
-      if (m.emissive && m.emissive.getHex() !== 0) {
-        out.emissive = m.emissive.clone();
-        out.emissiveIntensity = Math.min(2.5, m.emissiveIntensity || 1);
-      }
-      if (name === 'Road') { out.map = tex.road; out.color.set('#ffffff'); }
-      if (name === 'Ground') { out.map = tex.ground; out.color.set('#ffffff'); }
+      out = m; // GLTFLoader 已經是 MeshStandardMaterial（顏色、粗糙度、金屬度、自發光都照 Blender）
+      if (name === 'Road') { out.map = tex.road; out.color.set('#ffffff'); out.roughness = 0.88; }
+      if (name === 'Ground') { out.map = tex.ground; out.color.set('#ffffff'); out.roughness = 1; }
+      if (/^Curb/.test(name)) out.roughness = 0.55;
+      if (out.emissiveIntensity > 0 && out.emissive && out.emissive.getHex() !== 0) out.emissiveIntensity = Math.min(1.6, out.emissiveIntensity);
     }
     out.name = name;
     cache.set(m, out);
     return out;
   }
+  const toon = pbr; // 舊名稱（下面沿用）
 
   // ---------------------------------------------------------- 卡丁車
   const kartG = await loader.loadAsync('assets/kart.glb');
@@ -196,10 +233,16 @@ export async function createWorld(renderer, onProgress = () => {}) {
     scene.fog.far = th.fog[1];
     hemi.color.set(th.hemi[0]);
     hemi.groundColor.set(th.hemi[1]);
-    hemi.intensity = th.hemi[2];
+    hemi.intensity = th.hemi[2] * 0.75; // PBR 另有環境光照補光，天空光減半免得整片發白
     sun.color.set(th.sun[0]);
     sun.intensity = th.sun[1];
     sunDir.set(...th.sunDir).normalize();
+    skyU.sunDir.value.copy(sunDir);
+    skyU.sunCol.value.set(th.sun[0]);
+    skyU.sunAmt.value = th.night ? 0.35 : 1;
+    makeEnv(th);
+    carLight.intensity = th.night ? 60 : 0;
+    scene.environmentIntensity = th.env ?? 0.55;
     for (const k of ['road', 'ground']) if (tex[k]) tex[k].dispose();
     tex = { road: roadTexture(th), ground: groundTexture(th) };
     tex.road.anisotropy = maxAniso;
@@ -253,7 +296,14 @@ export async function createWorld(renderer, onProgress = () => {}) {
     sun.target.position.set(fx, focus.y, fz);
     sun.position.set(fx + sunDir.x * 120, focus.y + sunDir.y * 120, fz + sunDir.z * 120);
     sky.position.copy(focus);
+    carLight.position.set(focus.x, focus.y + 4, focus.z);
   }
 
-  return { scene, makeKart, loadTrack, update, get theme() { return theme; } };
+  function setShadowSize(n) {
+    if (sun.shadow.mapSize.x === n) return;
+    sun.shadow.mapSize.set(n, n);
+    if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
+  }
+
+  return { scene, makeKart, loadTrack, update, setShadowSize, get theme() { return theme; } };
 }

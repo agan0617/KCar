@@ -124,9 +124,29 @@ function capture(e) {
 }
 
 /** 按鍵設定面板。onTuning：打開操控調參 */
-export function openKeySettings({ onTuning } = {}) {
-  const { body, bar } = dialog('按鍵設定');
+export function openKeySettings({ onTuning, quality } = {}) {
+  const { body, bar } = dialog('設定');
   addEventListener('keydown', capture, true);
+  if (quality) {
+    const q = document.createElement('div');
+    q.className = 'quality';
+    const draw = () => {
+      q.innerHTML = '<h4>畫質</h4>';
+      const row = document.createElement('div');
+      row.className = 'qrow';
+      for (const [v, label, tip] of [['high', '高畫質', '泛光、反鋸齒、高解析陰影'], ['low', '省電', '手機跑不順時用']]) {
+        const b = btn('', () => { quality.set(v); draw(); }, 'qbtn' + (quality.get() === v ? ' on' : ''));
+        b.innerHTML = `<b>${label}</b><small>${tip}</small>`;
+        row.appendChild(b);
+      }
+      q.appendChild(row);
+    };
+    draw();
+    body.appendChild(q);
+    const h = document.createElement('h4');
+    h.textContent = '按鍵';
+    body.appendChild(h);
+  }
   const note = document.createElement('p');
   note.className = 'dlg-note';
   note.textContent = '點一格，再按想用的鍵。每個動作可以設兩個鍵；同一個鍵只能給一個動作（會自動從原本的動作拿掉）。';

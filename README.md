@@ -57,7 +57,10 @@ node tools/sim.mjs tt hills driftYaw=1.1   # 臨時改參數看效果
 - 模型全部由 **Blender 腳本**產生（`tools/blender/`）：賽道路面、路緣石、護牆、地形、水（湖／海／熔岩）、起終點門、看台、各主題的場景物件（重複的用 GPU instancing）；卡丁車與駕駛（戴耳機的柴犬 Komugi，對手是同一個模型換色）
 - 每條賽道一個 `tools/blender/<id>_layout.json`：控制點、路寬、護牆距離、主題、湖的位置。腳本同時輸出模型 `assets/<id>.glb` 與遊戲物理用的中心線 `assets/<id>_path.json`，兩者永遠對得上
 - 主題的模型顏色與場景物件在 `build_track.py` 的 `THEMES` 與 `scatter_*`；天空、霧、燈光、路面與地面紋理在 [js/themes.js](js/themes.js)
-- 路面、地面紋理在遊戲裡用 canvas 畫；材質載入後換成卡通著色（toon），發光的（霓虹、窗戶、熔岩）保留自發光
+- 路面、地面紋理在遊戲裡用 canvas 畫；地面另有 Blender 算的頂點色（大片深淺、坡度、賽道旁磨損帶、主題特色）乘在紋理上
+- 算繪：PBR 材質（車身烤漆是透明漆層），環境光照用每條賽道自己的天空顏色生成，Neutral 色調映射；
+  「高畫質」另有泛光（霓虹、熔岩、車燈）與 4 倍 MSAA，「省電」直接畫。設定裡切換，手機跑不順（連續 4 秒低於 40fps）會自動切到省電
+- 卡丁車與護牆、路緣石等硬殼零件用 Blender 的倒角（bevel）做圓角
 
 改賽道形狀前先用 `python tools/check_layout.py <id>` 檢查長度、最小彎道半徑、有沒有自己撞到自己、高低差，並出一張俯視圖。
 
