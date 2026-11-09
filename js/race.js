@@ -20,7 +20,7 @@ export function rivalSkill(d, idx) {
   const t = (d - 1) / 4; // 0..1
   const lane = [-2.2, 2.2, 0][idx];
   return {
-    speed: 0.935 + 0.065 * t - idx * 0.018,
+    speed: 0.925 + 0.065 * t - idx * 0.018,
     drift: 0.55 + 0.45 * t - idx * 0.08,
     perfect: 0.15 + 0.7 * t - idx * 0.12,
     dj: 0.1 + 0.75 * t - idx * 0.1,
