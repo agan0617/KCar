@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#3d9bff">
+  <title>K飛車</title>
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./lib/three/three.module.js",
+        "three/addons/": "./lib/three/addons/",
+        "pixi.js": "./lib/pixi/pixi.mjs"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <canvas id="ui"></canvas>
+  <div id="rotate">請把手機轉成橫向</div>
+  <div id="err" hidden></div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
