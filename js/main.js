@@ -3,6 +3,21 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+// 放射狀動態模糊：從消失點往外拉，中間清楚、四周糊（越快越明顯；只有高畫質才有）
+const ZoomBlurShader = {
+  uniforms: { tDiffuse: { value: null }, strength: { value: 0 }, center: { value: new THREE.Vector2(0.5, 0.52) } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float strength; uniform vec2 center; varying vec2 vUv;
+    void main(){
+      vec2 d = vUv - center;
+      float amt = strength * smoothstep(0.24, 0.75, length(d)); // 車在畫面中下，0.24 以內不糊
+      vec4 acc = vec4(0.0);
+      for (int i = 0; i < 10; i++) { acc += texture2D(tDiffuse, vUv - d * amt * (float(i) / 9.0)); }
+      gl_FragColor = acc / 10.0;
+    }`,
+};
 import { VERSION } from './version.js';
 import { P, togglePanel, panelOpen } from './tuning.js';
 import { Input } from './input.js';
@@ -58,7 +73,7 @@ async function main() {
   const world = await createWorld(renderer, (p) => { hud.showLoading(p); hud.render(); });
 
   // ------------------------------------------------------------ 畫質：高（MSAA＋泛光＋高解析陰影）／省電（直接畫）
-  let composer = null, bloom = null;
+  let composer = null, bloom = null, zoomBlur = null;
   let quality = store.get(QUALITY_KEY, 'high');
   function setQuality(q) {
     quality = q;
@@ -66,13 +81,16 @@ async function main() {
     const dpr = window.devicePixelRatio || 1;
     renderer.setPixelRatio(Math.min(dpr, q === 'high' ? 2 : 1.25));
     world.setShadowSize(q === 'high' ? 2048 : 1024);
-    if (composer) { composer.dispose(); composer = null; bloom = null; }
+    if (composer) { composer.dispose(); composer = null; bloom = null; zoomBlur = null; }
     if (q === 'high') {
       const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
       composer = new EffectComposer(renderer, rt);
       composer.addPass(new RenderPass(world.scene, camera));
       bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.25, 0.4, 0.9);
       composer.addPass(bloom);
+      zoomBlur = new ShaderPass(ZoomBlurShader);
+      zoomBlur.enabled = false;
+      composer.addPass(zoomBlur);
       composer.addPass(new OutputPass());
       composer.setPixelRatio(renderer.getPixelRatio());
       composer.setSize(innerWidth, innerHeight);
@@ -364,8 +382,17 @@ async function main() {
       camera.position.x += (Math.random() - 0.5) * sh;
       camera.position.y += (Math.random() - 0.5) * sh;
     }
-    look.set(k.x + fx * 4.5, k.y + 0.9, k.z + fz * 4.5);
+    // 看向車前方較遠、較高的點：車子落在畫面下方三分之一，前方路面看得多
+    look.set(k.x + fx * P.camLookAhead, k.y + P.camLookHeight, k.z + fz * P.camLookAhead);
     camera.lookAt(look);
+    // 動態模糊：接近極速開始出現，噴射時最強
+    if (zoomBlur) {
+      const fast = Math.max(0, Math.min(1, (spd01 - 0.8) / 0.2));
+      const s = (fast * 0.06 + (k.nitroT > 0 ? 0.13 : k.boostT > 0 ? 0.08 : 0)) * P.speedFx;
+      const u = zoomBlur.uniforms.strength;
+      u.value += (s - u.value) * (1 - Math.exp(-6 * dt));
+      zoomBlur.enabled = u.value > 0.003;
+    }
     // 視角隨車速放大（低速 P.fov，極速多 fovSpeed 度），噴射再加 fovBoost
     const fov = P.fov + Math.pow(Math.min(1, spd01), 1.5) * P.fovSpeed + boost * P.fovBoost;
     camera.fov += (fov - camera.fov) * (1 - Math.exp(-5 * dt));

@@ -36,8 +36,18 @@ function roadTexture(th) {
     g.fillStyle = r.edge;
     g.fillRect(w * 0.022, 0, w * 0.022, h);
     g.fillRect(w * 0.956, 0, w * 0.022, h);
+    // 中央虛線：每 4 公尺一段 2 公尺（越密地面掠過感越強）
     g.fillStyle = r.center;
-    g.fillRect(w * 0.494, 0, w * 0.012, h * 0.5);
+    g.fillRect(w * 0.494, 0, w * 0.012, h * 0.25);
+    g.fillRect(w * 0.494, h * 0.5, w * 0.012, h * 0.25);
+    // 兩側車道的淡色補丁（瀝青修補痕），給路面多一點會往後流的紋路
+    const rp = rand(31);
+    for (let i = 0; i < 10; i++) {
+      g.fillStyle = `rgba(0,0,0,${0.025 + rp() * 0.03})`;
+      const x = w * (0.08 + rp() * 0.8), y = rp() * h;
+      if (Math.abs(x - w * 0.5) < w * 0.06) continue;
+      g.fillRect(x, y, w * (0.03 + rp() * 0.06), h * (0.03 + rp() * 0.07));
+    }
   });
 }
 
