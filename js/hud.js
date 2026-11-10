@@ -588,7 +588,7 @@ export class Hud {
     this.overlayLayout();
   }
 
-  showResult({ mode, track, total, laps, bestLap, newLap, newTotal, order, onRetry, onHome, retryLabel = '再跑一次', homeLabel = '回首頁', note = '' }) {
+  showResult({ mode, track, total, laps, bestLap, newLap, newTotal, order, onRetry, onHome, onReplay, retryLabel = '再跑一次', homeLabel = '回首頁', note = '' }) {
     this.clearOverlay();
     const o = this.overlay;
     const shade = new Graphics();
@@ -610,9 +610,12 @@ export class Hud {
     }
     const body = new Text({ text: lines.join('\n'), style: style(26, '#ffffff', { align: 'center', lineHeight: 40 }) });
     body.anchor.set(0.5, 0);
-    const b1 = button(retryLabel, 260, 60, 0xff5a3d, onRetry);
-    const b2 = button(homeLabel, 260, 60, 0x4a5a7a, onHome);
-    o.addChild(shade, title, sub, body, b1, b2);
+    const bs = [
+      button(retryLabel, 250, 60, 0xff5a3d, onRetry),
+      onReplay ? button('重播', 200, 60, 0x16a085, onReplay) : null,
+      button(homeLabel, 250, 60, 0x4a5a7a, onHome),
+    ].filter(Boolean);
+    o.addChild(shade, title, sub, body, ...bs);
     this.overlayLayout = () => {
       const W = this.W, H = this.H;
       const s = Math.min(1, Math.max(0.5, Math.min(W / 1000, H / 680)));
@@ -620,8 +623,8 @@ export class Hud {
       title.scale.set(s); title.position.set(W / 2, H * 0.12);
       sub.scale.set(s); sub.position.set(W / 2, H * 0.12 + 56 * s);
       body.scale.set(s); body.position.set(W / 2, H * 0.12 + 86 * s);
-      b1.scale.set(s); b1.position.set(W / 2 - 140 * s, H * 0.84);
-      b2.scale.set(s); b2.position.set(W / 2 + 140 * s, H * 0.84);
+      const xs = bs.length === 3 ? [-250, 0, 250] : [-140, 140];
+      bs.forEach((b, i) => { b.scale.set(s); b.position.set(W / 2 + xs[i] * s, H * 0.84); });
     };
     this.overlayLayout();
   }

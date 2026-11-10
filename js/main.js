@@ -32,6 +32,7 @@ import { openHelp, openKeySettings, closeDialog, onKeysChange } from './controls
 import { Lobby } from './net/lobby.js';
 import { OnlineRace } from './net/client.js';
 import { SEAT_COLORS } from './net/shared.js';
+import { Recorder, Replay, ReplayBar } from './replay.js';
 
 const STEP = 1 / 120;
 const BEST_KEY = 'kcar.best.v2'; // { [賽道 id]: { lap, total } }
@@ -228,6 +229,8 @@ async function main() {
     G.race = new Race(G.track, { mode, laps: G.meta.laps, difficulty: G.meta.difficulty });
     syncLooks();
     for (const v of looks) v.fx.reset();
+    closeReplay();
+    G.rec = new Recorder(G.track, G.race.racers, { trackName: G.meta.name, laps: G.race.laps === Infinity ? 99 : G.race.laps });
     G.state = 'countdown';
     G.countT = 3.0;
     G.startBoostUsed = false;
@@ -248,6 +251,7 @@ async function main() {
 
   function goTitle() {
     togglePanel(false);
+    closeReplay();
     G.race = new Race(G.track, { mode: 'race', laps: G.meta.laps, difficulty: G.meta.difficulty });
     syncLooks();
     G.state = 'title';
@@ -293,7 +297,7 @@ async function main() {
     const order = race.racers
       .map((r) => ({ name: r.name, color: r.color, isPlayer: r.isPlayer, t: race.estimateFinish(r), done: r.finishT != null }))
       .sort((a, c) => a.t - c.t);
-    hud.showResult({
+    showResult({
       mode: G.mode, track: G.meta.name, total: me.finishT ?? race.clock, laps: me.laps, bestLap, newLap, newTotal, order,
       onRetry: () => startRace(G.mode), onHome: goTitle,
     });
@@ -348,6 +352,8 @@ async function main() {
     G.online = { code: lobby.room ? lobby.room.code : '' };
     G.mode = 'race';
     G.race = new OnlineRace(G.track, lobby.net, { seats: prep.seats, laps: prep.laps, goTick: m.goTick, myId: lobby.net.id });
+    closeReplay();
+    G.rec = new Recorder(G.track, G.race.racers, { trackName: trackById(prep.track).name, laps: prep.laps });
     syncLooks();
     for (const v of looks) v.fx.reset();
     G.state = 'countdown';
@@ -386,7 +392,7 @@ async function main() {
     const order = m.order.map((o) => ({ name: o.name, color: SEAT_COLORS[o.seat], isPlayer: !o.bot && o.id === myId, t: o.t, done: o.done }));
     const mine = m.order.filter((o) => !o.bot && o.id === myId)[0];
     const laps = mine ? mine.laps : race.player.laps;
-    hud.showResult({
+    showResult({
       mode: 'race', track: trackById(m.track).name, laps, bestLap: laps.length ? Math.min(...laps) : null, newLap: false, order,
       note: '（多人連線：成績不列入個人紀錄）',
       retryLabel: '回房間', homeLabel: '離開房間',
@@ -427,6 +433,65 @@ async function main() {
     const me = race.player;
     const who = me.ctrl === 'a' && me.finishT == null ? '　電腦代駕中（按任何鍵接回）' : '';
     netInfo.textContent = `房間 ${G.online.code}　延遲 ${Math.round(net.rtt)} ms${who}`;
+  }
+
+  // ------------------------------------------------------------ 重播（replay.js：比賽中每 1/30 秒記一筆，成績頁按「重播」從頭播）
+  const replayBar = new ReplayBar({
+    onExit: () => exitReplay(),
+    onSeek: () => { for (const v of looks) v.fx.reset(); snapCamera(); },
+    onTarget: () => snapCamera(),
+  });
+
+  /** 成績頁：記下參數（重播完回來要再顯示一次），有紀錄就多一顆「重播」 */
+  function showResult(args) {
+    G.lastResult = args;
+    hud.showResult({ ...args, onReplay: G.rec && !G.rec.empty ? startReplay : null });
+  }
+
+  function startReplay() {
+    if (!G.rec || G.rec.empty) return;
+    closeDialog();
+    G.replay = new Replay(G.rec);
+    G.state = 'replay';
+    hud.clearOverlay();
+    hud.setRaceVisible(false, false);
+    for (const v of looks) { v.group.visible = false; v.fx.reset(); }
+    for (const r of G.rec.racers) lookOf(r).group.visible = true;
+    replayBar.show(G.replay);
+    snapCamera();
+  }
+
+  function exitReplay() {
+    closeReplay();
+    G.state = 'result';
+    syncLooks();
+    for (const v of looks) v.fx.reset();
+    if (G.lastResult) hud.showResult({ ...G.lastResult, onReplay: startReplay });
+  }
+
+  /** 收掉重播（開新比賽、回首頁時） */
+  function closeReplay() {
+    if (replayBar.visible) replayBar.hide();
+    G.replay = null;
+    if (G.state === 'replay') G.state = 'result';
+  }
+
+  /** 重播的一幀：播放時間往前、車照紀錄擺、鏡頭跟選中的那台 */
+  function replayFrame(dt, t) {
+    const rp = G.replay;
+    const dv = rp.advance(dt);
+    const k = rp.karts[rp.target];
+    G.rec.racers.forEach((r, i) => {
+      poseKart(lookOf(r), rp.karts[i], dv);
+      lookOf(r).fx.update(dv, rp.karts[i], t);
+    });
+    world.update(dt, t, lookOf(G.rec.racers[rp.target]).group.position);
+    placeCamera(dv || 1e-4, 0, k); // 鏡頭用重播時間追：4 倍速時才跟得上車，暫停時停住
+    const f = Math.max(0, Math.min(1, (Math.abs(k.spd) / P.maxSpeed - 0.6) / 0.4));
+    wind.update(dv, k, rp.playing ? Math.max(f, k.nitroT > 0 ? 1.3 : k.boostT > 0 ? 1 : 0) * P.speedFx : 0);
+    sfx.update(k, rp.playing && rp.speed <= 2);
+    replayBar.render(rp.ended !== G.replayEnded);
+    G.replayEnded = rp.ended;
   }
 
   // ------------------------------------------------------------ 事件 → 畫面／聲音回饋（只看玩家的車）
@@ -506,13 +571,15 @@ async function main() {
   // ------------------------------------------------------------ 鏡頭與車的外觀
   const tmpV = new THREE.Vector3();
   const look = new THREE.Vector3();
+  const camTarget = () => (G.replay ? G.replay.karts[G.replay.target] : G.race.player.kart);
   function snapCamera() {
-    const k = G.race.player.kart;
+    const k = camTarget();
     G.camYaw = k.h;
-    placeCamera(1, 1);
+    G.lastSpd = undefined;
+    placeCamera(1, 1, k);
   }
-  function placeCamera(dt, snap = 0) {
-    const k = G.race.player.kart;
+  function placeCamera(dt, snap = 0, kk = null) {
+    const k = kk || G.race.player.kart;
     const mix = k.drift ? P.camDriftMix : 0.15;
     // 鏡頭方向：主要跟速度方向（甩尾時才看得到車身打橫），一部分跟車頭
     const target = lerpAngle(k.phi, k.h, mix);
@@ -616,6 +683,13 @@ async function main() {
       else pause();
     }
     if (!G.race) { input.endFrame(); hud.render(); return; }
+    if (G.state === 'replay' && G.replay) {
+      input.endFrame();
+      replayFrame(dt, t);
+      draw();
+      hud.render();
+      return;
+    }
 
     if (G.online) {
       // 連線：照 server 回報的輸入排隊長度微調快慢（rate 0.97～1.03），自己的車預測、對手前推
@@ -634,6 +708,8 @@ async function main() {
       acc = 0;
     }
 
+    // 重播紀錄：比賽進行中（連線的選單開著也算，比賽沒停）每 1/30 秒記一筆
+    if (G.rec && (G.state === 'countdown' || G.state === 'race' || (G.online && G.state === 'paused'))) G.rec.tick(dt, G.race.clock);
     if (G.state === 'countdown') {
       const n = Math.ceil(G.online ? G.race.countLeft : G.countT);
       if (n !== G.lastCount && n >= 1 && n <= 3) { G.lastCount = n; sfx.beep(523, 0.18, 'square', 0.22); }
