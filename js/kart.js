@@ -1,8 +1,8 @@
 // 卡丁車物理（街機式）。
 //
-// 模型：車頭方向 h 由方向鍵／甩尾控制；速度方向 phi 以「抓地力」的速率追車頭。
-// 正常行駛抓地強（phi 幾乎等於 h）；甩尾時抓地弱，車頭轉得比速度方向快，就產生側滑角（slip）。
-// 側滑角 × 車速 → 集氣；甩尾放開後車身回正，在時機窗內「再按 ↑」＝小噴，
+// 模型：正常行駛時車頭方向 h 由方向鍵控制，速度方向 phi 以「抓地力」的速率追車頭（phi 幾乎等於 h）。
+// 甩尾時反過來：方向鍵控制路線 phi 轉多快（內切急、外拉緩），車頭跟在路線內側一個偏角（側滑角 slip）上。
+// 側滑角 × 車速 → 集氣；甩尾放開後車頭轉回路線方向（回正，反打方向更快），在時機窗內「再按 ↑」＝小噴，
 // 回正得越正（側滑角越小）越完美；小噴後再按一次＝雙噴。集滿氣得到一顆氮氣（最多兩顆）。
 //
 // 座標：three.js，Y 朝上。前方 = (sin h, cos h)，右手邊 = (-cos h, sin h)，右轉 = h 變小。
@@ -20,7 +20,7 @@ const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 // 多人連線：一台車的完整物理狀態（快照下傳、client 回滾重放都靠它）。
 // 加了會影響 step() 的欄位，一定要補進這裡，不然連線時預測會一直被校正。
 const STATE_KEYS = ['x', 'y', 'z', 'h', 'phi', 'spd', 'steer', 'hint', 'drift', 'driftDir', 'driftT', 'driftMaxSlip',
-  'driftArm', 'recoverT', 'boostT', 'boostAdd', 'boostKind', 'nitroT', 'gauge', 'nitros', 'onGrass', 'onCurb',
+  'driftArm', 'recoverT', 'straighten', 'boostT', 'boostAdd', 'boostKind', 'nitroT', 'gauge', 'nitros', 'onGrass', 'onCurb',
   'pitch', 'yawRate', 'lastS', 'dist', 'topMul', 'sbUsed', 'sbPend'];
 
 export class Kart {
@@ -64,6 +64,7 @@ export class Kart {
     this.driftMaxSlip = 0;
     this.driftArm = false;
     this.recoverT = 99;
+    this.straighten = false;
     this.jetWin = null;
     this.boostT = 0;
     this.boostAdd = 0;
@@ -131,17 +132,25 @@ export class Kart {
       ev.push({ type: 'driftStart', dir: this.driftDir });
     }
 
-    let grip;
+    // 甩尾模型（0.9.0 起）：甩尾時直接控制「路線」轉多快（phi），車頭（h）只是跟在路線內側一個偏角上。
+    // 方向往內壓＝路線轉得急、往外拉＝路線比平常轉向還緩，所以長彎能一路甩完。
+    // 放開甩尾後是「車頭轉回路線方向」（回正），路線不會因為偏角突然往彎心切；反打方向回正得更快。
     const speedAbs = Math.abs(this.spd);
+    const h0 = this.h;
     if (this.drift) {
       const rel = this.steer * this.driftDir; // +1 內切、-1 外拉
-      // 點煞：甩尾中按煞車，車頭往彎內多轉（剛按下那一下先甩一截），代價是掉速（在下面速度段算）
+      // 點煞：甩尾中按煞車，路線往彎內多轉（剛按下那一下先甩一截），代價是掉速（在下面速度段算）
       const pb = brake ? P.brakeYaw : 0;
-      if (control && inp.pressed('down')) { this.h -= this.driftDir * P.brakeKick; ev.push({ type: 'pointBrake' }); }
-      const yaw = this.driftDir * (P.driftYaw + P.driftYawSteer * rel + pb);
-      this.h -= yaw * dt;
-      this.yawRate = -yaw;
-      grip = P.driftGrip;
+      if (control && inp.pressed('down')) {
+        this.phi -= this.driftDir * P.brakeKick * 0.5;
+        this.h -= this.driftDir * P.brakeKick;
+        ev.push({ type: 'pointBrake' });
+      }
+      const pathYaw = this.driftDir * Math.max(0, P.driftTurn + P.driftTurnSteer * rel + pb);
+      if (this.spd > 0) this.phi -= pathYaw * dt;
+      const want = (P.driftSlip + P.driftSlipSteer * rel) * DEG;
+      const target = this.phi - this.driftDir * want;
+      this.h += wrap(target - this.h) * (1 - Math.exp(-P.driftSlipRate * dt));
       this.driftT += dt;
       const s = Math.abs(this.slip);
       this.driftMaxSlip = Math.max(this.driftMaxSlip, s);
@@ -154,11 +163,18 @@ export class Kart {
       const low = Math.min(1, speedAbs / 5);
       const rate = P.steerRate * (1 - P.steerHighLoss * hi) * low;
       const yaw = this.steer * rate * (this.spd >= 0 ? 1 : -1);
-      this.h -= yaw * dt;
-      this.yawRate = -yaw;
       this.recoverT += dt;
-      const t = clamp(this.recoverT / P.gripRecover, 0, 1);
-      grip = P.driftGrip + (P.grip - P.driftGrip) * t * t;
+      if (this.straighten && this.spd >= 0) {
+        // 回正中：方向鍵轉的是路線，車頭往路線方向收；反打方向（往甩尾的反方向）收得更快
+        this.phi -= yaw * dt;
+        const counter = steerIn * this.driftDir < 0 ? P.counterSteer : 1;
+        const s = wrap(this.h - this.phi) * Math.exp(-P.driftRecover * counter * dt);
+        this.h = this.phi + s;
+        if (Math.abs(s) < 0.5 * DEG) this.straighten = false;
+      } else {
+        this.straighten = false;
+        this.h -= yaw * dt;
+      }
     }
 
     // ---------------------------------------------------------- 小噴／雙噴時機
@@ -232,9 +248,10 @@ export class Kart {
     if (this.spd > top) this.spd = Math.max(top, this.spd - ((this.spd - top) * 1.5 + 2) * dt);
     if (this.onGrass) this.spd -= Math.sign(this.spd) * Math.min(Math.abs(this.spd), P.grassDrag * 0.25 * dt);
 
-    // 速度方向追車頭
-    if (this.spd >= 0) this.phi += wrap(this.h - this.phi) * (1 - Math.exp(-grip * dt));
-    else this.phi = this.h;
+    // 速度方向追車頭（甩尾與回正中是反過來，由上面直接算路線）
+    if (this.spd < 0) this.phi = this.h;
+    else if (!this.drift && !this.straighten) this.phi += wrap(this.h - this.phi) * (1 - Math.exp(-P.grip * dt));
+    this.yawRate = dt > 0 ? -wrap(this.h - h0) / dt : 0;
     this.h = wrap(this.h);
     this.phi = wrap(this.phi);
 
@@ -286,6 +303,7 @@ export class Kart {
     if (!this.drift) return;
     this.drift = false;
     this.recoverT = 0;
+    this.straighten = true;
     const can = allowJet && this.driftT >= P.jetMinDrift && this.driftMaxSlip > 8 * DEG;
     this.jetWin = can ? { t: 0, stage: 1 } : null;
     this.events.push({ type: 'driftEnd', canJet: can, reason });

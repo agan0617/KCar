@@ -2,7 +2,7 @@
 //
 //   node tools/sim.mjs tt [賽道…]           計時賽：完美自動駕駛（每彎甩、完美小噴＋雙噴）與不甩尾的圈速
 //   node tools/sim.mjs race [賽道…] [N=5]   競賽：玩家自動駕駛分「完美」與「普通玩家」兩種，各跑 N 場，看名次分布與時間差
-//   參數覆寫：在最後加 driftYaw=1.1 driftGrip=2 這種
+//   參數覆寫：在最後加 driftTurn=0.9 driftSlip=20 這種
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';

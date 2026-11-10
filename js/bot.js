@@ -97,8 +97,13 @@ export class AutoDriver {
 
     if (st.drifting) {
       const key = st.dir > 0 ? 'right' : 'left', other = st.dir > 0 ? 'left' : 'right';
-      this.set(other, false);
-      this.set(key, -err * st.dir > -0.05 || !k.drift);
+      if (!k.drift) { this.set(other, false); this.set(key, true); }
+      else {
+        // 甩尾中方向鍵控制的是路線：拿路線方向（phi）跟目標比，太外就內切、太內就外拉
+        const need = -(wrap(Math.atan2(tx - k.x, tz - k.z) - k.phi) + wobble) * st.dir;
+        this.set(key, need > 0.03);
+        this.set(other, need < -0.05);
+      }
       const remain = wrap(headAt(s + 25) - k.phi);
       if (k.drift && Math.abs(turnAhead) < 0.35 && Math.abs(remain) < 0.25) {
         this.set('drift', false);
