@@ -114,7 +114,10 @@ export class Kart {
     const speedAbs = Math.abs(this.spd);
     if (this.drift) {
       const rel = this.steer * this.driftDir; // +1 內切、-1 外拉
-      const yaw = this.driftDir * (P.driftYaw + P.driftYawSteer * rel);
+      // 點煞：甩尾中按煞車，車頭往彎內多轉（剛按下那一下先甩一截），代價是掉速（在下面速度段算）
+      const pb = brake ? P.brakeYaw : 0;
+      if (control && inp.pressed('down')) { this.h -= this.driftDir * P.brakeKick; ev.push({ type: 'pointBrake' }); }
+      const yaw = this.driftDir * (P.driftYaw + P.driftYawSteer * rel + pb);
       this.h -= yaw * dt;
       this.yawRate = -yaw;
       grip = P.driftGrip;
@@ -192,7 +195,9 @@ export class Kart {
     if (this.nitroT > 0) { top += P.nitroSpeed; this.nitroT -= dt; }
     if (this.onGrass) top *= P.grassTop;
     const boosting = this.boosting;
-    if (brake) {
+    if (brake && this.drift) {
+      this.spd -= P.brakeDrag * dt; // 點煞：比一般煞車輕，主要拿來甩車頭
+    } else if (brake) {
       if (this.spd > 0.5) this.spd -= P.brake * dt;
       else this.spd = Math.max(-P.reverseMax, this.spd - P.accel * 0.6 * dt);
     } else if ((thr || boosting) && this.spd < top) {
