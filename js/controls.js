@@ -90,6 +90,13 @@ function dialog(title) {
   return { body: d.querySelector('.dlg-body'), bar: d.querySelector('.dlg-bar') };
 }
 
+/** 給其他面板用（多人連線大廳）：開一個對話框，面板開著時按鍵不漏給遊戲、Esc 關閉 */
+export function openDialog(title) {
+  const d = dialog(title);
+  addEventListener('keydown', capture, true);
+  return d;
+}
+
 function btn(text, onClick, cls = '') {
   const b = document.createElement('button');
   b.textContent = text;

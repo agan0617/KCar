@@ -17,13 +17,34 @@ const wrap = (a) => {
 };
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
+// 多人連線：一台車的完整物理狀態（快照下傳、client 回滾重放都靠它）。
+// 加了會影響 step() 的欄位，一定要補進這裡，不然連線時預測會一直被校正。
+const STATE_KEYS = ['x', 'y', 'z', 'h', 'phi', 'spd', 'steer', 'hint', 'drift', 'driftDir', 'driftT', 'driftMaxSlip',
+  'driftArm', 'recoverT', 'boostT', 'boostAdd', 'boostKind', 'nitroT', 'gauge', 'nitros', 'onGrass', 'onCurb',
+  'pitch', 'yawRate', 'lastS', 'dist', 'topMul', 'sbUsed', 'sbPend'];
+
 export class Kart {
   constructor(track) {
     this.track = track;
     this.proj = {};
     this.events = [];
     this.topMul = 1; // 極速倍率（電腦車手的強弱、追趕機制用；玩家固定 1）
+    this.sbUsed = false; // 起步噴：這場按過了（連線版由 net/shared.js 判，單機版由 main.js 判）
+    this.sbPend = false; // 起步噴：倒數最後 0.25 秒按了，GO 時生效
+    this.dist = 0;
     this.place(0, 0);
+  }
+
+  getState() {
+    const s = STATE_KEYS.map((k) => this[k]);
+    s.push(this.jetWin ? [this.jetWin.t, this.jetWin.stage] : 0);
+    return s;
+  }
+
+  setState(s) {
+    for (let i = 0; i < STATE_KEYS.length; i++) this[STATE_KEYS[i]] = s[i];
+    const w = s[STATE_KEYS.length];
+    this.jetWin = w ? { t: w[0], stage: w[1] } : null;
   }
 
   /** 放到沿線距離 s、橫向偏移 lateral（右正）的地方，靜止 */

@@ -96,7 +96,36 @@ export class Race {
     }
   }
 
-  collide(karts) {
+  collide(karts) { collideKarts(karts); }
+
+  /** 名次：先比完賽時間，沒完賽的比跑的距離 */
+  standings() { return standingsOf(this.racers); }
+
+  /** 還沒完賽的車：用目前平均速度估完賽時間（玩家先到終點時結算用） */
+  estimateFinish(r) { return estimateFinishOf(r, this.laps, this.track.length, this.clock); }
+}
+
+export const GRID_SLOTS = GRID;
+
+export function standingsOf(racers) {
+  return [...racers].sort((a, b) => {
+    if (a.finishT != null && b.finishT != null) return a.finishT - b.finishT;
+    if (a.finishT != null) return -1;
+    if (b.finishT != null) return 1;
+    return b.kart.dist - a.kart.dist;
+  });
+}
+
+export function estimateFinishOf(r, laps, trackLength, clock) {
+  if (r.finishT != null) return r.finishT;
+  const total = laps * trackLength;
+  const v = Math.max(1, r.kart.dist / Math.max(1, clock));
+  return clock + Math.max(0, total - r.kart.dist) / v;
+}
+
+/** 車與車的碰撞（單機、連線 server、連線 client 的預測共用；順序會影響結果，三邊都照座位順序） */
+export function collideKarts(karts) {
+  { // eslint-disable-line no-lone-blocks -- 原本是 Race 的方法，縮排照舊
     const minD = KART_R * 2;
     for (let i = 0; i < karts.length; i++) {
       for (let j = i + 1; j < karts.length; j++) {
@@ -122,23 +151,5 @@ export class Race {
         }
       }
     }
-  }
-
-  /** 名次：先比完賽時間，沒完賽的比跑的距離 */
-  standings() {
-    return [...this.racers].sort((a, b) => {
-      if (a.finishT != null && b.finishT != null) return a.finishT - b.finishT;
-      if (a.finishT != null) return -1;
-      if (b.finishT != null) return 1;
-      return b.kart.dist - a.kart.dist;
-    });
-  }
-
-  /** 還沒完賽的車：用目前平均速度估完賽時間（玩家先到終點時結算用） */
-  estimateFinish(r) {
-    if (r.finishT != null) return r.finishT;
-    const total = this.laps * this.track.length;
-    const v = Math.max(1, r.kart.dist / Math.max(1, this.clock));
-    return this.clock + Math.max(0, total - r.kart.dist) / v;
   }
 }

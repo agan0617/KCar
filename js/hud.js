@@ -474,7 +474,7 @@ export class Hud {
   }
 
   /** 首頁：賽道卡片（點了就換賽道，背景跟著換）＋三種模式 */
-  showTitle({ version, tracks, selected, best, touch, loading, onSelect, onStart, onHelp, onSettings }) {
+  showTitle({ version, tracks, selected, best, touch, loading, onSelect, onStart, onHelp, onSettings, onOnline, online }) {
     this.clearOverlay();
     this.loadText = null;
     const o = this.overlay;
@@ -508,14 +508,15 @@ export class Hud {
       return c;
     });
     const modes = [
-      button('競賽（對 3 位電腦）', 300, 62, 0xff5a3d, () => onStart('race')),
-      button('計時賽', 200, 62, 0x7b61ff, () => onStart('time')),
-      button('自由練習', 200, 62, 0x2a9df4, () => onStart('free')),
+      button('競賽（對 3 位電腦）', 290, 62, 0xff5a3d, () => onStart('race')),
+      button('計時賽', 160, 62, 0x7b61ff, () => onStart('time')),
+      button('自由練習', 160, 62, 0x2a9df4, () => onStart('free')),
+      button(online ? '多人（已連線）' : '多人連線', 200, 62, 0x16a085, () => onOnline && onOnline()),
     ];
     const loadT = new Text({ text: loading ? '載入賽道中…' : '', style: style(20, '#ffffff') });
     loadT.anchor.set(0.5);
     this.titleLoadText = loadT;
-    for (const m of modes) m.alpha = loading ? 0.45 : 1;
+    for (const m of modes.slice(0, 3)) m.alpha = loading ? 0.45 : 1;
     const cur = best[selected] || {};
     const bestT = new Text({ text: `這條賽道　最佳單圈 ${fmtTime(cur.lap)}　計時賽最佳 ${fmtTime(cur.total)}`, style: style(16, '#e8f4ff') });
     bestT.anchor.set(0.5);
@@ -543,8 +544,8 @@ export class Hud {
       const cw = 162 * s, cy = H * 0.13 + 140 * s;
       cards.forEach((c, i) => { c.scale.set(s); c.position.set(W / 2 + (i - 2.5) * cw, cy); });
       const my = cy + 104 * s;
-      // 三顆寬 300／200／200、間隔 20，整排置中
-      const xs = [-220, 50, 270].map((x) => x * s);
+      // 四顆寬 290／160／160／200、間隔 20，整排置中
+      const xs = [-290, -45, 135, 335].map((x) => x * s);
       modes.forEach((m, i) => { m.scale.set(s); m.position.set(W / 2 + xs[i], my); });
       loadT.scale.set(s); loadT.position.set(W / 2, my + 48 * s);
       bestT.scale.set(s); bestT.position.set(W / 2, my + 52 * s);
@@ -562,19 +563,20 @@ export class Hud {
     if (this.titleLoadText) this.titleLoadText.text = `載入賽道中… ${Math.round(p * 100)}%`;
   }
 
-  showPause({ onResume, onRestart, onHelp, onSettings, onHome }) {
+  /** onRestart 給 null 就不顯示（連線比賽不能重來）；homeLabel 換「回首頁」的字 */
+  showPause({ onResume, onRestart, onHelp, onSettings, onHome, title: titleText = '暫停', homeLabel = '回首頁' }) {
     this.clearOverlay();
     const o = this.overlay;
     const shade = new Graphics();
-    const title = new Text({ text: '暫停', style: style(64, '#ffd23f') });
+    const title = new Text({ text: titleText, style: style(64, '#ffd23f') });
     title.anchor.set(0.5);
     const bs = [
       button('繼續', 280, 58, 0x2a9df4, onResume),
-      button('重新開始', 280, 58, 0xff5a3d, onRestart),
+      onRestart ? button('重新開始', 280, 58, 0xff5a3d, onRestart) : null,
       button('操作說明', 280, 58, 0x16a085, onHelp),
       button('設定（按鍵／調參）', 280, 58, 0x7b61ff, onSettings),
-      button('回首頁', 280, 58, 0x4a5a7a, onHome),
-    ];
+      button(homeLabel, 280, 58, 0x4a5a7a, onHome),
+    ].filter(Boolean);
     o.addChild(shade, title, ...bs);
     this.overlayLayout = () => {
       const W = this.W, H = this.H;
@@ -586,7 +588,7 @@ export class Hud {
     this.overlayLayout();
   }
 
-  showResult({ mode, track, total, laps, bestLap, newLap, newTotal, order, onRetry, onHome }) {
+  showResult({ mode, track, total, laps, bestLap, newLap, newTotal, order, onRetry, onHome, retryLabel = '再跑一次', homeLabel = '回首頁', note = '' }) {
     this.clearOverlay();
     const o = this.overlay;
     const shade = new Graphics();
@@ -601,14 +603,15 @@ export class Hud {
       order.forEach((r, i) => lines.push(`${i + 1}　${r.name.padEnd(7, ' ')}　${r.done ? '' : '≈'}${fmtTime(r.t)}${r.isPlayer ? '　◀ 你' : ''}`));
       lines.push('');
       lines.push(`最快單圈 ${fmtTime(bestLap)}${newLap ? '  ★新紀錄' : ''}`);
+      if (note) lines.push(note);
     } else {
       if (mode === 'time') lines.push(`總時間 ${fmtTime(total)}${newTotal ? '  ★新紀錄' : ''}`);
       laps.forEach((t, i) => lines.push(`第 ${i + 1} 圈  ${fmtTime(t)}${t === bestLap && newLap ? '  ★最佳單圈' : ''}`));
     }
     const body = new Text({ text: lines.join('\n'), style: style(26, '#ffffff', { align: 'center', lineHeight: 40 }) });
     body.anchor.set(0.5, 0);
-    const b1 = button('再跑一次', 260, 60, 0xff5a3d, onRetry);
-    const b2 = button('回首頁', 260, 60, 0x4a5a7a, onHome);
+    const b1 = button(retryLabel, 260, 60, 0xff5a3d, onRetry);
+    const b2 = button(homeLabel, 260, 60, 0x4a5a7a, onHome);
     o.addChild(shade, title, sub, body, b1, b2);
     this.overlayLayout = () => {
       const W = this.W, H = this.H;

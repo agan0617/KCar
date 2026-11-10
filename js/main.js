@@ -19,7 +19,7 @@ const ZoomBlurShader = {
     }`,
 };
 import { VERSION } from './version.js';
-import { P, togglePanel, panelOpen } from './tuning.js';
+import { P, DEFS, DEFAULTS, togglePanel, panelOpen } from './tuning.js';
 import { Input } from './input.js';
 import { Track } from './track.js';
 import { Race, RIVALS } from './race.js';
@@ -29,11 +29,19 @@ import { Fx, Wind } from './fx.js';
 import { Hud, fmtTime } from './hud.js';
 import { Sfx } from './audio.js';
 import { openHelp, openKeySettings, closeDialog, onKeysChange } from './controls.js';
+import { Lobby } from './net/lobby.js';
+import { OnlineRace } from './net/client.js';
+import { SEAT_COLORS } from './net/shared.js';
 
 const STEP = 1 / 120;
 const BEST_KEY = 'kcar.best.v2'; // { [賽道 id]: { lap, total } }
 const TRACK_KEY = 'kcar.track';
 const QUALITY_KEY = 'kcar.quality';
+
+// 連線比賽時暫停輸入（暫停選單開著）：車照樣在跑（比賽不能停），只是放開所有鍵
+const NO_INPUT = { steer: 0, throttle: 0, braking: false, driftHeld: false, jet: false, pressed: () => false };
+// 連線比賽一律用預設的操控參數（server 用預設值算，client 預測要跟它一樣）；鏡頭參數不影響物理，照個人設定
+const CAM_KEYS = new Set(DEFS.find(([g]) => g === '鏡頭')[1].map((i) => i[0]));
 
 const lerpAngle = (a, b, t) => {
   let d = b - a;
@@ -132,7 +140,8 @@ async function main() {
   });
   const playerLook = looks[0];
   const wind = new Wind(world.scene);
-  const lookOf = (r) => (r.isPlayer ? playerLook : looks[1 + RIVALS.findIndex((x) => x.name === r.name)]);
+  // 連線比賽照座位挑車（座位 0～3＝Komugi 紅／Mochi 藍／Azuki 綠／Kinako 紫）
+  const lookOf = (r) => (r.seat != null ? looks[r.seat] : r.isPlayer ? playerLook : looks[1 + RIVALS.findIndex((x) => x.name === r.name)]);
 
   // ------------------------------------------------------------ 狀態
   const G = {
@@ -153,8 +162,19 @@ async function main() {
   };
   const bestOf = (id) => G.best[id] || (G.best[id] = {});
 
-  async function selectTrack(id) {
+  function selectTrack(id) {
+    G.loadPromise = loadTrackInner(id);
+    return G.loadPromise;
+  }
+  /** 連線：確定已經載好這條賽道 */
+  async function ensureTrack(id) {
+    if (G.trackReady === id) return;
+    if (G.trackId === id && G.loadPromise) { await G.loadPromise; if (G.trackReady === id) return; }
+    await selectTrack(id);
+  }
+  async function loadTrackInner(id) {
     const seq = ++G.loadSeq;
+    G.trackReady = null;
     G.trackId = id;
     G.meta = trackById(id);
     store.set(TRACK_KEY, id);
@@ -163,11 +183,13 @@ async function main() {
     const path = await world.loadTrack(id, (p) => { if (seq === G.loadSeq) hud.setTitleLoading(p); });
     if (seq !== G.loadSeq) return; // 載入途中又換了別條
     G.track = new Track(path);
+    G.trackReady = id;
     hud.setTrack(G.track);
     applyLook();
     G.race = new Race(G.track, { mode: 'race', laps: G.meta.laps, difficulty: G.meta.difficulty });
     syncLooks();
     for (const v of looks) v.fx.reset();
+    if (G.online) return; // 載入途中連線比賽已經開始（不該發生，保險）
     G.state = 'title';
     showTitle(false);
   }
@@ -181,12 +203,14 @@ async function main() {
       onStart: (mode) => { if (G.state === 'title') startRace(mode); },
       onHelp: help,
       onSettings: settings,
+      onOnline: () => lobby.open(),
+      online: lobby.connected,
     });
   }
 
   const help = () => openHelp({ touch: input.isTouch });
   const settings = () => openKeySettings({
-    onTuning: () => togglePanel(true),
+    onTuning: () => openTuning(),
     quality: { get: () => quality, set: (q) => { perf.done = true; setQuality(q); } },
   });
   // 改了按鍵：首頁底下那行說明跟著換
@@ -217,6 +241,11 @@ async function main() {
     snapCamera();
   }
 
+  function openTuning() {
+    if (G.online) { hud.popup('連線比賽用預設的操控參數，不能調', '#ffd23f', 26, 1.6, 120); return; }
+    togglePanel(true);
+  }
+
   function goTitle() {
     togglePanel(false);
     G.race = new Race(G.track, { mode: 'race', laps: G.meta.laps, difficulty: G.meta.difficulty });
@@ -230,6 +259,11 @@ async function main() {
     G.prevState = G.state;
     G.state = 'paused';
     hud.setRaceVisible(false, false);
+    if (G.online) {
+      // 連線比賽停不下來：選單蓋上去，車放開所有鍵繼續跑
+      hud.showPause({ title: '選單', onResume: resume, onRestart: null, onHelp: help, onSettings: settings, homeLabel: '離開比賽', onHome: () => { closeDialog(); leaveOnline(true); } });
+      return;
+    }
     hud.showPause({ onResume: resume, onRestart: () => { closeDialog(); startRace(G.mode); }, onHelp: help, onSettings: settings, onHome: () => { closeDialog(); goTitle(); } });
   }
   function resume() {
@@ -237,7 +271,7 @@ async function main() {
     togglePanel(false);
     hud.clearOverlay();
     hud.setRaceVisible(true, input.isTouch);
-    G.state = G.prevState || 'race';
+    G.state = G.online ? (G.race.phase === 'race' ? 'race' : 'countdown') : G.prevState || 'race';
   }
   hud.onPause = pause;
   document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
@@ -269,6 +303,132 @@ async function main() {
     }
   }
 
+  // ------------------------------------------------------------ 多人連線（大廳在 net/lobby.js、預測在 net/client.js）
+  const netInfo = document.createElement('div');
+  netInfo.id = 'netinfo';
+  netInfo.hidden = true;
+  document.body.appendChild(netInfo);
+  const lobby = new Lobby({
+    getTrack: () => G.trackId,
+    // 房主換賽道：背景跟著換、順便先載好
+    onRoomTrack: (id) => { if (!G.online && id !== G.trackId && (G.state === 'title' || G.state === 'loading')) selectTrack(id); },
+    onPrep: async (m) => {
+      G.prep = m;
+      if (G.online) exitOnline();
+      await ensureTrack(m.track);
+      if (lobby.net) lobby.net.send({ t: 'loaded' });
+    },
+    onGo: (m) => startOnline(m),
+    onSnap: (m) => { if (G.online) G.race.onSnap(m); },
+    onResult: (m) => onlineResult(m),
+    onDisconnect: () => {
+      if (G.online) { exitOnline(); goTitle(); } else if (G.state === 'title') showTitle(false);
+      hud.popup('跟 server 的連線斷了', '#ff9f6b', 30, 2.5, 120);
+    },
+  });
+
+  function usePhysicsDefaults(on) {
+    if (on) {
+      G.savedP = { ...P };
+      for (const k in DEFAULTS) if (!CAM_KEYS.has(k)) P[k] = DEFAULTS[k];
+    } else if (G.savedP) {
+      for (const k in G.savedP) if (!CAM_KEYS.has(k)) P[k] = G.savedP[k];
+      G.savedP = null;
+    }
+  }
+
+  async function startOnline(m) {
+    const prep = G.prep;
+    if (!prep || !lobby.net) return;
+    await ensureTrack(prep.track);
+    closeDialog();
+    togglePanel(false);
+    sfx.start();
+    usePhysicsDefaults(true);
+    G.online = { code: lobby.room ? lobby.room.code : '' };
+    G.mode = 'race';
+    G.race = new OnlineRace(G.track, lobby.net, { seats: prep.seats, laps: prep.laps, goTick: m.goTick, myId: lobby.net.id });
+    syncLooks();
+    for (const v of looks) v.fx.reset();
+    G.state = 'countdown';
+    G.lastCount = 4;
+    G.lastDist = undefined;
+    G.wrongT = 0;
+    acc = 0;
+    hud.clearOverlay();
+    hud.setRaceVisible(true, input.isTouch);
+    hud.countdown('');
+    snapCamera();
+    netInfo.hidden = false;
+  }
+
+  /** 離開連線比賽的畫面狀態（不管連線本身） */
+  function exitOnline() {
+    G.online = null;
+    netInfo.hidden = true;
+    usePhysicsDefaults(false);
+  }
+
+  /** 選單「離開比賽」：退出房間回首頁（連線留著，首頁「多人」可以再進大廳） */
+  function leaveOnline(leaveRoom) {
+    if (leaveRoom) lobby.leave();
+    exitOnline();
+    goTitle();
+  }
+
+  function onlineResult(m) {
+    if (!G.online) return;
+    const race = G.race;
+    exitOnline();
+    G.state = 'result';
+    hud.setRaceVisible(false, false);
+    const myId = lobby.net ? lobby.net.id : -1;
+    const order = m.order.map((o) => ({ name: o.name, color: SEAT_COLORS[o.seat], isPlayer: !o.bot && o.id === myId, t: o.t, done: o.done }));
+    const mine = m.order.filter((o) => !o.bot && o.id === myId)[0];
+    const laps = mine ? mine.laps : race.player.laps;
+    hud.showResult({
+      mode: 'race', track: trackById(m.track).name, laps, bestLap: laps.length ? Math.min(...laps) : null, newLap: false, order,
+      note: '（多人連線：成績不列入個人紀錄）',
+      retryLabel: '回房間', homeLabel: '離開房間',
+      onRetry: () => { goTitle(); lobby.open(); },
+      onHome: () => { lobby.leave(); goTitle(); },
+    });
+    const place = order.findIndex((o) => o.isPlayer) + 1;
+    sfx.beep(place === 1 ? 1318 : 660, 0.6, 'square', 0.25);
+  }
+
+  function onlinePhysics() {
+    const race = G.race, me = race.player, k = me.kart;
+    race.step(G.state === 'paused' ? NO_INPUT : input);
+    if (race.phase === 'race') {
+      if (G.state === 'countdown') G.state = 'race';
+      if (G.prevState === 'countdown') G.prevState = 'race';
+    }
+    for (const e of race.lapQueue.splice(0)) {
+      if (e.finished) {
+        hud.popup('完賽！等其他人跑完…', '#ffd23f', 50, 3, 0);
+        sfx.beep(1318, 0.4, 'square', 0.25);
+      } else {
+        hud.popup(`第 ${e.lap} 圈 ${fmtTime(e.time)}`, '#ffffff', 34, 1.6, -80);
+        if (race.laps - e.lap === 1) hud.popup('最後一圈！', '#ffd23f', 50, 1.6, 0);
+        sfx.beep(880, 0.2, 'square', 0.2);
+      }
+    }
+    const ds = k.dist - (G.lastDist ?? k.dist);
+    G.lastDist = k.dist;
+    G.wrongT = me.finishT == null && ds < -0.002 && k.spd > 3 ? G.wrongT + STEP : Math.max(0, G.wrongT - STEP * 2);
+    handleEvents(k);
+    input.endFrame();
+  }
+
+  function updateNetInfo() {
+    const race = G.race, net = lobby.net;
+    if (!net) return;
+    const me = race.player;
+    const who = me.ctrl === 'a' && me.finishT == null ? '　電腦代駕中（按任何鍵接回）' : '';
+    netInfo.textContent = `房間 ${G.online.code}　延遲 ${Math.round(net.rtt)} ms${who}`;
+  }
+
   // ------------------------------------------------------------ 事件 → 畫面／聲音回饋（只看玩家的車）
   function handleEvents(k) {
     for (const e of k.events) {
@@ -287,6 +447,7 @@ async function main() {
         case 'nitroReady': hud.popup('集氣完成 +1 氮氣', '#34d6ff', 28, 0.9, 100); sfx.beep(1320, 0.12, 'sine', 0.2); break;
         case 'wall': sfx.bump(e.impact); G.shake = Math.min(0.6, e.impact * 0.05); break;
         case 'bump': if (e.impact > 2) { sfx.bump(e.impact); G.shake = Math.min(0.4, e.impact * 0.04); } break;
+        case 'start': startBoostFx(); break;
         default: break;
       }
     }
@@ -335,6 +496,9 @@ async function main() {
 
   function startBoost(k) {
     k.addBoost(P.startBoost, 1.0, 'start');
+    startBoostFx();
+  }
+  function startBoostFx() {
     hud.popup('起步噴！', '#4cd964', 46, 1.0, 0);
     sfx.whoosh(1);
   }
@@ -445,7 +609,7 @@ async function main() {
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
     t += dt;
-    if (input.pressed('tuning')) togglePanel();
+    if (input.pressed('tuning')) { if (G.online) openTuning(); else togglePanel(); }
     if (input.pressed('pause')) {
       if (G.state === 'paused') resume();
       else if (panelOpen()) togglePanel(false);
@@ -453,7 +617,16 @@ async function main() {
     }
     if (!G.race) { input.endFrame(); hud.render(); return; }
 
-    if (G.state === 'countdown' || G.state === 'race') {
+    if (G.online) {
+      // 連線：照 server 回報的輸入排隊長度微調快慢（rate 0.97～1.03），自己的車預測、對手前推
+      acc += dt * G.race.rate;
+      while (acc >= STEP && G.online) { onlinePhysics(); acc -= STEP; }
+      if (G.online) {
+        G.race.updateView(dt);
+        G.race.flush();
+        if ((G.netT = (G.netT || 0) + dt) > 0.5) { G.netT = 0; updateNetInfo(); }
+      }
+    } else if (G.state === 'countdown' || G.state === 'race') {
       acc += dt;
       while (acc >= STEP && (G.state === 'countdown' || G.state === 'race')) { physics(STEP); acc -= STEP; }
     } else {
@@ -462,7 +635,7 @@ async function main() {
     }
 
     if (G.state === 'countdown') {
-      const n = Math.ceil(G.countT);
+      const n = Math.ceil(G.online ? G.race.countLeft : G.countT);
       if (n !== G.lastCount && n >= 1 && n <= 3) { G.lastCount = n; sfx.beep(523, 0.18, 'square', 0.22); }
       hud.countdown(n >= 1 ? String(n) : '');
     } else if (G.state === 'race' && G.race.clock < 0.8) {
@@ -472,15 +645,16 @@ async function main() {
 
     const race = G.race, me = race.player, k = me.kart;
     for (const r of race.racers) poseKart(lookOf(r), r.kart, dt);
-    world.update(dt, t, playerLook.group.position);
+    const meLook = lookOf(me);
+    world.update(dt, t, meLook.group.position);
     if (G.state === 'title' || G.state === 'loading') {
       titleCam.a += dt * 0.12;
-      const c = playerLook.group.position;
+      const c = meLook.group.position;
       camera.position.set(c.x + Math.sin(titleCam.a) * 18, c.y + 6, c.z + Math.cos(titleCam.a) * 18);
       camera.lookAt(c.x, c.y + 1, c.z);
       camera.fov = P.fov;
       camera.updateProjectionMatrix();
-    } else if (G.state !== 'paused') {
+    } else if (G.state !== 'paused' || G.online) {
       placeCamera(dt);
       for (const r of race.racers) lookOf(r).fx.update(dt, r.kart, t);
       // 風線：過了六成極速才出現，越快越濃；噴射時最濃
@@ -500,7 +674,7 @@ async function main() {
         tags: nameTags(),
       }, k, dt);
     }
-    sfx.update(k, G.state === 'race' || G.state === 'countdown');
+    sfx.update(k, G.state === 'race' || G.state === 'countdown' || !!G.online);
     watchFps(dt);
     draw();
     hud.render();
@@ -508,7 +682,7 @@ async function main() {
 
   requestAnimationFrame(frame);
   await selectTrack(G.trackId);
-  window.KR = { world, G, P, start: startRace, select: selectTrack, snap: snapCamera };
+  window.KR = { world, G, P, start: startRace, select: selectTrack, snap: snapCamera, lobby };
 }
 
 main().catch((e) => {
