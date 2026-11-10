@@ -23,7 +23,7 @@ import { P, DEFS, DEFAULTS, togglePanel, panelOpen } from './tuning.js';
 import { Input } from './input.js';
 import { Track } from './track.js';
 import { Race, RIVALS } from './race.js';
-import { TRACKS, trackById } from './tracks.js';
+import { TRACKS, trackById, aiLevel } from './tracks.js';
 import { createWorld } from './world.js';
 import { Fx, Wind } from './fx.js';
 import { Hud, fmtTime } from './hud.js';
@@ -187,7 +187,7 @@ async function main() {
     G.trackReady = id;
     hud.setTrack(G.track);
     applyLook();
-    G.race = new Race(G.track, { mode: 'race', laps: G.meta.laps, difficulty: G.meta.difficulty });
+    G.race = new Race(G.track, { mode: 'race', laps: G.meta.laps, difficulty: aiLevel(G.meta) });
     syncLooks();
     for (const v of looks) v.fx.reset();
     if (G.online) return; // 載入途中連線比賽已經開始（不該發生，保險）
@@ -226,7 +226,7 @@ async function main() {
     closeDialog();
     sfx.start();
     G.mode = mode;
-    G.race = new Race(G.track, { mode, laps: G.meta.laps, difficulty: G.meta.difficulty });
+    G.race = new Race(G.track, { mode, laps: G.meta.laps, difficulty: aiLevel(G.meta) });
     syncLooks();
     for (const v of looks) v.fx.reset();
     closeReplay();
@@ -252,7 +252,7 @@ async function main() {
   function goTitle() {
     togglePanel(false);
     closeReplay();
-    G.race = new Race(G.track, { mode: 'race', laps: G.meta.laps, difficulty: G.meta.difficulty });
+    G.race = new Race(G.track, { mode: 'race', laps: G.meta.laps, difficulty: aiLevel(G.meta) });
     syncLooks();
     G.state = 'title';
     showTitle(false);

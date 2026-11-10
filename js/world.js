@@ -74,7 +74,7 @@ function disposeTree(obj) {
   });
 }
 
-const NO_SHADOW = new Set(['Road', 'Ground', 'Water', 'Ice', 'Lava', 'Cloud', 'AshCloud', 'CurbA', 'CurbB', 'CheckBlack', 'CheckWhite']);
+const NO_SHADOW = new Set(['Road', 'Ground', 'Water', 'Ice', 'Lava', 'Choco', 'Cloud', 'AshCloud', 'CurbA', 'CurbB', 'CheckBlack', 'CheckWhite']);
 // 換色用：卡丁車材質名稱 → 對手設定的欄位
 const RECOLOR = { KartRed: 'kart', Hoodie: 'hoodie', ShibaFur: 'fur', ShibaCream: 'cream' };
 

@@ -17,7 +17,7 @@ import sys
 from mathutils import Vector, noise
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import (Builder, Instances, M, basis, box, cone, cylinder, export_glb, mat, reset_scene, sphere)  # noqa: E402
+from common import (Builder, Instances, M, basis, box, cone, cylinder, export_glb, mat, reset_scene, sphere, torus)  # noqa: E402
 
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 ROOT = os.path.abspath(argv[0] if argv else '.')
@@ -52,8 +52,19 @@ THEMES = {
                  wall=('#ff2e88', '#20232c', '#00e5ff'), water=None, banner='#311b92'),
     'volcano': dict(ground='#3d3436', terrain='hills', amp=20, curb=('#d50000', '#212121'),
                     wall=('#4e342e', '#ff7043', '#ffab00'), water='Lava', banner='#3e2723'),
+    'sakura': dict(ground='#9ccc65', terrain='hills', amp=10, curb=('#e91e63', '#ffffff'),
+                   wall=('#d32f2f', '#fafafa', '#f8bbd0'), water='Water', banner='#ad1457'),
+    'autumn': dict(ground='#b39b4c', terrain='hills', amp=24, curb=('#d84315', '#fff3e0'),
+                   wall=('#6d4c41', '#ffe0b2', '#ff8f00'), water='Water', banner='#bf360c'),
+    'candy': dict(ground='#ffdff0', terrain='hills', amp=9, curb=('#ff4fa3', '#ffffff'),
+                  wall=('#ff80ab', '#ffffff', '#80d8ff'), water='Choco', banner='#ec407a'),
+    # quay：碼頭（賽道旁一圈平地，再往外直接落進海裡）
+    'harbor': dict(ground='#4a4f5a', terrain='quay', amp=0, curb=('#ffd600', '#222222'),
+                   wall=('#1e88e5', '#20232c', '#ffca28'), water='Water', banner='#0d47a1'),
 }
 TH = THEMES[THEME]
+NIGHT = THEME in ('city', 'harbor')  # 夜景：護牆、拱門、反光片自發光
+QUAY = WALL + 38  # quay 地形：賽道中心線往外多遠以內是碼頭平地
 
 # ================================================================ 中心線
 P = [Vector((p[0], p[2] if len(p) > 2 else 0.0, p[1])) for p in LAYOUT['points']]  # 遊戲座標 (x, 高度, z)
@@ -148,7 +159,7 @@ def smooth(e0, e1, x):
     return t * t * (3 - 2 * t)
 
 
-MARGIN = 260 if TH['terrain'] == 'sea' else 230
+MARGIN = 260 if TH['terrain'] in ('sea', 'quay') else 230
 minx = min(p.x for p in S) - MARGIN
 maxx = max(p.x for p in S) + MARGIN
 minz = min(p.z for p in S) - MARGIN
@@ -176,6 +187,10 @@ def ground(x, z):
         # 小島：離賽道越遠越往下沉進海裡，邊緣是深海
         y = base + nz2 * 0.3 - smooth(WALL + 5, WALL + 34, d) * 4.0 - (1 - smooth(0, 200, ex)) * 6
         return y
+    if mode == 'quay':
+        # 碼頭：賽道旁 QUAY 公尺內是平的水泥地，再往外一個陡坎落進海裡（像岸壁）
+        edge = QUAY + noise.noise(Vector((x * 0.012, z * 0.012, 2.0))) * 8
+        return base - smooth(edge, edge + 7, d) * 5.0
     if mode == 'flat':
         y = base
     elif mode == 'dunes':
@@ -196,15 +211,15 @@ m_road = mat('Road', '#5b6170', rough=0.9)
 m_ground = mat('Ground', TH['ground'], rough=1.0)
 m_curb_r = mat('CurbA', TH['curb'][0])
 m_curb_w = mat('CurbB', TH['curb'][1])
-m_wall_a = mat('WallA', TH['wall'][0], emit=0.6 if THEME == 'city' else 0)
+m_wall_a = mat('WallA', TH['wall'][0], emit=0.6 if NIGHT else 0)
 m_wall_b = mat('WallB', TH['wall'][1])
-m_wall_top = mat('WallTop', TH['wall'][2], emit=1.0 if THEME == 'city' else 0)
+m_wall_top = mat('WallTop', TH['wall'][2], emit=1.0 if NIGHT else 0)
 m_chk_b = mat('CheckBlack', '#202020')
 m_chk_w = mat('CheckWhite', '#ffffff')
 m_tire = mat('Tire', '#262626', rough=0.95)
 m_sign = mat('SignYellow', '#ffd600')
 m_arrow = mat('ArrowRed', '#e53935')
-m_concrete = mat('Concrete', '#d5dbe0' if THEME != 'city' else '#5a6070')
+m_concrete = mat('Concrete', '#d5dbe0' if not NIGHT else '#5a6070')
 m_roof = mat('RoofRed', '#e53935')
 m_people = [mat(f'Fan{i}', c) for i, c in enumerate(['#e53935', '#1e88e5', '#fdd835', '#43a047', '#ff7043', '#ab47bc', '#ffffff'])]
 m_skin = mat('Skin', '#f2c6a0')
@@ -212,7 +227,7 @@ m_metal = mat('Metal', '#b0bec5', rough=0.35, metal=0.6)
 m_banner = mat('Banner', TH['banner'])
 m_text = mat('BannerText', '#ffffff', emit=0.3)
 m_flag = [mat('FlagRed', '#ff3b30'), mat('FlagYellow', '#ffcc00'), mat('FlagGreen', '#34c759'), mat('FlagBlue', '#007aff')]
-m_cloud = mat('Cloud', '#ffffff', emit=0.25)
+m_cloud = mat('Cloud', '#ffe3f3' if THEME == 'candy' else '#ffffff', emit=0.25)
 
 # ================================================================ 路面、路緣石、護牆、起終點
 CROSS = [-HW, -HW / 2, 0.0, HW / 2, HW]
@@ -311,6 +326,10 @@ TINT = {  # (亮處, 暗處, 磨損帶)；sRGB 乘數，1＝原色
     'snow': ((1.0, 1.0, 1.0), (0.82, 0.88, 1.0), (0.8, 0.82, 0.86)),
     'city': ((1.0, 1.0, 1.0), (0.8, 0.82, 0.9), (0.72, 0.72, 0.76)),
     'volcano': ((1.0, 1.0, 1.0), (0.66, 0.58, 0.6), (0.78, 0.68, 0.64)),
+    'sakura': ((1.0, 1.0, 1.0), (0.8, 0.9, 0.72), (0.92, 0.86, 0.8)),
+    'autumn': ((1.0, 1.0, 1.0), (0.84, 0.7, 0.56), (0.86, 0.78, 0.66)),
+    'candy': ((1.0, 1.0, 1.0), (0.74, 0.98, 0.9), (0.96, 0.9, 0.94)),  # 粉紅糖霜地上一片片薄荷綠
+    'harbor': ((1.0, 1.0, 1.0), (0.84, 0.87, 0.94), (0.74, 0.74, 0.78)),
 }[THEME]
 
 
@@ -334,6 +353,12 @@ for iz in range(nzc):
         c = lerp3(c, TINT[2], 0.65 * (1 - smooth(HW + CURB, WALL + 4, d)))
         if THEME == 'beach' and y < WATER_Y + 0.6:  # 靠水的濕沙
             c = lerp3(c, (0.7, 0.64, 0.54), smooth(WATER_Y + 0.6, WATER_Y - 0.4, y))
+        if THEME == 'autumn':  # 一片片落葉（偏紅橘）
+            c = lerp3(c, (1.0, 0.62, 0.42), 0.55 * smooth(0.25, 0.6, noise.noise(Vector((x * 0.04, z * 0.04, 6.0)))))
+        if THEME == 'sakura':  # 樹下落花：草地上偏粉
+            c = lerp3(c, (1.0, 0.8, 0.86), 0.5 * smooth(0.2, 0.55, noise.noise(Vector((x * 0.035, z * 0.035, 8.0)))))
+        if THEME == 'harbor' and d > QUAY - 2:  # 岸邊潮濕變暗
+            c = tuple(v * 0.75 for v in c)
         if THEME == 'snow':  # 低窪處偏藍
             c = lerp3(c, (0.78, 0.86, 1.0), smooth(0.2, -0.6, n))
         if THEME == 'volcano':  # 熔岩池周圍發紅
@@ -372,7 +397,9 @@ elif TH['water'] == 'Ice':
     water_m = mat('Ice', '#bfe7ff', rough=0.1)
 elif TH['water'] == 'Lava':
     water_m = mat('Lava', '#ff5a1f', emit=2.0)
-if TH['terrain'] == 'sea':
+elif TH['water'] == 'Choco':
+    water_m = mat('Choco', '#5d3a1a', rough=0.25)
+if TH['terrain'] in ('sea', 'quay'):
     # 整片海：大方形
     sea = Builder('Water')
     E = 3000
@@ -390,7 +417,7 @@ def free_spot(x, z, clear):
     for lx, lz, lr in LAKES:
         if math.hypot(x - lx, z - lz) < lr + 6:
             return False
-    if TH['terrain'] == 'sea' and gh(x, z) < WATER_Y + 0.25:
+    if TH['terrain'] in ('sea', 'quay') and gh(x, z) < WATER_Y + 0.25:
         return False
     return True
 
@@ -424,6 +451,40 @@ def scatter(count, clear, put, cluster=True, tries=20000, near=None):
 
 props = Builder('Props')
 anim = []  # 要動的零件另外建物件（Spin_*、Bob_*）
+
+
+def straight_spots(count, sep=220):
+    """挑最直的幾段（前後 40 公尺內最大曲率最小者），彼此相隔 sep 公尺以上；起終點門附近不要。"""
+    cand = []
+    for i in range(N):
+        s = i * STEP
+        if s < 150 or s > LENGTH - 120:
+            continue
+        cand.append((max(abs(CURV[(i + k) % N]) for k in range(-20, 21, 4)), i))
+    cand.sort()
+    spots = []
+    for c, i in cand:
+        if c > 1 / 70 or len(spots) >= count:
+            break
+        if all(min(abs(i - j), N - abs(i - j)) * STEP > sep for j in spots):
+            spots.append(i)
+    return spots
+
+
+def along_track(clear, lo, hi, tries=80):
+    """在賽道旁 lo～hi 公尺找一塊空地，回傳 (取樣索引, 位置, 哪一側) 或 None。"""
+    for _ in range(tries):
+        i = random.randrange(N)
+        side = random.choice((-1, 1))
+        p = at(i, side * random.uniform(lo, hi))
+        if free_spot(p.x, p.z, clear):
+            return i, p, side
+    return None
+
+
+def facing(i, p, y):
+    """沿賽道方向擺放的變換（x 朝前進方向）。"""
+    return basis(T[i], UP, T[i].cross(UP), Vector((p.x, y, p.z)))
 
 # ================================================================ 各主題的場景物件
 
@@ -795,14 +856,420 @@ def scatter_volcano():
     mountains(['#3a3234', '#4a3f42', '#2e2729'], hmin=120, hmax=260)
 
 
+def scatter_sakura():
+    m_trunk = mat('SakuraTrunk', '#5d4037')
+    pinks = [mat('Blossom1', '#ffb7d5'), mat('Blossom2', '#ff9ec7'), mat('Blossom3', '#ffd9ea')]
+    m_leaf = [mat('Leaf1', '#4f9e3a'), mat('Leaf2', '#79b955')]
+    m_pine = mat('Pine', '#2f6d4a')
+    rnd = random.Random(5)
+    # 櫻花樹：歪一點的樹幹＋三根枝＋一團團粉紅花雲
+    trees = []
+    for k in range(4):
+        parts = [(cylinder(0.4, 2.7, 8, r2=0.26), m_trunk, M((0, -0.1, 0), rot=(0, 0, 0.07)))]
+        for b in range(3):
+            parts.append((cylinder(0.17, 2.3, 6, r2=0.07), m_trunk, M((0, 2.1, 0), rot=(0, b * 2.1 + k, 0)) @ M(rot=(0, 0, -0.95))))
+        for c in range(7):
+            a, rr = rnd.uniform(0, 6.28), rnd.uniform(0.4, 2.2)
+            parts.append((sphere(rnd.uniform(1.2, 1.8), 9, 6), pinks[(k + c) % 3],
+                          M((math.cos(a) * rr, 3.5 + rnd.uniform(0, 1.3), math.sin(a) * rr), scale=(1, 0.78, 1))))
+        trees.append(variant(f'Sakura{k}', parts))
+    greens = [variant(f'TreeRound{k}', [(cylinder(0.35, 2.4, 7), m_trunk, M((0, -0.1, 0))),
+                                        (sphere(1.9, 9, 6), lm, M((0, 3.4, 0))), (sphere(1.3, 8, 5), lm, M((0.8, 4.4, -0.3)))])
+              for k, lm in enumerate(m_leaf)]
+    pine = variant('TreePine', [(cylinder(0.3, 1.6, 6), m_trunk, M((0, -0.1, 0)))] +
+                   [(cone(r, h, 9), m_pine, M((0, yy, 0), rot=(0, k * 0.7, 0))) for k, (r, h, yy) in enumerate(((2.4, 3.2, 1.2), (1.9, 2.8, 2.6), (1.3, 2.4, 3.9)))])
+    ti = Instances('Trees')
+
+    def tree(x, z):
+        kd = random.random()
+        me = random.choice(trees) if kd < 0.72 else random.choice(greens) if kd < 0.88 else pine
+        ti.put(me, (x, gh(x, z), z), yaw=random.uniform(0, 6.28), scale=random.uniform(0.85, 1.35))
+        return True
+    print('[track] trees', scatter(400, WALL + 5, tree))
+    # 地上的落花（薄薄一片片）
+    petal = [variant(f'Petals{k}', [(sphere(rnd.uniform(0.6, 1.2), 8, 4), pm, M((rnd.uniform(-1.5, 1.5), 0.03, rnd.uniform(-1.5, 1.5)), scale=(1, 0.06, 1)))
+                                    for _ in range(5)]) for k, pm in enumerate(pinks)]
+    pi_ = Instances('Petals')
+    scatter(160, WALL + 1.2, lambda x, z: bool(pi_.put(random.choice(petal), (x, gh(x, z), z), yaw=random.uniform(0, 6.28))), near=(WALL + 1.5, WALL + 9))
+    # 石燈籠：沿賽道兩側成排
+    m_stone = mat('Stone', '#b9b4aa')
+    m_glow = mat('LanternGlow', '#ffe9b0', emit=1.2)
+    toro = variant('StoneLantern', [(box(1.0, 0.3, 1.0, base=True), m_stone, None), (cylinder(0.18, 1.1, 8), m_stone, M((0, 0.3, 0))),
+                                    (box(0.9, 0.2, 0.9, base=True), m_stone, M((0, 1.4, 0))), (box(0.6, 0.55, 0.6, base=True), m_glow, M((0, 1.6, 0))),
+                                    (cone(0.78, 0.5, 4), m_stone, M((0, 2.15, 0), rot=(0, math.pi / 4, 0))), (sphere(0.13, 6, 4), m_stone, M((0, 2.7, 0)))])
+    li = Instances('Lanterns')
+    for i in range(10, N, 16):
+        for side in (-1, 1):
+            if CURV[i] * side > 0 and 1 / max(abs(CURV[i]), 1e-6) < WALL + 4:
+                continue
+            p = at(i, side * (WALL + 2.0))
+            if free_spot(p.x, p.z, WALL + 1.5):
+                li.put(toro, (p.x, gh(p.x, p.z) - 0.05, p.z), yaw=math.atan2(T[i].x, T[i].z))
+    # 鳥居：在幾段直線上成排跨過賽道（取代別條賽道的拱門）
+    m_torii = mat('Torii', '#e0401e')
+    m_kasagi = mat('Kasagi', '#2b2b2b')
+    for c in straight_spots(3, sep=200):
+        for k in range(-2, 3):
+            i = (c + k * 5) % N
+            fm = facing(i, S[i], S[i].y - 0.2)
+            w = WALL + 0.9
+            for sd in (-1, 1):
+                props.add(cylinder(0.45, 8.4, 12, r2=0.38), m_torii, fm @ M((0, 0, sd * w)))
+                props.add(cylinder(0.6, 0.6, 12), m_kasagi, fm @ M((0, 0, sd * w)))
+            props.add(box(0.7, 0.55, 2 * w + 1.4), m_torii, fm @ M((0, 6.6, 0)))           # 貫
+            props.add(box(0.9, 0.7, 2 * w + 3.2), m_torii, fm @ M((0, 8.1, 0)))           # 島木
+            props.add(box(1.2, 0.55, 2 * w + 4.6), m_kasagi, fm @ M((0, 8.7, 0)))          # 笠木
+            for sd in (-1, 1):  # 笠木兩端往上翹
+                props.add(box(1.2, 0.5, 2.2), m_kasagi, fm @ M((0, 8.85, sd * (w + 2.6)), rot=(sd * 0.22, 0, 0)))
+            props.add(box(0.5, 1.4, 0.5), m_torii, fm @ M((0, 7.35, 0)))                    # 額束
+    # 和風房子：灰泥牆、木框、黑瓦屋頂
+    m_plaster = mat('Plaster', '#f4ecdc')
+    m_wood = mat('DarkWood', '#5b3a29')
+    m_tile = mat('RoofTile', '#3d4757')
+    for k in range(12):
+        f = along_track(WALL + 12, WALL + 14, WALL + 34)
+        if not f:
+            continue
+        i, p, _ = f
+        fm = facing(i, p, gh(p.x, p.z) - 0.2)
+        w, d = random.uniform(7, 10), random.uniform(5, 7)
+        props.add(box(w, 3.4, d, base=True), m_plaster, fm)
+        props.add(box(w + 0.1, 0.25, d + 0.1), m_wood, fm @ M((0, 3.3, 0)))
+        for sx in (-1, 1):
+            props.add(box(0.25, 3.4, d + 0.08, base=True), m_wood, fm @ M((sx * w / 2, 0, 0)))
+        props.add(box(1.4, 2.2, 0.1, base=True), m_wood, fm @ M((0, 0, d / 2 + 0.02)))
+        props.add(box(w + 1.6, 0.25, d + 1.6), m_tile, fm @ M((0, 3.55, 0)))             # 屋簷
+        props.add(cone(1.0, 2.4, 4), m_tile, fm @ M((0, 3.6, 0), rot=(0, math.pi / 4, 0), scale=((w + 1.2) * 0.72, 1, (d + 1.2) * 0.72)))
+    # 五重塔（兩座，遠一點）
+    m_pag = mat('PagodaRed', '#c43c2a')
+    m_gold = mat('Gold', '#e0b040', rough=0.35, metal=0.7)
+    for k in range(2):
+        f = along_track(WALL + 30, WALL + 45, WALL + 80)
+        if not f:
+            continue
+        i, p, _ = f
+        y = gh(p.x, p.z) - 0.3
+        mm = M((p.x, y, p.z), rot=(0, random.uniform(0, 6.28), 0))
+        h = 0.0
+        for t in range(5):
+            sz = 7.0 - t * 0.8
+            props.add(box(sz, 3.2, sz, base=True), m_pag, mm @ M((0, h, 0)))
+            props.add(box(sz + 3.4, 0.35, sz + 3.4, base=True), m_tile, mm @ M((0, h + 3.2, 0)))
+            props.add(cone((sz + 3.4) * 0.72, 1.1, 4), m_tile, mm @ M((0, h + 3.5, 0), rot=(0, math.pi / 4, 0)))
+            h += 3.9
+        props.add(cylinder(0.25, 6.5, 8), m_gold, mm @ M((0, h - 0.2, 0)))
+        for r in range(5):
+            props.add(torus(0.7, 0.08, 14, 4), m_gold, mm @ M((0, h + 1.5 + r * 0.9, 0), rot=(math.pi / 2, 0, 0)))
+    mountains(['#9fb4cf', '#b3c2dc', '#8ea6c6'], snow=True, hmin=170, hmax=330)
+
+
+def scatter_autumn():
+    m_trunk = mat('Trunk', '#5d4037')
+    m_maple = [mat('MapleRed', '#d84315'), mat('MapleCrimson', '#c62828'), mat('MapleOrange', '#f57c00'), mat('MapleYellow', '#f9a825')]
+    m_pine = mat('Pine', '#2e5d3a')
+    rnd = random.Random(8)
+    maples = []
+    for k in range(6):
+        a_m, b_m = m_maple[k % 4], m_maple[(k + 1 + k // 4) % 4]
+        parts = [(cylinder(0.36, 2.8, 7, r2=0.24), m_trunk, M((0, -0.1, 0)))]
+        for c in range(6):
+            a, rr = rnd.uniform(0, 6.28), rnd.uniform(0.3, 1.6)
+            parts.append((sphere(rnd.uniform(1.2, 1.9), 9, 6), a_m if c % 3 else b_m, M((math.cos(a) * rr, 3.4 + rnd.uniform(0, 1.8), math.sin(a) * rr))))
+        maples.append(variant(f'Maple{k}', parts))
+    pine = variant('TreePine', [(cylinder(0.3, 1.6, 6), m_trunk, M((0, -0.1, 0)))] +
+                   [(cone(r, h, 9), m_pine, M((0, yy, 0), rot=(0, k * 0.7, 0))) for k, (r, h, yy) in enumerate(((2.5, 3.4, 1.2), (2.0, 3.0, 2.8), (1.4, 2.6, 4.3)))])
+    ti = Instances('Trees')
+
+    def tree(x, z):
+        me = random.choice(maples) if random.random() < 0.82 else pine
+        ti.put(me, (x, gh(x, z), z), yaw=random.uniform(0, 6.28), scale=random.uniform(0.85, 1.45))
+        return True
+    print('[track] trees', scatter(520, WALL + 5, tree))
+    # 路邊的落葉堆
+    piles = [variant(f'LeafPile{k}', [(sphere(rnd.uniform(0.5, 0.9), 8, 5), m_maple[(k + j) % 4], M((rnd.uniform(-1.2, 1.2), 0.05, rnd.uniform(-1.2, 1.2)), scale=(1, 0.32, 1)))
+                                      for j in range(5)]) for k in range(4)]
+    pl = Instances('LeafPiles')
+    scatter(220, WALL + 1.2, lambda x, z: bool(pl.put(random.choice(piles), (x, gh(x, z), z), yaw=random.uniform(0, 6.28), scale=random.uniform(0.7, 1.3))), near=(WALL + 1.5, WALL + 12))
+    m_rock = mat('Rock', '#8f8a84')
+    rock = variant('Rock', [(sphere(1.0, 7, 5, smooth=False), m_rock, None)])
+    ri = Instances('Rocks')
+    scatter(70, WALL + 3, lambda x, z: bool(ri.put(rock, (x, gh(x, z) + 0.1, z), yaw=random.uniform(0, 6.28), scale=random.uniform(0.6, 2.4))), cluster=False)
+    # 溪邊的石頭
+    for lx, lz, lr in LAKES:
+        for _ in range(2):
+            a = random.uniform(0, 6.28)
+            x, z = lx + math.cos(a) * (lr + 2), lz + math.sin(a) * (lr + 2)
+            if nearest(x, z)[0] > WALL + 3:
+                ri.put(rock, (x, gh(x, z), z), yaw=random.uniform(0, 6.28), scale=random.uniform(0.5, 1.3))
+    # 木橋：賽道跨過溪流的那幾段，路面底下補橋面、兩側欄杆、水裡的橋墩
+    m_bridge = mat('BridgeWood', '#8d5a3b')
+    m_bridge2 = mat('BridgeWoodDark', '#5d3a24')
+    span = [i for i in range(N) if any(math.hypot(S[i].x - lx, S[i].z - lz) < lr + 9 for lx, lz, lr in LAKES)]
+    for i in span:
+        fm = facing(i, S[i], S[i].y)
+        props.add(box(STEP + 0.05, 0.9, 2 * WALL + 2.4), m_bridge, fm @ M((0, -0.55, 0)))
+        for sd in (-1, 1):
+            props.add(box(STEP + 0.05, 0.18, 0.25), m_bridge2, fm @ M((0, 2.1, sd * (WALL + 0.9))))
+            if i % 2 == 0:
+                props.add(box(0.25, 2.2, 0.25, base=True), m_bridge2, fm @ M((0, 0, sd * (WALL + 0.9))))
+        if i % 4 == 0:
+            for sd in (-1, 0, 1):
+                props.add(cylinder(0.45, 4.0, 8), m_bridge2, fm @ M((0, -4.5, sd * WALL * 0.8)))
+    print('[track] bridge', len(span))
+    mountains(['#9c4a2a', '#b8742f', '#7d5a3a'], hmin=150, hmax=300)
+
+
+def scatter_candy():
+    sweet = [mat('CandyPink', '#ff4f9a'), mat('CandyPurple', '#8c5cff'), mat('CandyBlue', '#29b6f6'), mat('CandyYellow', '#ffc928'), mat('CandyGreen', '#4cd07d')]
+    m_white = mat('CandyWhite', '#ffffff')
+    m_red = mat('CandyRed', '#e8203a')
+    rnd = random.Random(9)
+    # 棒棒糖：白棍＋圓盤＋白色漩渦圈
+    pops = []
+    for k, cm in enumerate(sweet):
+        parts = [(cylinder(0.13, 5.0, 8), m_white, None), (cylinder(1.7, 0.4, 24), cm, M((0, 6.3, -0.2), rot=(math.pi / 2, 0, 0)))]
+        for r in (0.55, 1.05, 1.5):
+            for zz in (0.22, -0.22):
+                parts.append((torus(r, 0.1, 24, 5), m_white, M((0, 6.3, zz))))
+        pops.append(variant(f'Lollipop{k}', parts))
+    # 甜甜圈：麵包色圈＋上半糖霜＋彩色糖粒
+    m_dough = mat('Dough', '#e3a865')
+    icings = [mat('IcingPink', '#ff8fc6'), mat('IcingChoco', '#6b3d22'), mat('IcingWhite', '#fff4f8')]
+    donuts = []
+    for k, im in enumerate(icings):
+        lay = M((0, 1.0, 0), rot=(-math.pi / 2, 0, 0))
+        parts = [(torus(2.2, 1.0, 22, 10), m_dough, lay), (torus(2.2, 1.04, 22, 10), im, lay @ M((0, 0, 0.32), scale=(1, 1, 0.72)))]
+        for s in range(18):
+            a = rnd.uniform(0, 6.28)
+            rr = 2.2 + rnd.uniform(-0.6, 0.6)
+            parts.append((box(0.12, 0.12, 0.45), sweet[s % 5], M((math.cos(a) * rr, 2.02, math.sin(a) * rr), rot=(0, rnd.uniform(0, 3.14), 0))))
+        donuts.append(variant(f'Donut{k}', parts))
+    # 拐杖糖：紅白相間的棍子＋彎鉤
+    cane_parts = []
+    for s in range(12):
+        cane_parts.append((cylinder(0.3, 0.5, 10), m_red if s % 2 else m_white, M((0, s * 0.5, 0))))
+    cane_parts.append((torus(0.9, 0.3, 14, 8, arc=math.pi), m_red, M((-0.9, 6.0, 0))))
+    cane = variant('CandyCane', cane_parts)
+    # 軟糖（gumdrop）
+    gums = [variant(f'Gumdrop{k}', [(sphere(1.0, 12, 8), cm, M((0, 0.55, 0), scale=(1, 0.95, 1)))]) for k, cm in enumerate(sweet)]
+    pi_, di, gi, ci = Instances('Lollipops'), Instances('Donuts'), Instances('Gumdrops'), Instances('Canes')
+
+    def treat(x, z):
+        kd = random.random()
+        if kd < 0.55:
+            pi_.put(random.choice(pops), (x, gh(x, z), z), yaw=random.uniform(0, 6.28), scale=random.uniform(0.8, 1.6))
+        elif kd < 0.8:
+            di.put(random.choice(donuts), (x, gh(x, z) - 0.2, z), yaw=random.uniform(0, 6.28), scale=random.uniform(0.9, 1.8))
+        else:
+            gi.put(random.choice(gums), (x, gh(x, z), z), yaw=random.uniform(0, 6.28), scale=random.uniform(1.2, 2.6))
+        return True
+    print('[track] treats', scatter(360, WALL + 4, treat))
+    scatter(180, WALL + 1.5, lambda x, z: bool(gi.put(random.choice(gums), (x, gh(x, z), z), yaw=random.uniform(0, 6.28), scale=random.uniform(0.4, 1.0))), near=(WALL + 2, WALL + 14))
+    # 拐杖糖沿著護牆外成排
+    for i in range(4, N, 15):
+        for side in (-1, 1):
+            if CURV[i] * side > 0 and 1 / max(abs(CURV[i]), 1e-6) < WALL + 4:
+                continue
+            p = at(i, side * (WALL + 1.8))
+            if free_spot(p.x, p.z, WALL + 1.2):
+                ci.put(cane, (p.x, gh(p.x, p.z) - 0.1, p.z), yaw=math.atan2(T[i].x, T[i].z) + (math.pi / 2 if side > 0 else -math.pi / 2))
+    # 大甜甜圈立在地上（像輪子）
+    for k in range(6):
+        f = along_track(WALL + 10, WALL + 14, WALL + 40)
+        if not f:
+            continue
+        i, p, _ = f
+        im = random.choice(icings)
+        mm = M((p.x, gh(p.x, p.z) + 5.6, p.z), rot=(0, random.uniform(0, 6.28), 0))
+        props.add(torus(4.4, 2.0, 26, 12), m_dough, mm)
+        props.add(torus(4.4, 2.06, 26, 12), im, mm @ M((0, 0, 0.55), scale=(1, 1, 0.75)))
+    # 蛋糕塔：三層，邊緣奶油圈，頂上櫻桃與蠟燭
+    m_cream = mat('Cream', '#fff6ea')
+    tiers = [mat('CakePink', '#f8b4d0'), mat('CakeChoco', '#7b4a2e'), mat('CakeMint', '#a8ecd6'), mat('CakeLemon', '#ffe58a')]
+    m_cherry = mat('Cherry', '#d50032')
+    m_flame = mat('Flame', '#ffcf5a', emit=2.0)
+    for k in range(5):
+        f = along_track(WALL + 22, WALL + 30, WALL + 70)
+        if not f:
+            continue
+        i, p, _ = f
+        y = gh(p.x, p.z) - 0.3
+        sc = random.uniform(0.9, 1.4)
+        h = 0.0
+        for t, (r, hh) in enumerate(((9, 5), (6.5, 4.5), (4.2, 4))):
+            r, hh = r * sc, hh * sc
+            props.add(cylinder(r, hh, 28), tiers[(k + t) % 4], M((p.x, y + h, p.z)))
+            props.add(torus(r, 0.45 * sc, 28, 6), m_cream, M((p.x, y + h + hh, p.z), rot=(-math.pi / 2, 0, 0)))
+            h += hh
+        props.add(sphere(1.1 * sc, 12, 8), m_cherry, M((p.x, y + h + 0.9 * sc, p.z)))
+        for c in range(5):
+            a = c * 2 * math.pi / 5
+            cx_, cz_ = p.x + math.cos(a) * 2.6 * sc, p.z + math.sin(a) * 2.6 * sc
+            props.add(cylinder(0.2 * sc, 2.0 * sc, 8), sweet[c], M((cx_, y + h, cz_)))
+            props.add(sphere(0.28 * sc, 8, 5), m_flame, M((cx_, y + h + 2.3 * sc, cz_), scale=(1, 1.5, 1)))
+    mountains(['#f8bbd0', '#d1c4e9', '#b3e5fc'], snow=True, hmin=140, hmax=280)
+
+
+def scatter_harbor():
+    # 貨櫃：一排排堆在賽道旁的碼頭上
+    cols = ['#b83a2e', '#1f5fa8', '#2e8b57', '#e07b24', '#13867a', '#7d4a9e', '#c9a227', '#6f7b85']
+    conts, cmats = [], []
+    for k, c in enumerate(cols):
+        mb = mat(f'Container{k}', c, rough=0.6, metal=0.2)
+        cmats.append(mb)
+        md = mat(f'ContainerEnd{k}', c, rough=0.8)
+        parts = [(box(12.0, 2.6, 2.44, base=True), mb, None)]
+        for sx in (-1, 1):
+            parts.append((box(0.2, 2.7, 2.54, base=True), md, M((sx * 6.0, -0.05, 0))))
+        for r in range(-5, 6):  # 側面的浪板
+            parts.append((box(0.12, 2.3, 2.5, base=True), md, M((r * 1.0, 0.15, 0))))
+        conts.append(variant(f'Container{k}', parts))
+    ci = Instances('Containers')
+    cnt = 0
+    for i in range(0, N, 8):
+        if min(i, N - i) < 26:
+            continue  # 起點看台附近不放
+        for side in (-1, 1):
+            if random.random() < 0.35:
+                continue
+            for row, off in enumerate((WALL + 5.0, WALL + 7.9, WALL + 10.8)):
+                p = at(i, side * off)
+                if not free_spot(p.x, p.z, WALL + 3.5) or gh(p.x, p.z) < WATER_Y + 0.3:
+                    break
+                y = gh(p.x, p.z) - 0.05
+                for lv in range(random.randint(1, 3 if row else 2)):
+                    ci.put(random.choice(conts), (p.x, y + lv * 2.62, p.z), yaw=math.atan2(T[i].z, -T[i].x) + random.uniform(-0.03, 0.03))
+                    cnt += 1
+    print('[track] containers', cnt)
+    # 岸邊起重機：腳跨在碼頭上，吊臂伸到海面
+    m_crane = mat('CraneOrange', '#e8541c', rough=0.5, metal=0.3)
+    m_crane2 = mat('CraneWhite', '#e9edf0', rough=0.5, metal=0.3)
+    m_redlight = mat('RedLight', '#ff2a2a', emit=3.0)
+    placed = []
+    for _ in range(400):
+        if len(placed) >= 6:
+            break
+        i = random.randrange(N)
+        side = random.choice((-1, 1))
+        p, q = at(i, side * (QUAY - 8)), at(i, side * (QUAY + 18))
+        if gh(p.x, p.z) < WATER_Y + 0.3 or gh(q.x, q.z) > WATER_Y - 1 or not free_spot(p.x, p.z, WALL + 14):
+            continue
+        if any(math.hypot(p.x - a, p.z - b) < 60 for a, b in placed):
+            continue
+        placed.append((p.x, p.z))
+        out = R[i] * side
+        mm = basis(T[i] * side, UP, out, Vector((p.x, gh(p.x, p.z) - 0.2, p.z)))  # z 朝海（x 跟著換號，保持右手座標）
+        for sx in (-6, 6):
+            for sz in (-7, 7):
+                props.add(box(1.0, 24, 1.0, base=True), m_crane, mm @ M((sx, 0, sz)))
+            props.add(box(1.0, 1.2, 15, base=True), m_crane, mm @ M((sx, 9, 0)))
+        props.add(box(13.5, 2.2, 1.4, base=True), m_crane, mm @ M((0, 22.5, -7)))
+        props.add(box(13.5, 2.2, 1.4, base=True), m_crane, mm @ M((0, 22.5, 7)))
+        props.add(box(3.0, 2.2, 62, base=True), m_crane2, mm @ M((0, 25, 14)))        # 吊臂
+        props.add(box(8, 5, 8, base=True), m_crane2, mm @ M((0, 24.5, -12)))            # 機房
+        props.add(cone(2.2, 9, 4), m_crane, mm @ M((0, 27, -4), rot=(0, math.pi / 4, 0)))
+        for zz in (-12, 44):
+            props.add(sphere(0.45, 8, 5), m_redlight, mm @ M((0, 27.6 if zz < 0 else 27.3, zz)))
+        props.add(box(2.6, 1.8, 2.6, base=True), m_crane2, mm @ M((0, 22.0, 30)))      # 吊車
+    print('[track] cranes', len(placed))
+    # 倉庫
+    m_ware = [mat('Warehouse1', '#56627a'), mat('Warehouse2', '#6b5b4b')]
+    m_wroof = mat('WarehouseRoof', '#3a4150')
+    m_win = mat('WarehouseWindow', '#ffd77a', emit=1.4)
+    for k in range(9):
+        f = along_track(WALL + 16, WALL + 18, QUAY - 10)
+        if not f:
+            continue
+        i, p, _ = f
+        if gh(p.x, p.z) < WATER_Y + 0.3:
+            continue
+        fm = facing(i, p, gh(p.x, p.z) - 0.2)
+        w, d, h = random.uniform(22, 34), random.uniform(12, 16), random.uniform(7, 10)
+        props.add(box(w, h, d, base=True), random.choice(m_ware), fm)
+        props.add(cone(1.0, 2.5, 4), m_wroof, fm @ M((0, h, 0), rot=(0, math.pi / 4, 0), scale=(w * 0.72, 1, d * 0.72)))
+        for wx in range(-2, 3):
+            for sd in (-1, 1):
+                props.add(box(2.2, 1.0, 0.12), m_win, fm @ M((wx * w / 5.5, h - 2, sd * (d / 2 + 0.02))))
+    # 路燈（同城市的款式）
+    m_lamp = mat('LampGlow', '#fff3c4', emit=2.5)
+    m_pole = mat('LampPole', '#5b6270')
+    lamp = variant('StreetLamp', [(cylinder(0.12, 6.5, 6), m_pole, None), (box(1.6, 0.15, 0.2, base=True), m_pole, M((0.7, 6.4, 0))),
+                                   (box(0.7, 0.25, 0.45), m_lamp, M((1.4, 6.3, 0)))])
+    li = Instances('Lamps')
+    for i in range(0, N, 12):
+        for side in (-1, 1):
+            if CURV[i] * side > 0 and 1 / max(abs(CURV[i]), 1e-6) < WALL + 2:
+                continue
+            p = at(i, side * (WALL + 0.9))
+            yaw = math.atan2(T[i].x, T[i].z) + (math.pi / 2 if side > 0 else -math.pi / 2)
+            li.put(lamp, (p.x, p.y - 0.1, p.z), yaw=yaw)
+    # 燈塔：碼頭邊上一座
+    m_lw = mat('LighthouseWhite', '#ffffff')
+    m_lr = mat('LighthouseRed', '#e53935')
+    m_beam = mat('LampGlowBright', '#fff59d', emit=3.0)
+    for _ in range(600):
+        i = random.randrange(N)
+        side = random.choice((-1, 1))
+        p, q = at(i, side * (QUAY - 4)), at(i, side * (QUAY + 12))
+        if gh(p.x, p.z) > WATER_Y + 0.3 and gh(q.x, q.z) < WATER_Y - 1 and free_spot(p.x, p.z, WALL + 20) \
+                and all(math.hypot(p.x - a, p.z - b) > 40 for a, b in placed):
+            y = gh(p.x, p.z) - 0.3
+            for s in range(6):
+                props.add(cylinder(3.0 - s * 0.3, 3.0, 14, r2=2.7 - s * 0.3), m_lw if s % 2 == 0 else m_lr, M((p.x, y + s * 3, p.z)))
+            props.add(cylinder(1.4, 2.0, 12), m_beam, M((p.x, y + 18, p.z)))
+            props.add(cone(1.9, 1.6, 12, smooth=True), m_lr, M((p.x, y + 20, p.z)))
+            break
+    # 海上的船（亮著窗）
+    m_hull = [mat('HullRed', '#7a1f1f'), mat('HullNavy', '#1d2b4a'), mat('HullGreen', '#1f4a3a')]
+    m_deck = mat('ShipWhite', '#dfe4ea')
+    m_swin = mat('ShipWindow', '#ffe08a', emit=1.6)
+    ships = 0
+    for _ in range(3000):
+        if ships >= 7:
+            break
+        x, z = random.uniform(minx + 30, maxx - 30), random.uniform(minz + 30, maxz - 30)
+        if nearest(x, z, reach=6)[0] < QUAY + 40 or gh(x, z) > WATER_Y - 2:
+            continue
+        L, W2 = random.uniform(40, 80), random.uniform(9, 14)
+        mm = M((x, WATER_Y - 1.2, z), rot=(0, random.uniform(0, 6.28), 0))
+        props.add(box(L, 6, W2, base=True), random.choice(m_hull), mm)
+        props.add(box(L * 0.95, 0.4, W2 * 0.92, base=True), m_deck, mm @ M((0, 6, 0)))
+        props.add(box(10, 9, W2 * 0.8, base=True), m_deck, mm @ M((-L * 0.36, 6, 0)))
+        for f in range(3):
+            props.add(box(10.1, 0.8, W2 * 0.82), m_swin, mm @ M((-L * 0.36, 8 + f * 2.4, 0)))
+        props.add(cylinder(1.2, 5, 10), m_hull[0], mm @ M((-L * 0.36, 15, 0)))
+        for c in range(int(L / 14)):  # 甲板上幾個貨櫃
+            props.add(box(12, 2.6, W2 * 0.7, base=True), cmats[(c + ships) % 8],
+                      mm @ M((-L * 0.2 + c * 13, 6.4, 0)))
+        ships += 1
+    print('[track] ships', ships)
+    # 對岸的城市燈火
+    bodies = [mat('Bldg1', '#2a2f45'), mat('Bldg2', '#353b55'), mat('Bldg3', '#1f2436')]
+    wins = [mat('WindowWarm', '#ffd77a', emit=1.6), mat('WindowCool', '#8fe3ff', emit=1.6)]
+    for k in range(48):
+        a = 2 * math.pi * k / 48 + random.uniform(-0.03, 0.03)
+        rr = FAR + random.uniform(120, 320)
+        x, z = cx + math.cos(a) * rr, cz + math.sin(a) * rr
+        h = random.uniform(40, 160)
+        w = random.uniform(25, 45)
+        mm = M((x, -1, z), rot=(0, -a, 0))
+        props.add(box(w, h, w, base=True), random.choice(bodies), mm)
+        wm = random.choice(wins)
+        for f in range(1, int(h / 14)):
+            if random.random() < 0.35:
+                continue
+            props.add(box(w + 0.2, 2.6, w + 0.2), wm, mm @ M((0, f * 14, 0)))
+
+
 {'hills': scatter_hills, 'beach': scatter_beach, 'desert': scatter_desert,
- 'snow': scatter_snow, 'city': scatter_city, 'volcano': scatter_volcano}[THEME]()
+ 'snow': scatter_snow, 'city': scatter_city, 'volcano': scatter_volcano,
+ 'sakura': scatter_sakura, 'autumn': scatter_autumn, 'candy': scatter_candy, 'harbor': scatter_harbor}[THEME]()
 
 
 def grass_tufts():
     """路邊的草叢（細葉片，GPU instancing），讓護牆外不再是一片平面。城市與雪地沒有。"""
     cols = {'hills': ('#4f9e35', '#6dbb45'), 'beach': ('#8cb85a', '#a9c96a'), 'desert': ('#b49a55', '#9c8a4e'),
-            'volcano': ('#4a3b38', '#6b3a2a')}.get(THEME)
+            'volcano': ('#4a3b38', '#6b3a2a'), 'sakura': ('#6fae4a', '#8cc265'), 'autumn': ('#a68a3e', '#8f6f35')}.get(THEME)
     if not cols:
         return
     mats = [mat(f'Tuft{k}', c, rough=0.9) for k, c in enumerate(cols)]
@@ -922,7 +1389,7 @@ for i in range(0, N, 9):
 # 速度感：護牆頂每 12 公尺一根反光標柱（車開過時一根根刷過去）
 m_post = mat('PostWhite', '#f4f4f4', rough=0.5)
 m_band = mat('PostBand', TH['wall'][0], rough=0.5)
-m_refl = mat('Reflector', '#ffb300', emit=1.2 if THEME in ('city', 'volcano') else 0.4)
+m_refl = mat('Reflector', '#ffb300', emit=1.2 if NIGHT or THEME == 'volcano' else 0.4)
 post = variant('MarkerPost', [(cylinder(0.07, 1.3, 8), m_post, None), (cylinder(0.075, 0.22, 8), m_band, M((0, 0.75, 0))),
                               (box(0.1, 0.18, 0.05), m_refl, M((0, 1.05, 0.07)))])
 pi_ = Instances('MarkerPosts')
@@ -937,22 +1404,9 @@ for i in range(0, N, 6):
 
 # 速度感：直線上方的拱門（遠遠看得到、接近時從頭上掠過）
 m_arch = mat('ArchFrame', '#e8ecef', rough=0.4, metal=0.5)
-m_archb = mat('ArchBanner', TH['wall'][0], emit=0.8 if THEME == 'city' else 0)
-m_archs = mat('ArchStripe', TH['wall'][2], emit=0.8 if THEME == 'city' else 0)
-# 挑最直的幾段（前後 40 公尺內最大曲率最小者），彼此相隔 220 公尺以上；起終點門附近不要
-cand = []
-for i in range(N):
-    s = i * STEP
-    if s < 150 or s > LENGTH - 120:
-        continue
-    cand.append((max(abs(CURV[(i + k) % N]) for k in range(-20, 21, 4)), i))
-cand.sort()
-arch_spots = []
-for c, i in cand:
-    if c > 1 / 70 or len(arch_spots) >= 4:
-        break
-    if all(min(abs(i - j), N - abs(i - j)) * STEP > 220 for j in arch_spots):
-        arch_spots.append(i)
+m_archb = mat('ArchBanner', TH['wall'][0], emit=0.8 if NIGHT else 0)
+m_archs = mat('ArchStripe', TH['wall'][2], emit=0.8 if NIGHT else 0)
+arch_spots = [] if THEME == 'sakura' else straight_spots(4)  # 櫻花古都改成鳥居（scatter_sakura）
 for i in arch_spots:
     p0 = S[i]
     am = basis(R[i], UP, -T[i], p0 + UP * 6.2)
@@ -968,8 +1422,8 @@ for i in arch_spots:
 print(f'[track] arches={len(arch_spots)}')
 props.build()
 
-# 雲（城市夜景不要）
-if THEME != 'city':
+# 雲（夜景不要）
+if not NIGHT:
     clouds = Builder('Clouds')
     m_c = m_cloud if THEME != 'volcano' else mat('AshCloud', '#6d6266')
     for k in range(26):

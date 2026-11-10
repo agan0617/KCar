@@ -537,16 +537,28 @@ export class Hud {
     o.addChild(shade, logo, sub, ...cards, ...modes, loadT, bestT, help, ver, bHelp, bSet);
     this.overlayLayout = () => {
       const W = this.W, H = this.H;
-      const s = Math.min(1.1, Math.max(0.45, Math.min(W / 1060, H / 640)));
+      const s = Math.min(1.1, Math.max(0.45, Math.min(W / 1060, H / 720)));
       shade.clear().rect(0, 0, W, H).fill({ color: 0x0b1733, alpha: 0.22 });
-      logo.scale.set(s); logo.position.set(W / 2, H * 0.13);
-      sub.scale.set(s); sub.position.set(W / 2, H * 0.13 + 62 * s);
-      const cw = 162 * s, cy = H * 0.13 + 140 * s;
-      cards.forEach((c, i) => { c.scale.set(s); c.position.set(W / 2 + (i - 2.5) * cw, cy); });
-      const my = cy + 104 * s;
-      // 四顆寬 290／160／160／200、間隔 20，整排置中
-      const xs = [-290, -45, 135, 335].map((x) => x * s);
-      modes.forEach((m, i) => { m.scale.set(s); m.position.set(W / 2 + xs[i], my); });
+      logo.scale.set(s); logo.position.set(W / 2, H * 0.12);
+      sub.scale.set(s); sub.position.set(W / 2, H * 0.12 + 62 * s);
+      // 賽道卡片：一排最多 5 張，超過就換行（10 條＝兩排）
+      const perRow = 5, rows = Math.ceil(cards.length / perRow);
+      const cw = 162 * s, rh = 102 * s, cy = H * 0.12 + 132 * s;
+      cards.forEach((c, i) => {
+        const r = Math.floor(i / perRow), n = Math.min(perRow, cards.length - r * perRow);
+        c.scale.set(s);
+        c.position.set(W / 2 + (i % perRow - (n - 1) / 2) * cw, cy + r * rh);
+      });
+      let my = cy + (rows - 1) * rh + 100 * s;
+      // 四顆寬 290／160／160／200、間隔 20，整排置中；畫面太窄（手機直拿）就拆成兩排
+      if (W >= 900 * s + 20) {
+        const xs = [-290, -45, 135, 335].map((x) => x * s);
+        modes.forEach((m, i) => { m.scale.set(s); m.position.set(W / 2 + xs[i], my); });
+      } else {
+        const pos = [[-90, 0], [145, 0], [-110, 72], [90, 72]];
+        modes.forEach((m, i) => { m.scale.set(s); m.position.set(W / 2 + pos[i][0] * s, my + pos[i][1] * s); });
+        my += 72 * s;
+      }
       loadT.scale.set(s); loadT.position.set(W / 2, my + 48 * s);
       bestT.scale.set(s); bestT.position.set(W / 2, my + 52 * s);
       bestT.visible = !loading;

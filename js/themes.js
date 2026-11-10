@@ -45,4 +45,36 @@ export const THEMES = {
     ground: { base: '#3d3436', dots: ['rgba(30,24,26,0.7)', 'rgba(80,66,68,0.5)', 'rgba(120,50,30,0.35)'] },
     road: { base: '#4a4446', speck: [60, 100], edge: '#ffccbc', center: 'rgba(255,140,60,0.9)' },
   },
+  sakura: {
+    env: 0.55, exposure: 1.0, bloom: [0.3, 0.4, 1.0],
+    skyTop: '#6fb2f5', horizon: '#ffe8f2', fog: [380, 1500],
+    hemi: ['#fff0f6', '#8fbf6a', 1.35], sun: ['#fff4ec', 2.4], sunDir: [0.4, 1, 0.25],
+    // 草地上散著粉紅、白色的落花
+    ground: { base: '#9ccc65', dots: ['rgba(110,170,70,0.55)', 'rgba(255,170,205,0.8)', 'rgba(255,236,244,0.85)'] },
+    road: { base: '#6e6a76', speck: [95, 140], edge: '#ffffff', center: 'rgba(255,255,255,0.85)' },
+  },
+  autumn: {
+    env: 0.55, exposure: 1.0, bloom: [0.3, 0.4, 1.0],
+    skyTop: '#4f8fdc', horizon: '#ffe2bf', fog: [340, 1400],
+    hemi: ['#fff0dc', '#8a6a3a', 1.3], sun: ['#ffe0b0', 2.5], sunDir: [-0.5, 0.75, 0.35],
+    // 乾草地上的紅、橘落葉
+    ground: { base: '#b39b4c', dots: ['rgba(205,85,40,0.6)', 'rgba(235,150,40,0.6)', 'rgba(140,110,50,0.5)'] },
+    road: { base: '#6a6560', speck: [95, 140], edge: '#fff3e0', center: 'rgba(255,235,200,0.85)' },
+  },
+  candy: {
+    env: 0.6, exposure: 1.0, bloom: [0.32, 0.4, 1.0],
+    skyTop: '#7fc0ff', horizon: '#ffe3f5', fog: [420, 1600],
+    hemi: ['#fff0fa', '#f6b6d6', 1.45], sun: ['#fff8f0', 2.4], sunDir: [0.3, 1, 0.4],
+    // 粉紅糖霜上撒彩色糖粒
+    ground: { base: '#ffdff0', dots: ['rgba(255,160,205,0.55)', 'rgba(140,230,200,0.65)', 'rgba(140,190,255,0.7)'] },
+    road: { base: '#7a5f78', speck: [110, 160], edge: '#ffffff', center: 'rgba(255,220,240,0.9)' },
+  },
+  harbor: {
+    env: 1.15, exposure: 1.0, bloom: [0.55, 0.35, 1.0],
+    night: true,
+    skyTop: '#030817', horizon: '#173556', fog: [240, 1100],
+    hemi: ['#6f86c0', '#141a24', 0.8], sun: ['#c8d6ff', 0.95], sunDir: [-0.4, 1, 0.5],
+    ground: { base: '#454a55', dots: ['rgba(70,76,90,0.7)', 'rgba(38,42,52,0.6)', 'rgba(95,100,112,0.4)'] },
+    road: { base: '#3c404c', speck: [55, 95], edge: '#f4f4f4', center: 'rgba(255,214,0,0.9)' },
+  },
 };

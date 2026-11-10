@@ -9,7 +9,7 @@ import { dirname, join } from 'node:path';
 import { Track } from '../js/track.js';
 import { Race } from '../js/race.js';
 import { P } from '../js/tuning.js';
-import { TRACKS } from '../js/tracks.js';
+import { TRACKS, aiLevel } from '../js/tracks.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -29,7 +29,7 @@ const NO_DRIFT = { drift: 0, perfect: 0, dj: 0 };
 
 function run(meta, mode, playerSkill, seed) {
   const track = new Track(JSON.parse(readFileSync(join(root, 'assets', meta.id + '_path.json'), 'utf8')));
-  const race = new Race(track, { mode, laps: meta.laps, difficulty: meta.difficulty, rng: rng(seed), playerSkill });
+  const race = new Race(track, { mode, laps: meta.laps, difficulty: aiLevel(meta), rng: rng(seed), playerSkill });
   const dt = 1 / 120;
   let t = 0, walls = 0;
   // 倒數 3 秒

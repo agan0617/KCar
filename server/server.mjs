@@ -21,7 +21,7 @@ import { dirname, join, normalize, extname, sep } from 'node:path';
 import { performance } from 'node:perf_hooks';
 
 import { VERSION } from '../js/version.js';
-import { TRACKS, trackById } from '../js/tracks.js';
+import { TRACKS, trackById, aiLevel } from '../js/tracks.js';
 import { Track } from '../js/track.js';
 import { Kart } from '../js/kart.js';
 import { P } from '../js/tuning.js';
@@ -400,7 +400,7 @@ class Room {
       const conn = s.bot ? null : this.players.find((c) => c.id === s.id) || null;
       const r = {
         seat: s.seat, id: s.id, name: s.name, bot: s.bot, conn, kart, driver: null,
-        skill: s.bot ? rivalSkill(meta.difficulty, botIdx++) : rivalSkill(Math.min(5, meta.difficulty + 1), 1),
+        skill: s.bot ? rivalSkill(aiLevel(meta), botIdx++) : rivalSkill(Math.min(5, aiLevel(meta) + 1), 1),
         held: [0, 0, 0, 0], lapsDone: 0, lapStart: 0, laps: [], finishT: null, ctrl: s.bot ? 'b' : 'h',
       };
       if (s.bot) r.driver = new AutoDriver(kart, r.skill);
