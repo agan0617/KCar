@@ -3,7 +3,7 @@
 
 import { openDialog, closeDialog, dialogOpen } from '../controls.js';
 import { TRACKS, trackById } from '../tracks.js';
-import { Net, defaultServer } from './client.js';
+import { Net, defaultServer, hostOf, needsServerPage } from './client.js';
 import { SEAT_COLORS, SEAT_NAMES, MAX_PLAYERS } from './shared.js';
 
 const NAME_KEY = 'kcar.name';
@@ -36,7 +36,14 @@ export class Lobby {
   }
 
   // ---------------------------------------------------------- 連線
-  showConnect() {
+  /** 從 GitHub Pages／App 轉過來的（網址帶 #mp=名字）：直接用那個名字連這台 server */
+  autoConnect(name) {
+    store.set(NAME_KEY, name);
+    store.set(SERVER_KEY, '');
+    this.showConnect(true);
+  }
+
+  showConnect(auto = false) {
     this.view = 'connect';
     const { body, bar } = openDialog('多人連線');
     body.innerHTML = `
@@ -48,8 +55,9 @@ export class Lobby {
       <p class="dlg-note ${this.msg ? 'warn' : ''}" data-msg>${esc(this.msg)}</p>
       <h4>怎麼開 server</h4>
       <p>在放 KCar 的電腦上執行 <kbd>node server/server.mjs</kbd>（或雙擊 <kbd>server\\start.bat</kbd>），
-      畫面會列出網址。同一個網路的其他電腦、手機，用瀏覽器開那個網址（<kbd>http://那台的 IP:8787/</kbd>）就能玩，Server 欄留空即可。
-      這台電腦自己玩可以直接用 GitHub Pages 版連 <kbd>localhost:8787</kbd>。</p>`;
+      畫面會列出網址。同一個網路的其他電腦、手機（含 KCar App），Server 欄填那台的 IP（例如 <kbd>192.168.1.5</kbd>），
+      會自動改開 server 供應的網頁；也可以直接用瀏覽器開 <kbd>http://那台的 IP:8787/</kbd>。
+      開 server 的那台電腦自己玩，Server 欄留空（＝<kbd>localhost:8787</kbd>）。</p>`;
     const form = body.querySelector('form');
     form.name.value = store.get(NAME_KEY, '');
     form.addr.value = store.get(SERVER_KEY, '');
@@ -58,12 +66,19 @@ export class Lobby {
     const ok = button('連線', go, 'primary');
     bar.append(button('取消', closeDialog), ok);
     setTimeout(() => (form.name.value ? ok : form.name).focus(), 0);
+    if (auto && form.name.value) go();
   }
 
   async connect(name, addr, msgEl, okBtn) {
     if (!name) { msgEl.textContent = '先取個名字'; msgEl.className = 'dlg-note warn'; return; }
     store.set(NAME_KEY, name);
     store.set(SERVER_KEY, addr);
+    if (needsServerPage(addr)) {
+      msgEl.textContent = `改開 server 的網頁（http://${hostOf(addr)}/）…`;
+      msgEl.className = 'dlg-note';
+      location.href = `http://${hostOf(addr)}/#mp=${encodeURIComponent(name)}`;
+      return;
+    }
     msgEl.textContent = '連線中…';
     msgEl.className = 'dlg-note';
     okBtn.disabled = true;

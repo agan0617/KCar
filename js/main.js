@@ -682,6 +682,12 @@ async function main() {
 
   requestAnimationFrame(frame);
   await selectTrack(G.trackId);
+  // 從 GitHub Pages／App 轉到 server 的網頁（網址帶 #mp=名字）：直接打開大廳連這台 server
+  if (location.hash.startsWith('#mp=')) {
+    const name = decodeURIComponent(location.hash.slice(4));
+    history.replaceState(null, '', location.pathname + location.search);
+    lobby.autoConnect(name);
+  }
   window.KR = { world, G, P, start: startRace, select: selectTrack, snap: snapCamera, lobby };
 }
 

@@ -12,13 +12,22 @@ export function defaultServer() {
   return 'localhost:8787';
 }
 
-/** 「192.168.1.5:8787」「http://x:8787/」都轉成 ws://x:8787/ws */
-export function wsUrl(addr) {
+/** 「192.168.1.5:8787」「http://x:8787/」都轉成「x:8787」 */
+export function hostOf(addr) {
   let a = String(addr || '').trim();
   if (!a) a = defaultServer();
   a = a.replace(/^https?:\/\//, '').replace(/^wss?:\/\//, '').replace(/\/.*$/, '');
   if (!/:\d+$/.test(a)) a += ':8787';
-  return `ws://${a}/ws`;
+  return a;
+}
+export const wsUrl = (addr) => `ws://${hostOf(addr)}/ws`;
+
+/**
+ * https 的網頁（GitHub Pages、App）不准連別台電腦的 ws://（混合內容），只有 localhost 例外。
+ * 這種情況改開 server 自己供應的 http 網頁（版本也一定對得上）。
+ */
+export function needsServerPage(addr) {
+  return location.protocol === 'https:' && !/^(localhost|127\.0\.0\.1|\[::1\]):/.test(hostOf(addr));
 }
 
 export class Net {

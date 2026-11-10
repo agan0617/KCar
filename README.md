@@ -48,9 +48,9 @@ node server/server.mjs                 # 或雙擊 server\start.bat；預設埠 
 server 啟動時會列出網址：
 
 - **這台電腦**：直接開 GitHub Pages 版，首頁「多人連線」的 Server 欄填 `localhost:8787`（或留空）
-- **同網路的其他電腦、手機**：用瀏覽器開 server 列出的 `http://<這台的 IP>:8787/`（server 同時供應遊戲網頁，版本一定對得上），Server 欄留空
+- **同網路的其他電腦、手機、KCar App**：Server 欄填那台的 IP（例如 `192.168.1.5`），會自動改開 server 供應的 `http://<IP>:8787/` 網頁並連上（server 同時供應遊戲網頁，版本一定對得上）；也可以直接用瀏覽器開那個網址。App 在 server 網頁上按返回鍵回線上版
 - 第一次啟動 Windows 防火牆會問要不要讓 Node.js 連網，要勾「私人網路」，其他裝置才連得進來
-- GitHub Pages 是 https，瀏覽器不准它連別台電腦的 `ws://`，所以其他裝置一定要開 server 給的 http 網址
+- GitHub Pages 是 https，瀏覽器不准它連別台電腦的 `ws://`（只有 localhost 例外），所以才要轉去 server 給的 http 網址
 
 流程：連線 → 開新房間（房主選賽道）或輸入 4 位數房號加入 → 房主按「開始比賽」→ 大家載完賽道一起倒數。
 比完回房間可以再開一場。連線比賽一律用預設操控參數（調參面板關閉），成績不列入個人紀錄。
