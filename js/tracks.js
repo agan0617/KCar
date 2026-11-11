@@ -6,7 +6,6 @@ export const TRACKS = [
   { id: 'snow', name: '雪國山道', difficulty: 3, laps: 3 },
   { id: 'city', name: '霓虹夜城', difficulty: 4, laps: 3 },
   { id: 'volcano', name: '熔岩火山', difficulty: 5, laps: 3 },
-  { id: 'testbed', name: '測試', difficulty: 3, laps: 3 },
 ];
 
 export const trackById = (id) => TRACKS.find((t) => t.id === id) || TRACKS[0];

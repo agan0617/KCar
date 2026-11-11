@@ -23,13 +23,14 @@ function rand(seed) {
 
 // 照片材質（Poly Haven CC0，用 KCar_assets_src/_scripts/make_tex.py 先處理成「細節圖」：線性空間每色版平均 0.5，shader 乘 2 後平均＝1，
 // 顏色由主題底色×Blender 頂點色決定，照片只給紋路）。值＝每格幾公尺（世界座標 UV）
-const DETAIL = { grass: 3, sand: 4, snow: 5, dirt: 3, rock: 6, ash: 4, leaves: 3, pavement: 4 };
+const DETAIL = { grass: 3, sand: 4, snow: 5, dirt: 3, rock: 6, ash: 4, leaves: 3, pavement: 4, wood: 3 };
 // 紋路強度（1＝照處理好的細節圖；大於 1 加強明暗起伏，兩層混合後會變淡要補回來）
-const DETAIL_K = { grass: 1.9, sand: 1.5, snow: 1.3, dirt: 1.6, rock: 1.6, ash: 1.4, leaves: 1.5, pavement: 1.5 };
+const DETAIL_K = { grass: 1.9, sand: 1.5, snow: 1.3, dirt: 1.6, rock: 1.6, ash: 1.4, leaves: 1.5, pavement: 1.5, wood: 1.5 };
 // Blender 材質 → 細節圖、投影方式（top＝由上往下投；box＝依面法線挑軸，給垂直面用）
 const DETAIL_MAT = {
   EdgeSand: ['sand', 'top'], EdgeSnow: ['snow', 'top'], EdgeDirt: ['dirt', 'top'], DirtRoad: ['dirt', 'top'],
   Cliff: ['rock', 'box'], Bridge: ['pavement', 'box'], BridgePier: ['pavement', 'box'],
+  Boardwalk: ['wood', 'box'], TunnelPortal: ['rock', 'box'],
 };
 
 // 細節圖的取樣：兩個尺度（第二層旋轉＋放大）混合＋一層很低頻的明暗，遠處看不出重複；
@@ -178,7 +179,7 @@ function disposeTree(obj) {
   });
 }
 
-const NO_SHADOW = new Set(['Boost', 'DirtRoad', 'EdgeSand', 'EdgeSnow', 'EdgeDirt', 'Cliff', 'Fence', 'Road', 'Ground', 'Water', 'Ice', 'Lava', 'Choco', 'Cloud', 'AshCloud', 'CurbA', 'CurbB', 'CheckBlack', 'CheckWhite']);
+const NO_SHADOW = new Set(['Boardwalk', 'DirtRoad', 'EdgeSand', 'EdgeSnow', 'EdgeDirt', 'Cliff', 'Fence', 'Road', 'Ground', 'Water', 'Ice', 'Lava', 'Choco', 'Cloud', 'AshCloud', 'CurbA', 'CurbB', 'CheckBlack', 'CheckWhite']);
 // 換色用：卡丁車材質名稱 → 對手設定的欄位
 const RECOLOR = { KartRed: 'kart', Hoodie: 'hoodie', ShibaFur: 'fur', ShibaCream: 'cream' };
 

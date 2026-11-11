@@ -26,9 +26,9 @@ BRIDGE_DY = 4.0     # 高差超過這個就當橋處理（不到 MIN_CLEAR 會�
 SPEED = 40.0        # 跳台試算的車速（m/s）
 GRAVITY = 30.0      # 遊戲重力（m/s²）
 DEFAULTS = {'w': 7.5, 'bank': 0.0, 'curb': 1.0, 'wallL': 'wall', 'wallR': 'wall', 'run': 3.0,
-            'edge': 'grass', 'gap': False, 'tunnel': False}
+            'edge': 'grass', 'gap': False, 'tunnel': False, 'viaduct': False}
 NUM_KEYS = ('w', 'bank', 'curb', 'run')               # 兩點之間平滑內插
-SEG_KEYS = ('wallL', 'wallR', 'edge', 'gap', 'tunnel')  # 取前一點的值
+SEG_KEYS = ('wallL', 'wallR', 'edge', 'gap', 'tunnel', 'viaduct')  # 取前一點的值
 SHORTCUT_RUN = 1.5  # 捷徑兩側路肩寬
 
 
@@ -64,7 +64,7 @@ def game(p):
 
 
 def catmull(p0, p1, p2, p3, t, alpha=0.5):
-    """centripetal Catmull-Rom（同 build_track.py）。"""
+    """centripetal Catmull-Rom。"""
     def tj(ti, a, b):
         return ti + max(dist(a, b), 1e-4) ** alpha
     t0 = 0.0
@@ -112,6 +112,7 @@ def resolve_points(lay):
             q[k] = float(q[k])
         q['gap'] = bool(q['gap'])
         q['tunnel'] = bool(q['tunnel'])
+        q['viaduct'] = q['viaduct'] if q['viaduct'] in ('wood',) else bool(q['viaduct'])
         out.append(q)
     return out
 
@@ -197,8 +198,8 @@ class Strip:
                 self.h_terr.setdefault(k, []).append(i)
 
     def terr_ok(self, i):
-        """地形要貼合的取樣點：畫出來、不是缺口、不是橋。"""
-        return self.drawn[i] and not self.gap[i] and not self.bridge[i]
+        """地形要貼合的取樣點：畫出來、不是缺口、不是橋（含高架）、不是隧道（隧道上面地形蓋住）。"""
+        return self.drawn[i] and not self.gap[i] and not self.bridge[i] and not self.tunnel[i]
 
     def nxt(self, i):
         if self.closed:
@@ -215,6 +216,8 @@ class Strip:
         j = self.nxt(i)
         if w == 'none' and (self.bridge[i] or (j is not None and self.bridge[j])):
             return 'rail'  # 橋上一定要有護欄
+        if w == 'none' and self.tunnel[i]:
+            return 'wall'  # 隧道裡一定有牆
         return w
 
     def eo(self, i, side=1):
@@ -343,7 +346,7 @@ class Strip:
         return lerp3(self.point(a, o), self.point(b, o), u)
 
 
-def sample_main(pts):
+def sample_main(pts, lay_walls=None):
     n = len(pts)
     P = [q['pos'] for q in pts]
     G = [q['gap'] for q in pts]
@@ -380,6 +383,12 @@ def sample_main(pts):
             attrs[k].append(pts[i][k] + (pts[j][k] - pts[i][k]) * s)
         for k in SEG_KEYS:
             attrs[k].append(pts[i][k])
+    for ov in lay_walls or []:  # walls 覆寫：用小數 at 指定一段護牆
+        key = 'wallL' if str(ov.get('side', 'L')).upper().startswith('L') else 'wallR'
+        a0, a1 = float(ov['from']) % n, float(ov['to']) % n
+        for k, u in enumerate(U):
+            if (a0 <= u < a1) if a0 <= a1 else (u >= a0 or u < a1):
+                attrs[key][k] = ov.get('type', 'none')
     st_ = Strip('main', S, U, st, attrs, True, L)
     st_.npts = n
     return st_
@@ -404,8 +413,8 @@ def sample_shortcut(main, sc, k):
     hw = float(sc.get('w', 3.5))
     n = len(S)
     attrs = {'hw': [hw] * n, 'bank': [0.0] * n, 'curb': [0.0] * n, 'run': [SHORTCUT_RUN] * n,
-             'wallL': ['none'] * n, 'wallR': ['none'] * n, 'edge': [sc.get('edge', 'grass')] * n,
-             'gap': [False] * n, 'tunnel': [False] * n}
+             'wallL': [sc.get('wall', 'none')] * n, 'wallR': [sc.get('wall', 'none')] * n,
+             'edge': [sc.get('edge', 'grass')] * n, 'gap': [False] * n, 'tunnel': [False] * n, 'viaduct': [False] * n}
     # 高度：接主線的那一頭貼著主線的路面平面，離開主線路緣石外 hw 之後 14 公尺內漸變成 via 的高度；
     # 跟主線重疊的那一段不畫（drawn=False，車在那裡就是開在主線上）
     S2, drawn, emain = [], [], []
@@ -505,22 +514,73 @@ def gap_runs(st):
     return runs
 
 
+def cut_junction_walls(main, sc):
+    """捷徑進出口：主線那一側的護牆自動切開（捷徑離開主線前 8m 到完全分開後 10m）。"""
+    sc.junctions = []
+    for idx in (range(sc.n), range(sc.n - 1, -1, -1)):
+        hits = []
+        for k in idx:
+            if sc.emain[k] > sc.hw[k] + sc.run[k] + 6:
+                break
+            p = sc.S[k]
+            d, o, a, u, bi = main.project(p[0], p[2], reach=4)
+            hits.append((main.s[a] + u * main.step, 1 if o >= 0 else -1))
+        if not hits:
+            continue
+        side = hits[-1][1]
+        base = hits[0][0]
+        rel = [((v - base + main.length / 2) % main.length) - main.length / 2 for v, _ in hits]
+        s0, s1 = base + min(rel) - 8, base + max(rel) + 10
+        arr = main.wallR if side > 0 else main.wallL
+        for i in range(main.n):
+            if ((main.s[i] - s0) % main.length) <= (s1 - s0):
+                arr[i] = 'none'
+        sc.junctions.append((s0 % main.length, s1 % main.length, side))
+
+
 def build_model(lay):
     """layout → 主線、捷徑、交叉、缺口、加速帶。"""
     pts = resolve_points(lay)
-    main = sample_main(pts)
+    main = sample_main(pts, lay.get('walls'))
     shortcuts = [sample_shortcut(main, sc, k) for k, sc in enumerate(lay.get('shortcuts', []))]
+    for sc in shortcuts:
+        cut_junction_walls(main, sc)
     strips = [main] + shortcuts
     recs, conflicts = detect_crossings(strips)
+    for i in range(main.n):  # 高架：跟立體交叉的橋同一套（地形不貼、橋面板＋橋墩）
+        if main.viaduct[i]:
+            main.bridge[i] = True
+    # 中心線跨過 hazard（熔岩、水）的路段自動做成橋（前後多 8m）；只擦到路邊的不算（產生器會把 hazard 切開）
+    polys = [h['poly'] for h in lay.get('hazards', [])]
+    for st in strips:
+        hit = [st.drawn[i] and not st.gap[i] and any(point_in_poly(st.S[i][0], st.S[i][2], pl) for pl in polys) for i in range(st.n)]
+        for i in range(st.n):
+            if hit[i]:
+                for k in range(-4, 5):
+                    j = i + k
+                    if st.closed:
+                        j %= st.n
+                    if 0 <= j < st.n and st.drawn[j]:
+                        st.bridge[j] = True
+        st.over_hazard = sum(hit)
+        st.index()
     gaps = gap_runs(main)
     for g in gaps:
         lip, land = main.S[g['lip']], main.S[g['land']]
         g['pit'] = min(lip[1], land[1]) - 11.0   # 缺口底下的深谷
     boosts = []
     for b in lay.get('boost', []):
-        sc = main.at_to_s(b['at'])
         ln = float(b.get('len', 10))
-        boosts.append({'s0': sc - ln / 2, 's1': sc + ln / 2, 'd': float(b.get('d', 0)), 'w': float(b.get('w', 3)), 'at': b['at']})
+        on = b.get('on')
+        if on is not None and 0 <= int(on) < len(shortcuts):  # 捷徑上的加速帶：at＝捷徑上的比例 0..1
+            st = shortcuts[int(on)]
+            sc = float(b['at']) * st.length
+            sc = max(ln / 2 + 1, min(st.length - ln / 2 - 1, sc))
+        else:
+            st = main
+            sc = main.at_to_s(b['at'])
+        boosts.append({'s0': sc - ln / 2, 's1': sc + ln / 2, 'd': float(b.get('d', 0)), 'w': float(b.get('w', 3)), 'at': b['at'],
+                       'strip': st, 'on': on})
     return {'pts': pts, 'main': main, 'shortcuts': shortcuts, 'strips': strips, 'crossings': recs,
             'conflicts': conflicts, 'gaps': gaps, 'boosts': boosts}
 
@@ -597,6 +657,19 @@ def check(name, out_dir):
     gmax, gi = max(grades)
     ys = [p[1] for p in main.S]
     print(f"  高低差 {max(ys) - min(ys):.1f} m；最陡 {gmax * 100:.1f}%（第 {main.U[gi]:.2f} 點附近）{'  ⚠ 超過 20%' if gmax > 0.2 else ''}")
+    climb = sum(max(0.0, main.S[(i + 1) % N][1] - main.S[i][1]) for i in range(N) if not main.gap[i])
+    best, cur, b_at, c_at = 0, 0, 0, 0
+    for k in range(2 * N):  # 最長直線：曲率半徑 > 300m 的連續路段
+        i = k % N
+        if abs(main.curv[i]) < 1 / 300 and not main.gap[i]:
+            if cur == 0:
+                c_at = i
+            cur += 1
+            if best < cur <= N:
+                best, b_at = cur, c_at
+        else:
+            cur = 0
+    print(f"  總爬升 {climb:.0f} m；最長直線 {best * main.step:.0f} m（從第 {main.U[b_at]:.2f} 點起）")
     # 立體交叉
     cl = cluster(md['crossings'])
     for c in cl:
@@ -633,21 +706,30 @@ def check(name, out_dir):
             print('  ⚠ 捷徑沒有比較短')
     # 加速帶
     for b in md['boosts']:
-        a, u = main.locate((b['s0'] + b['s1']) / 2)
-        hw = main.lerp(main.hw, a, u)
+        st = b['strip']
+        a, u = st.locate((b['s0'] + b['s1']) / 2)
+        hw = st.lerp(st.hw, a, u)
         okb = abs(b['d']) + b['w'] <= hw + 0.01
-        print(f"  加速帶 at={b['at']}：s={b['s0']:.0f}～{b['s1']:.0f} m，d={b['d']}，半寬 {b['w']} {'✅' if okb else '❌ 超出路面'}")
+        where = st.name if st is not main else '主線'
+        print(f"  加速帶 at={b['at']}（{where}）：s={b['s0']:.0f}～{b['s1']:.0f} m，d={b['d']}，半寬 {b['w']} {'✅' if okb else '❌ 超出路面'}")
         ok = ok and okb
     # hazard
     for hz in lay.get('hazards', []):
         poly = hz['poly']
         dmin = 1e9
-        for p in poly:
-            pr = main.project(p[0], p[1], reach=6)
-            if pr:
-                d, o, a, u, bi = pr
-                dmin = min(dmin, d - main.eo(a))
-        print(f"  hazard {hz['type']}：離最近的路肩外緣 {dmin:.1f} m {'✅' if dmin > 0 else '❌ 蓋到路面'}")
+        for k in range(len(poly)):  # 沿每條邊每 1m 檢查（不只看頂點）；橋上不算
+            p0, p1 = poly[k], poly[(k + 1) % len(poly)]
+            ln = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
+            for m in range(int(ln) + 1):
+                t = m / max(ln, 1e-6)
+                x, z = p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t
+                for st in md['strips']:
+                    pr = st.project(x, z, reach=6)
+                    if pr and st.drawn[pr[4]] and not st.bridge[pr[4]] and not st.gap[pr[4]]:
+                        d, o, a, u, bi = pr
+                        if d - st.eo(a) < dmin:
+                            dmin, where = d - st.eo(a), (st.name, st.U[a] if st is main else st.s[a])
+        print(f"  hazard {hz['type']}：離最近的路肩外緣 {dmin:.1f} m {'✅' if dmin > 0 else '❌ 蓋到路面（%s %.2f 附近）' % where}")
         ok = ok and dmin > 0
     # 隧道、開放路肩
     tl = sum(1 for t in main.tunnel if t) * main.step

@@ -128,7 +128,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -141,7 +142,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -154,7 +156,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -167,7 +170,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -180,7 +184,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -193,7 +198,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -206,7 +212,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -219,7 +226,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -232,7 +240,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -245,7 +254,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -257,7 +267,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -269,7 +280,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -281,7 +293,8 @@
    "curb": 0.8,
    "wallL": "rail",
    "wallR": "rail",
-   "run": 1.5
+   "run": 1.5,
+   "viaduct": true
   },
   {
    "p": [
@@ -681,8 +694,9 @@
     ]
    ],
    "w": 3.5,
-   "surf": "dirt"
+   "surf": "dirt",
+   "wall": "wall"
   }
  ],
  "props": []
-}
+}

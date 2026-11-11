@@ -2,23 +2,17 @@
 
 甩尾集氣、抓小噴時機的卡丁車競速遊戲。網頁版：<https://agan0617.github.io/KCar/>（Android App 外殼在 [KCarApp](https://github.com/agan0617/KCarApp)）
 
-十條賽道、四種模式：**競賽**（對 3 位電腦車手 Mochi、Azuki、Kinako，3 圈）、**計時賽**（3 圈）、**自由練習**、**多人連線**（最多 4 人，空位電腦補；server 架在自己的電腦，見〈多人連線〉）。
+五條賽道、四種模式：**競賽**（對 3 位電腦車手 Mochi、Azuki、Kinako，3 圈）、**計時賽**（3 圈）、**自由練習**、**多人連線**（最多 4 人，空位電腦補；server 架在自己的電腦，見〈多人連線〉）。
 
 | 賽道 | 難度 | 主題 | 特色 |
 |---|---|---|---|
-| 椰林海灘 | ★ | 小島海灘 | 路最寬、彎道最緩，幾乎不用甩尾；椰子樹、遮陽傘、燈塔 |
-| 陽光山丘 | ★★ | 草原丘陵 | 上下坡、S 彎；風車、熱氣球、湖 |
-| 櫻花古都 | ★★ | 春天和風 | 練長甩：四個 130～180° 的長甩彎，中間夾可以一路外拉甩過的大半徑彎；櫻花樹、成排鳥居、石燈籠、瓦屋、五重塔 |
-| 仙人掌峽谷 | ★★★ | 沙漠 | 一個急彎、上下坡；仙人掌、紅岩柱、平頂山 |
-| 秋楓山谷 | ★★★ | 秋天山谷 | 連續 S 彎練左右換甩、爬上山腰再衝下來；楓樹林、落葉、木橋跨過溪流 |
-| 雪國山道 | ★★★★ | 雪山 | 之字形爬坡、兩個髮夾彎、路較窄；雪松、雪人、小木屋 |
-| 霓虹夜城 | ★★★★ | 夜晚城市 | 街區直角彎接 S 彎、護牆貼得近；高樓、霓虹、路燈 |
-| 糖果樂園 | ★★★★ | 甜點 | 彎型多變：先緩後急、一路轉約 270° 的超長甩尾彎，加上髮夾彎、S 彎；棒棒糖、甜甜圈、蛋糕塔、拐杖糖、巧克力池 |
-| 熔岩火山 | ★★★★★ | 火山 | 路最窄、連續髮夾彎、高低差 25m；熔岩池、枯樹、遠方火山口 |
-| 星空港灣 | ★★★★★ | 夜晚碼頭 | 路最窄、貨櫃區之間連續三個髮夾彎，接著長彎；貨櫃、岸邊起重機、燈塔、海上的船、對岸燈火 |
+| 椰林海灘 | ★ | 熱帶海島 | 繞著小島跑一圈：海岸傾斜掃彎（衝出去就掉進海裡）、水上木棧道、繞燈塔的大甩尾、飛越小溪的跳台、穿過椰林的沙地捷徑 |
+| 櫻花古都 | ★★ | 春天和風 | 甩尾天堂：四個半徑不同的長甩彎、S 彎練換向甩；8 字路線先從城下河邊穿過、再從拱橋上跨回來；千本鳥居、五重塔、神社參道捷徑 |
+| 雪國山道 | ★★★ | 雪山 | 之字爬坡兩個髮夾彎、山頂盲彎接大跳台、傾斜的下山掃彎、穿山冰隧道；橫越結冰湖的捷徑 |
+| 霓虹夜城 | ★★★★ | 夜晚城市 | 270° 圓環匝道爬上高架、8 字立體交叉、直角街區與直角 S 彎、下坡大直線接急彎、地下道；窄巷捷徑 |
+| 熔岩火山 | ★★★★★ | 火山 | 路窄、路旁就是熔岩：兩個飛越熔岩的跳台、連續髮夾彎爬上火山口、岩石拱橋、熔岩湖上的窄石橋捷徑 |
 
-電腦車手用跟玩家同一套物理，也會甩尾、小噴、雙噴、放氮氣；賽道越難，牠們越強（極速、甩尾率、小噴準度都會提高），另有輕微追趕機制（落後玩家太多會稍微加速）。
-甩尾彎特別多的賽道（櫻花古都、秋楓山谷），電腦沒甩就會撞牆、同樣強度會顯得太弱，所以在 [js/tracks.js](js/tracks.js) 用 `ai` 欄位把牠們調得比星等強一點，讓強弱跟同星等的賽道相近。
+電腦車手用跟玩家同一套物理，也會甩尾、點煞、小噴、雙噴、放氮氣、走捷徑（走線越準越常走）；賽道越難，牠們越強（極速、小噴與雙噴準度、走線都會提高），另有輕微追趕機制（落後玩家太多會稍微加速）。
 
 ## 玩法
 
@@ -46,7 +40,9 @@
 - 車子有重量：懸吊會隨加速、煞車、過彎、落地晃動；上坡掉速、下坡加速，坡頂衝太快會飛起來；撞牆會把車頭彈開
 - 放開甩尾後是車頭轉回前進方向（回正），路線不會往彎心切；同時按反方向回正更快
 - 小噴看放開甩尾後車身回正的程度：畫面下方的時機表綠區＝完美、黃區＝普通、紅區＝太早
-- 出賽道外側的草地會大幅減速，撞牆掉速
+- 開放路肩外的草地、沙地、雪地會大幅減速；捷徑多半是土路（小幅減速），要搭配小噴、氮氣或捷徑上的加速帶才划算
+- 加速帶（路面上往前流動的箭頭）一碰就加速；跳台要有速度才飛得過缺口
+- 掉進海、熔岩或跳台缺口，會在最後通過的路面重生（缺口前就移到缺口後）；撞牆會掉速、車頭被彈開
 
 ## 多人連線
 
@@ -118,42 +114,41 @@ node tools/nettest.mjs 4 volcano 8799      # 人數、賽道、埠；設 NETDEBU
 ```
 node tools/sim.mjs tt                      # 每條賽道：甩尾＋完美小噴 vs 不甩尾的圈速
 node tools/sim.mjs race volcano 10         # 競賽：玩家自動駕駛（完美／普通）對電腦的名次分布
-node tools/sim.mjs tt hills driftTurn=0.9  # 臨時改參數看效果
+node tools/sim.mjs tt sakura driftTurn=0.9 # 臨時改參數看效果
+node tools/sim.mjs tt city sc=0           # sc=0／sc=1：自動駕駛不走／一定走捷徑
 ```
 
-電腦強度在 [js/race.js](js/race.js) 的 `rivalSkill`（賽道難度 × 第幾位對手）；賽道難度用 [js/tracks.js](js/tracks.js) 的 `ai`（沒寫就是星等 `difficulty`，可以有小數）。
+電腦強度在 [js/race.js](js/race.js) 的 `rivalSkill`（賽道難度 × 第幾位對手）；賽道難度用 [js/tracks.js](js/tracks.js) 的 `ai`（沒寫就是星等 `difficulty`，可以有小數）。電腦怎麼開在 [js/bot.js](js/bot.js)。
 
 ## 美術與建置
 
 - 3D：three.js；2D 介面（首頁、HUD、觸控按鈕）：PixiJS，疊在 3D 畫布上
-- 模型全部由 **Blender 腳本**產生（`tools/blender/`）：賽道路面、路緣石、護牆、地形、水（湖／海／熔岩）、起終點門、看台、各主題的場景物件（重複的用 GPU instancing）；卡丁車與駕駛（戴耳機的柴犬 Komugi，對手是同一個模型換色）
-- 每條賽道一個 `tools/blender/<id>_layout.json`：控制點、路寬、護牆距離、主題、湖的位置。腳本同時輸出模型 `assets/<id>.glb` 與遊戲物理用的中心線 `assets/<id>_path.json`，兩者永遠對得上
-- 主題的模型顏色與場景物件在 `build_track.py` 的 `THEMES` 與 `scatter_*`；天空、霧、燈光、路面與地面紋理在 [js/themes.js](js/themes.js)
-- 路面、地面紋理在遊戲裡用 canvas 畫；地面另有 Blender 算的頂點色（大片深淺、坡度、賽道旁磨損帶、主題特色）乘在紋理上
-- 算繪：PBR 材質（車身烤漆是透明漆層），環境光照用每條賽道自己的天空顏色生成，Neutral 色調映射；
-  「高畫質」另有泛光（霓虹、熔岩、車燈）與 4 倍 MSAA，「省電」直接畫。設定裡切換，手機跑不順（連續 4 秒低於 40fps）會自動切到省電
-- 卡丁車與護牆、路緣石等硬殼零件用 Blender 的倒角（bevel）做圓角
+- **賽道**由 Blender 腳本 `tools/blender/build_track2.py` 依每條的 `tools/blender/<id>_layout.json` 產生（格式見 [TRACK_V2.md](tools/blender/TRACK_V2.md)、設計守則見 [TRACK_DESIGN.md](tools/blender/TRACK_DESIGN.md)）：逐點路寬與側傾、護牆可有可無、跳台缺口、加速帶、捷徑、立體交叉與高架（自動做橋與橋墩）、隧道、海與熔岩。同一份 layout 同時輸出模型 `assets/<id>.glb`、中心線 `assets/<id>_path.json`（圈數、名次、電腦走線、小地圖）、碰撞 `assets/<id>_col.json`（地面三角形＋護牆線段），三者永遠對得上
+- **物理**用碰撞資料（[js/collision.js](js/collision.js)）：往下找車子高度以下最高的地面（橋上橋下分得開），地面種類決定減速、加速帶、重生；護牆是線段
+- **場景物件庫**：`tools/blender/build_props.py` 把 CC0 素材（Kenney、Quaternius）整理成 `assets_src/props/<主題>.glb`（統一比例、修色、減面），日式物件（櫻花、鳥居、石燈籠、町家、神社、五重塔）是自製的；產生器依主題撒（同一件物件共用 mesh），車開得到的範圍內的樹、石頭、房子會加碰撞。來源清單見 [assets_src/props/LICENSE.md](assets_src/props/LICENSE.md)
+- **天空**是 Poly Haven 的 HDRI 轉成的照片天空（`assets/sky/`），環境光照用同一張產生；**地面、路肩、崖壁、橋、木棧道**用 Poly Haven 照片材質處理成的細節紋路（`assets/tex/`）乘上 Blender 算的頂點色（大片深淺、坡度、磨損帶），兩個尺度混合避免看得出重複；路面是 canvas 畫的邊線與虛線疊在柏油照片上。各主題的天空、霧、燈光在 [js/themes.js](js/themes.js)
+- 算繪：PBR 材質（車身烤漆是透明漆層），Neutral 色調映射，柔和陰影、車底接觸陰影；
+  「高畫質」另有泛光（霓虹、熔岩、車燈）、調色與 4 倍 MSAA，「省電」直接畫。設定裡切換，手機跑不順（連續 4 秒低於 40fps）會自動切到省電
+- 卡丁車與駕駛（戴耳機的柴犬 Komugi，對手是同一個模型換色）由 `tools/blender/build_kart.py` 產生；車身（輪子以外）有懸吊：加速抬頭、煞車點頭、過彎側傾、落地壓縮
 - 速度感：低而近的鏡頭、視角隨車速放大、加速時鏡頭被甩開、高速細微震動（參數都在調參面板「鏡頭」）；
-  接近極速出現速度線與從兩側刷過的風線；高畫質另有放射狀動態模糊（中間清楚、四周糊）；
-  護牆頂每 12 公尺一根反光標柱、直線上方有拱門；路面中線每 4 公尺一段；風切聲隨車速變大
+  接近極速出現速度線與從兩側刷過的風線；高畫質另有放射狀動態模糊（中間清楚、四周糊）；風切聲隨車速變大
 
-改賽道形狀前先用 `python tools/check_layout.py <id>` 檢查長度、最小彎道半徑、有沒有自己撞到自己、高低差，並出一張俯視圖。
+改賽道形狀前先檢查長度、彎道半徑、坡度、總爬升、最長直線、立體交叉高差、跳台需要的速度、hazard 有沒有蓋到路面，並出一張俯視圖：
+
+```
+python tools/check_layout2.py <id>
+```
 
 重新產生模型（需要 Blender 4.2 以上）：
 
 ```
-powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_assets.ps1                       # 全部
-powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_assets.ps1 -Track snow -NoKart   # 只重產一條
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_assets.ps1 -V2                       # 全部賽道＋卡丁車
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_assets.ps1 -V2 -Track snow -NoKart   # 只重產一條
+blender -b --factory-startup -P tools/blender/build_props.py -- [主題...]                          # 重產場景物件庫（素材來源目錄用 --src 指定）
 ```
 
-新增賽道：寫一個 `<id>_layout.json`、在 [js/tracks.js](js/tracks.js) 加一列、跑上面的指令。新主題另外要在 `build_track.py` 的 `THEMES`、`TINT`、`scatter_<主題>` 與 [js/themes.js](js/themes.js) 各加一份。
-
-設計甩尾賽道的經驗（電腦車手與 `sim.mjs` 的自動駕駛都靠這個判斷要不要甩）：
-
-- 自動駕駛只在「前方 8～40 公尺內要轉超過約 43°」才甩，也就是半徑約 42 公尺以下的彎；不甩的話，極速下抓地只能轉半徑約 70 公尺以上的彎
-- 所以彎道半徑最好落在 **42 公尺以下（要甩）或 75 公尺以上（不甩也過得去）**，中間那段電腦不甩又轉不過去，會一直撞牆。玩家倒是可以在 75～110 公尺的大彎一路外拉甩過去集氣
-- 左右換甩（S 彎）中間要留 25～30 公尺直線，不然連完美的自動駕駛都換不過來
-- 「轉 270°」的彎進出口的延長線一定會相交，做法是先大半徑再急彎（例如半徑 100 轉 90° 接半徑 36 轉 180°），出口再馬上往反方向彎開
+新增賽道：照 [TRACK_DESIGN.md](tools/blender/TRACK_DESIGN.md) 寫一個 `<id>_layout.json`、在 [js/tracks.js](js/tracks.js) 加一列、跑上面的指令，再用 `node tools/sim.mjs tt <id>` 與 `race <id>` 驗收。
+`testbed_layout.json` 是用到所有功能的測試賽道（不在遊戲清單裡）。
 
 App 圖示：`blender -b --factory-startup -P tools\blender\render_icon.py -- . icons\icon-512.png`
 
@@ -168,5 +163,8 @@ Copyright © 2026 agan0617. All rights reserved. 保留所有權利，詳見 [LI
 - **three.js** r187（`lib/three/`）：MIT，見 `lib/three/LICENSE`（https://threejs.org/）
 - **PixiJS** 8.22（`lib/pixi/`）：MIT，見 `lib/pixi/LICENSE`（https://pixijs.com/）
 - **Blender**：只用來產生模型的工具，沒有隨附（https://www.blender.org/）
+- **Kenney** 素材包（https://kenney.nl/）：CC0，場景物件（逐件來源見 `assets_src/props/LICENSE.md`）
+- **Quaternius** 素材包（https://quaternius.com/）：CC0，場景物件（同上）
+- **Poly Haven**（https://polyhaven.com/）：CC0，天空 HDRI（`assets/sky/`）與地面材質（`assets/tex/`）
 
 本作品是個人製作的非官方作品，與 QQ飛車（騰訊）、瑪利歐賽車 Mario Kart（任天堂）沒有關係；相關名稱與商標屬原權利人所有。
