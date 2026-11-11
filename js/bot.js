@@ -79,13 +79,52 @@ export class AutoDriver {
     }
 
     const look = 8 + v * (0.4 + 0.08 * (1 - sk.line));
-    const p = tr.pointAt(s + look);
-    const tx = p.x + -p.tz * this.lane, tz = p.z + p.tx * this.lane;
+    // 捷徑：入口前 45～90m 決定走不走（走線越準越常走）；入口前 30m 起瞄捷徑上的點，到出口再回主線
+    const L = tr.length;
+    if (!st.sc && tr.shortcuts) {
+      for (const sc of tr.shortcuts) {
+        let dIn = sc.from - s;
+        if (dIn < -L / 2) dIn += L; else if (dIn > L / 2) dIn -= L;
+        if (dIn > 45 && dIn < 90 && st.scSeen !== sc) {
+          st.scSeen = sc;
+          if (this.rng() < (sk.shortcut ?? Math.max(0, sk.line - 0.6) * 2)) { st.sc = sc; st.scI = 0; st.scWait = true; }
+        } else if (dIn < 0 && dIn > -L / 4 && st.scSeen === sc) st.scSeen = null; // 過了入口，下一圈再決定一次
+      }
+    }
+    // 決定走捷徑時正在甩尾：先收掉甩尾，走直線進捷徑（捷徑就是為了省掉那個彎）
+    if (st.sc && st.scWait) {
+      let dIn = st.sc.from - s;
+      if (dIn < -L / 2) dIn += L; else if (dIn > L / 2) dIn -= L;
+      if (dIn < 30 && st.drifting) { st.drifting = false; this.set('drift', false); }
+      if (dIn < 30) st.scWait = false;
+    }
+    let tx, tz, onSc = false;
+    if (st.sc && !st.scWait) {
+      const sc = st.sc, P3 = sc.pts, n = P3.length / 3;
+      let bi = st.scI, bd = Infinity;
+      for (let i = st.scI; i < Math.min(n, st.scI + 30); i++) {
+        const d = (P3[i * 3] - k.x) ** 2 + (P3[i * 3 + 2] - k.z) ** 2;
+        if (d < bd) { bd = d; bi = i; }
+      }
+      st.scI = bi;
+      if (bd > 15 * 15 && !st.scWait) { st.sc = null; bi = n; } // 離捷徑太遠（重生、被撞開）：放棄，回主線
+      const ti = bi + Math.round((5 + v * 0.18) / sc.spacing); // 捷徑窄又彎，看近一點才不會切到草地
+      if (bi >= n - 3) st.sc = null; // 出捷徑了（或放棄）
+      else if (ti < n) { tx = P3[ti * 3]; tz = P3[ti * 3 + 2]; onSc = true; }
+      else {
+        const p = tr.pointAt(sc.to + (ti - n + 1) * sc.spacing);
+        tx = p.x; tz = p.z; onSc = true;
+      }
+    }
+    if (!onSc) {
+      const p = tr.pointAt(s + look);
+      tx = p.x + -p.tz * this.lane; tz = p.z + p.tx * this.lane;
+    }
     const wobble = (1 - sk.line) * 0.06 * Math.sin(this.t * 1.7 + sk.lane);
     const err = wrap(Math.atan2(tx - k.x, tz - k.z) - (k.spd > 3 ? k.phi : k.h)) + wobble; // 用路線方向（回正中車頭還歪著）
     const turnAhead = wrap(headAt(s + 28 + v * 0.45) - headAt(s + 8)); // 車速越快看越遠（路線跟上車頭要時間）
 
-    if (!k.drift && !st.drifting && Math.abs(turnAhead) > 0.75 && k.spd > 18 && !st.skipCorner) {
+    if (!onSc && !k.drift && !st.drifting && Math.abs(turnAhead) > 0.75 && k.spd > 18 && !st.skipCorner) {
       if (this.rng() < sk.drift) {
         st.drifting = true;
         st.dir = turnAhead < 0 ? 1 : -1;
@@ -141,7 +180,8 @@ export class AutoDriver {
         } else if (!st.wantDj) { st.wantJet = null; this.set('up', true); } else this.set('up', false);
       } else {
         st.wantJet = null;
-        this.set('up', true);
+        // 捷徑又窄又彎：放慢一點才不會衝出去
+        this.set('up', !(onSc && k.spd > 30));
       }
       st.nitroWait -= 1 / 60;
       if (k.nitros > 0 && Math.abs(turnAhead) < 0.2 && st.nitroWait <= 0) {

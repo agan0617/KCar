@@ -19,6 +19,14 @@ export class Track {
     this.wall = data.wall ?? 99;
     this.wallT = data.wallThickness ?? 0.7;
     this.laps = data.laps;
+    // 捷徑（v2）：電腦走捷徑時瞄這條折線；spacing 是取樣間距
+    this.shortcuts = (data.shortcuts || []).map((sc) => {
+      const pts = Float32Array.from(sc.pts);
+      let len = 0;
+      for (let i = 3; i < pts.length; i += 3) len += Math.hypot(pts[i] - pts[i - 3], pts[i + 2] - pts[i - 1]);
+      return { from: sc.from, to: sc.to, hw: sc.hw, surf: sc.surf, pts, spacing: len / Math.max(1, pts.length / 3 - 1) };
+    });
+    if (!this.shortcuts.length) this.shortcuts = null;
     this.startS = data.start ?? 0;
     this.x = new Float32Array(n);
     this.y = new Float32Array(n);

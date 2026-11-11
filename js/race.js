@@ -20,12 +20,12 @@ export function rivalSkill(d, idx) {
   const t = (d - 1) / 4; // 0..1
   const lane = [-2.2, 2.2, 0][idx];
   return {
-    speed: 0.925 + 0.065 * t - idx * 0.018,
-    drift: 0.55 + 0.45 * t - idx * 0.08,
-    perfect: 0.15 + 0.7 * t - idx * 0.12,
-    dj: 0.1 + 0.75 * t - idx * 0.1,
-    nitro: 0.6 + 0.4 * t,
-    line: 0.55 + 0.45 * t - idx * 0.1,
+    speed: 0.935 + 0.07 * t - idx * 0.015,
+    drift: 0.88 + 0.12 * t - idx * 0.03, // 1.0 的賽道急彎不甩就撞牆，強弱改由下面幾項拉開
+    perfect: 0.25 + 0.6 * t - idx * 0.1,
+    dj: 0.15 + 0.7 * t - idx * 0.1,
+    nitro: 0.7 + 0.3 * t,
+    line: 0.7 + 0.3 * t - idx * 0.06,
     lane,
   };
 }
