@@ -1,0 +1,689 @@
+{
+ "theme": "beach",
+ "glb": "beach.glb",
+ "generator": "tools/blender/build_props.py",
+ "generated": "2026-11-11",
+ "legend": {
+  "size": "[寬(x), 深(z), 高(y)]，公尺；原點在底部中心，正面朝 +Z",
+  "category": "tree 樹／rock 岩石／building 建築／landmark 地標／deco 點綴／trackside 賽道設施",
+  "use": "far 遠景撒／roadside 路邊（護牆外）／landmark 地標（一條賽道放一兩個）／track 跨在或貼在路面上",
+  "density": "per_ha＝撒的區域裡每公頃幾個；per_100m＝沿賽道每 100 公尺幾個（兩側合計）；per_track＝一條賽道放幾個",
+  "emissive": "發光材質（three.js 端用 bloom 發光；名稱以 P_ 開頭）"
+ },
+ "objects": [
+  {
+   "name": "palm_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 25
+   },
+   "desc": "高椰子樹（細長、微彎）",
+   "size": [
+    6.43,
+    5.83,
+    10.0
+   ],
+   "tris": 1772,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_DarkGreen",
+    "P_qUltimateNature_Coconuts"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/PalmTree_1.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "palm_b",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 25
+   },
+   "desc": "高椰子樹（另一個姿勢）",
+   "size": [
+    8.06,
+    7.04,
+    11.0
+   ],
+   "tris": 1496,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_DarkGreen",
+    "P_qUltimateNature_Coconuts"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/PalmTree_3.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "palm_c",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 15
+   },
+   "desc": "矮椰子樹",
+   "size": [
+    5.58,
+    7.65,
+    7.0
+   ],
+   "tris": 1232,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_DarkGreen"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/PalmTree_2.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "palm_d",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 20
+   },
+   "desc": "卡通彎椰子樹（Kenney）",
+   "size": [
+    5.42,
+    6.05,
+    8.0
+   ],
+   "tris": 482,
+   "materials": [
+    "P_kPirate"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney pirate-kit",
+     "file": "kenney/pirate-kit/Models/GLB format/palm-detailed-bend.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/pirate-kit"
+    }
+   ]
+  },
+  {
+   "name": "palm_e",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 20
+   },
+   "desc": "卡通直椰子樹（Kenney）",
+   "size": [
+    6.87,
+    6.87,
+    9.0
+   ],
+   "tris": 482,
+   "materials": [
+    "P_kPirate"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney pirate-kit",
+     "file": "kenney/pirate-kit/Models/GLB format/palm-detailed-straight.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/pirate-kit"
+    }
+   ]
+  },
+  {
+   "name": "plant_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 60
+   },
+   "desc": "熱帶灌木",
+   "size": [
+    3.08,
+    2.42,
+    1.3
+   ],
+   "tris": 296,
+   "materials": [
+    "P_qUltimateNature_Green"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Plant_1.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "plant_b",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 60
+   },
+   "desc": "大葉植物",
+   "size": [
+    1.85,
+    1.65,
+    1.6
+   ],
+   "tris": 600,
+   "materials": [
+    "P_qUltimateNature_DarkGreen"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Plant_3.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "rock_a",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 12
+   },
+   "desc": "沙灘岩（半埋在沙裡）",
+   "size": [
+    4.14,
+    3.55,
+    2.6
+   ],
+   "tris": 552,
+   "materials": [
+    "P_kPirate"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney pirate-kit",
+     "file": "kenney/pirate-kit/Models/GLB format/rocks-sand-a.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/pirate-kit"
+    }
+   ]
+  },
+  {
+   "name": "rock_b",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 12
+   },
+   "desc": "沙灘岩（小）",
+   "size": [
+    2.56,
+    2.56,
+    1.8
+   ],
+   "tris": 448,
+   "materials": [
+    "P_kPirate"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney pirate-kit",
+     "file": "kenney/pirate-kit/Models/GLB format/rocks-sand-c.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/pirate-kit"
+    }
+   ]
+  },
+  {
+   "name": "rock_c",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "灰岩堆",
+   "size": [
+    4.25,
+    4.51,
+    3.5
+   ],
+   "tris": 300,
+   "materials": [
+    "P_kPirate"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney pirate-kit",
+     "file": "kenney/pirate-kit/Models/GLB format/rocks-b.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/pirate-kit"
+    }
+   ]
+  },
+  {
+   "name": "rock_large_a",
+   "category": "rock",
+   "use": "far",
+   "density": {
+    "per_ha": 3
+   },
+   "desc": "大圓石",
+   "size": [
+    3.73,
+    3.61,
+    5.0
+   ],
+   "tris": 2910,
+   "tris_source": 3072,
+   "materials": [
+    "P_qPirate"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius pirate-kit",
+     "file": "quaternius/pirate-kit/glTF/Environment_Rock_2.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/piratekit.html"
+    }
+   ]
+  },
+  {
+   "name": "cliff_a",
+   "category": "landmark",
+   "use": "far",
+   "density": {
+    "per_track": 4
+   },
+   "desc": "海崖岩塊（海岸線、遠景）",
+   "size": [
+    22.77,
+    21.9,
+    12.0
+   ],
+   "tris": 8596,
+   "materials": [
+    "P_qPirate"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius pirate-kit",
+     "file": "quaternius/pirate-kit/glTF/Environment_Cliff1.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/piratekit.html"
+    }
+   ]
+  },
+  {
+   "name": "dock_a",
+   "category": "building",
+   "use": "roadside",
+   "density": {
+    "per_track": 2
+   },
+   "desc": "木碼頭一段（含木樁，可接成長碼頭）",
+   "size": [
+    3.06,
+    3.72,
+    4.22
+   ],
+   "tris": 1912,
+   "materials": [
+    "P_qPirate"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius pirate-kit",
+     "file": "quaternius/pirate-kit/glTF/Environment_Dock.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/piratekit.html"
+    }
+   ]
+  },
+  {
+   "name": "bungalow_a",
+   "category": "building",
+   "use": "roadside",
+   "density": {
+    "per_track": 6
+   },
+   "desc": "高腳茅草屋（度假小屋）",
+   "size": [
+    6.8,
+    8.18,
+    5.9
+   ],
+   "tris": 792,
+   "materials": [
+    "P_BeachWood",
+    "P_BeachBambooWall",
+    "P_BeachInterior",
+    "P_BeachThatch",
+    "P_BeachThatchUnder"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "lifeguard_a",
+   "category": "building",
+   "use": "roadside",
+   "density": {
+    "per_track": 3
+   },
+   "desc": "救生員瞭望台",
+   "size": [
+    3.8,
+    5.24,
+    5.78
+   ],
+   "tris": 380,
+   "materials": [
+    "P_BeachWhite",
+    "P_BeachBlueWindow",
+    "P_BeachRed",
+    "P_BeachYellow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "lighthouse_a",
+   "category": "landmark",
+   "use": "landmark",
+   "density": {
+    "per_track": 1
+   },
+   "desc": "紅白燈塔（燈室發光）",
+   "size": [
+    9.6,
+    8.4,
+    22.7
+   ],
+   "tris": 1206,
+   "materials": [
+    "P_BeachStone",
+    "P_BeachWhite",
+    "P_BeachRed",
+    "P_BeachDarkMetal",
+    "P_BeachLighthouseGlow"
+   ],
+   "emissive": [
+    "P_BeachLighthouseGlow"
+   ],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "parasol_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 30
+   },
+   "desc": "海灘遮陽傘",
+   "size": [
+    2.0,
+    2.31,
+    2.6
+   ],
+   "tris": 96,
+   "materials": [
+    "P_kCityCommercial"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/detail-parasol-a.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "parasol_b",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 30
+   },
+   "desc": "海灘遮陽傘（另一色）",
+   "size": [
+    2.0,
+    2.31,
+    2.6
+   ],
+   "tris": 120,
+   "materials": [
+    "P_kCityCommercial"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/detail-parasol-b.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "lounger_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "海灘躺椅（藍）",
+   "size": [
+    0.7,
+    1.93,
+    0.71
+   ],
+   "tris": 132,
+   "materials": [
+    "P_BeachWood",
+    "P_BeachCloth_2f8fd8",
+    "P_BeachWhite"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "lounger_b",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "海灘躺椅（橘）",
+   "size": [
+    0.7,
+    1.93,
+    0.71
+   ],
+   "tris": 132,
+   "materials": [
+    "P_BeachWood",
+    "P_BeachCloth_ff8a3d",
+    "P_BeachWhite"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "boat_a",
+   "category": "deco",
+   "use": "far",
+   "density": {
+    "per_track": 6
+   },
+   "desc": "小划船（擺在沙灘或水上）",
+   "size": [
+    3.57,
+    3.08,
+    1.1
+   ],
+   "tris": 168,
+   "materials": [
+    "P_kWatercraft"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney watercraft-kit",
+     "file": "kenney/watercraft-kit/Models/GLB format/boat-row-small.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/watercraft-kit"
+    }
+   ]
+  },
+  {
+   "name": "buoy_a",
+   "category": "deco",
+   "use": "far",
+   "density": {
+    "per_track": 8
+   },
+   "desc": "浮標（水面）",
+   "size": [
+    0.68,
+    0.95,
+    2.0
+   ],
+   "tris": 218,
+   "materials": [
+    "P_kWatercraft"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney watercraft-kit",
+     "file": "kenney/watercraft-kit/Models/GLB format/buoy-flag.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/watercraft-kit"
+    }
+   ]
+  },
+  {
+   "name": "tent_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_track": 4
+   },
+   "desc": "帆布遮陽棚",
+   "size": [
+    2.97,
+    2.97,
+    2.6
+   ],
+   "tris": 148,
+   "materials": [
+    "P_kSurvival"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney survival-kit",
+     "file": "kenney/survival-kit/Models/GLB format/tent-canvas.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/survival-kit"
+    }
+   ]
+  },
+  {
+   "name": "barrel_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 0.5
+   },
+   "desc": "木桶",
+   "size": [
+    1.08,
+    1.08,
+    1.0
+   ],
+   "tris": 640,
+   "materials": [
+    "P_qPirate"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius pirate-kit",
+     "file": "quaternius/pirate-kit/glTF/Prop_Barrel.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/piratekit.html"
+    }
+   ]
+  }
+ ]
+}

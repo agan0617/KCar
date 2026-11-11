@@ -1,0 +1,944 @@
+{
+ "theme": "city",
+ "glb": "city.glb",
+ "generator": "tools/blender/build_props.py",
+ "generated": "2026-11-11",
+ "legend": {
+  "size": "[寬(x), 深(z), 高(y)]，公尺；原點在底部中心，正面朝 +Z",
+  "category": "tree 樹／rock 岩石／building 建築／landmark 地標／deco 點綴／trackside 賽道設施",
+  "use": "far 遠景撒／roadside 路邊（護牆外）／landmark 地標（一條賽道放一兩個）／track 跨在或貼在路面上",
+  "density": "per_ha＝撒的區域裡每公頃幾個；per_100m＝沿賽道每 100 公尺幾個（兩側合計）；per_track＝一條賽道放幾個",
+  "emissive": "發光材質（three.js 端用 bloom 發光；名稱以 P_ 開頭）"
+ },
+ "objects": [
+  {
+   "name": "skyscraper_a",
+   "category": "building",
+   "use": "far",
+   "density": {
+    "per_ha": 4
+   },
+   "desc": "摩天樓（窗戶發光）",
+   "size": [
+    14.96,
+    14.96,
+    31.68
+   ],
+   "tris": 1292,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/building-skyscraper-a.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "skyscraper_b",
+   "category": "building",
+   "use": "far",
+   "density": {
+    "per_ha": 4
+   },
+   "desc": "摩天樓",
+   "size": [
+    14.96,
+    14.96,
+    49.28
+   ],
+   "tris": 1592,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/building-skyscraper-b.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "skyscraper_c",
+   "category": "building",
+   "use": "far",
+   "density": {
+    "per_ha": 4
+   },
+   "desc": "摩天樓（細高）",
+   "size": [
+    14.08,
+    15.27,
+    44.88
+   ],
+   "tris": 1704,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/building-skyscraper-c.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "skyscraper_d",
+   "category": "building",
+   "use": "far",
+   "density": {
+    "per_ha": 4
+   },
+   "desc": "摩天樓（直條窗）",
+   "size": [
+    14.24,
+    13.66,
+    44.88
+   ],
+   "tris": 1156,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/building-skyscraper-e.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "building_a",
+   "category": "building",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "商業樓，窗戶發光",
+   "size": [
+    9.72,
+    10.34,
+    14.22
+   ],
+   "tris": 1252,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/building-a.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "building_b",
+   "category": "building",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "商業樓（轉角），窗戶發光",
+   "size": [
+    9.72,
+    11.99,
+    9.82
+   ],
+   "tris": 1195,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/building-c.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "building_c",
+   "category": "building",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "商業樓，窗戶發光",
+   "size": [
+    9.24,
+    11.33,
+    18.62
+   ],
+   "tris": 1794,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/building-f.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "building_d",
+   "category": "building",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "商業樓（大窗），窗戶發光",
+   "size": [
+    9.72,
+    11.09,
+    14.22
+   ],
+   "tris": 1512,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/building-h.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "building_e",
+   "category": "building",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "商業樓，窗戶發光",
+   "size": [
+    22.92,
+    10.36,
+    16.17
+   ],
+   "tris": 2960,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/building-k.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "bg_a",
+   "category": "building",
+   "use": "far",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "遠景低模大樓（188 面上下）",
+   "size": [
+    5.5,
+    5.5,
+    22.0
+   ],
+   "tris": 188,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/low-detail-building-a.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "bg_b",
+   "category": "building",
+   "use": "far",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "遠景低模大樓（188 面上下）",
+   "size": [
+    5.5,
+    5.5,
+    19.8
+   ],
+   "tris": 96,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/low-detail-building-e.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "bg_c",
+   "category": "building",
+   "use": "far",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "遠景低模大樓（188 面上下）",
+   "size": [
+    11.0,
+    5.5,
+    12.1
+   ],
+   "tris": 156,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/low-detail-building-wide-a.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "bg_d",
+   "category": "building",
+   "use": "far",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "遠景低模大樓（188 面上下）",
+   "size": [
+    5.5,
+    5.5,
+    23.1
+   ],
+   "tris": 378,
+   "materials": [
+    "P_kCityCommercial",
+    "P_CityWindowWarm",
+    "P_CityWindowCool",
+    "P_CityWindowDark"
+   ],
+   "emissive": [
+    "P_CityWindowCool",
+    "P_CityWindowWarm"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-commercial",
+     "file": "kenney/city-kit-commercial/Models/GLB format/low-detail-building-h.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-commercial"
+    }
+   ]
+  },
+  {
+   "name": "light_street_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 3
+   },
+   "desc": "彎臂路燈（燈頭發光）",
+   "size": [
+    0.55,
+    2.47,
+    7.42
+   ],
+   "tris": 92,
+   "materials": [
+    "P_kCityRoads",
+    "P_CityLampGlow"
+   ],
+   "emissive": [
+    "P_CityLampGlow"
+   ],
+   "source": [
+    {
+     "pack": "Kenney city-kit-roads",
+     "file": "kenney/city-kit-roads/Models/GLB format/light-curved.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-roads"
+    }
+   ]
+  },
+  {
+   "name": "light_street_b",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 3
+   },
+   "desc": "細路燈（Quaternius，燈發光）",
+   "size": [
+    0.4,
+    1.52,
+    6.5
+   ],
+   "tris": 526,
+   "materials": [
+    "P_qCyberpunkGame_Grey",
+    "P_qCyberpunkGame_LightGrey",
+    "P_CityLampGlow"
+   ],
+   "emissive": [
+    "P_CityLampGlow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius cyberpunk-game-kit",
+     "file": "quaternius/cyberpunk-game-kit/Platforms/Light_Street_1.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/cyberpunkgamekit.html"
+    }
+   ]
+  },
+  {
+   "name": "traffic_light_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 0.5
+   },
+   "desc": "紅綠燈（燈號不發光：素材的燈號跟外殼同一色塊分不開）",
+   "size": [
+    1.29,
+    0.99,
+    5.66
+   ],
+   "tris": 212,
+   "materials": [
+    "P_kCityRoads"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney city-kit-roads",
+     "file": "kenney/city-kit-roads/Models/GLB format/traffic-light.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-roads"
+    }
+   ]
+  },
+  {
+   "name": "sign_highway_a",
+   "category": "trackside",
+   "use": "track",
+   "density": {
+    "per_track": 2
+   },
+   "desc": "高速公路門架標誌",
+   "size": [
+    11.0,
+    1.46,
+    7.78
+   ],
+   "tris": 180,
+   "materials": [
+    "P_kCityRoads"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney city-kit-roads",
+     "file": "kenney/city-kit-roads/Models/GLB format/sign-highway.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-roads"
+    }
+   ]
+  },
+  {
+   "name": "sign_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "霓虹招牌（橫，日文；掛在建築上）",
+   "size": [
+    4.53,
+    0.22,
+    1.62
+   ],
+   "tris": 52,
+   "materials": [
+    "P_qCyberpunkGame_Grey",
+    "P_qCyberpunkGame_Glow"
+   ],
+   "emissive": [
+    "P_qCyberpunkGame_Glow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius cyberpunk-game-kit",
+     "file": "quaternius/cyberpunk-game-kit/Platforms/Sign_1.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/cyberpunkgamekit.html"
+    }
+   ]
+  },
+  {
+   "name": "sign_b",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "霓虹招牌（橫）",
+   "size": [
+    4.53,
+    0.22,
+    1.62
+   ],
+   "tris": 52,
+   "materials": [
+    "P_qCyberpunkGame_Grey",
+    "P_qCyberpunkGame_Glow"
+   ],
+   "emissive": [
+    "P_qCyberpunkGame_Glow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius cyberpunk-game-kit",
+     "file": "quaternius/cyberpunk-game-kit/Platforms/Sign_2.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/cyberpunkgamekit.html"
+    }
+   ]
+  },
+  {
+   "name": "sign_c",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "霓虹招牌（「リンゴ」）",
+   "size": [
+    4.45,
+    0.22,
+    1.59
+   ],
+   "tris": 52,
+   "materials": [
+    "P_qCyberpunkGame_Grey",
+    "P_qCyberpunkGame_Glow"
+   ],
+   "emissive": [
+    "P_qCyberpunkGame_Glow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius cyberpunk-game-kit",
+     "file": "quaternius/cyberpunk-game-kit/Platforms/Sign_3.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/cyberpunkgamekit.html"
+    }
+   ]
+  },
+  {
+   "name": "sign_d",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "霓虹招牌（直）",
+   "size": [
+    1.77,
+    0.22,
+    4.45
+   ],
+   "tris": 52,
+   "materials": [
+    "P_qCyberpunkGame_Grey",
+    "P_qCyberpunkGame_Glow"
+   ],
+   "emissive": [
+    "P_qCyberpunkGame_Glow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius cyberpunk-game-kit",
+     "file": "quaternius/cyberpunk-game-kit/Platforms/Sign_4.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/cyberpunkgamekit.html"
+    }
+   ]
+  },
+  {
+   "name": "sign_corner_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 1
+   },
+   "desc": "轉角霓虹招牌",
+   "size": [
+    3.82,
+    5.89,
+    2.54
+   ],
+   "tris": 124,
+   "materials": [
+    "P_qCyberpunkGame_Glow",
+    "P_qCyberpunkGame_DarkGrey"
+   ],
+   "emissive": [
+    "P_qCyberpunkGame_Glow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius cyberpunk-game-kit",
+     "file": "quaternius/cyberpunk-game-kit/Platforms/Sign_Corner_2.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/cyberpunkgamekit.html"
+    }
+   ]
+  },
+  {
+   "name": "sign_corner_b",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 1
+   },
+   "desc": "轉角霓虹招牌（另一款）",
+   "size": [
+    3.82,
+    5.89,
+    2.54
+   ],
+   "tris": 124,
+   "materials": [
+    "P_qCyberpunkGame_Glow",
+    "P_qCyberpunkGame_DarkGrey"
+   ],
+   "emissive": [
+    "P_qCyberpunkGame_Glow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius cyberpunk-game-kit",
+     "file": "quaternius/cyberpunk-game-kit/Platforms/Sign_Corner_3.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/cyberpunkgamekit.html"
+    }
+   ]
+  },
+  {
+   "name": "sign_small_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 3
+   },
+   "desc": "小霓虹招牌",
+   "size": [
+    1.68,
+    0.22,
+    1.62
+   ],
+   "tris": 52,
+   "materials": [
+    "P_qCyberpunkGame_Grey",
+    "P_qCyberpunkGame_Glow"
+   ],
+   "emissive": [
+    "P_qCyberpunkGame_Glow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius cyberpunk-game-kit",
+     "file": "quaternius/cyberpunk-game-kit/Platforms/Sign_Small_1.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/cyberpunkgamekit.html"
+    }
+   ]
+  },
+  {
+   "name": "sign_small_b",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 3
+   },
+   "desc": "小霓虹招牌（另一款）",
+   "size": [
+    1.68,
+    0.22,
+    1.62
+   ],
+   "tris": 52,
+   "materials": [
+    "P_qCyberpunkGame_Grey",
+    "P_qCyberpunkGame_Glow"
+   ],
+   "emissive": [
+    "P_qCyberpunkGame_Glow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius cyberpunk-game-kit",
+     "file": "quaternius/cyberpunk-game-kit/Platforms/Sign_Small_2.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/cyberpunkgamekit.html"
+    }
+   ]
+  },
+  {
+   "name": "tv_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 0.5
+   },
+   "desc": "屋頂電視牆（螢幕發光）",
+   "size": [
+    2.82,
+    1.21,
+    4.24
+   ],
+   "tris": 336,
+   "materials": [
+    "P_qCyberpunkGame_Grey",
+    "P_qCyberpunkGame_LightGrey",
+    "P_qCyberpunkGame_Glow",
+    "P_qCyberpunkGame_MetalLight"
+   ],
+   "emissive": [
+    "P_qCyberpunkGame_Glow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius cyberpunk-game-kit",
+     "file": "quaternius/cyberpunk-game-kit/Platforms/TV_2.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/cyberpunkgamekit.html"
+    }
+   ]
+  },
+  {
+   "name": "ac_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 1
+   },
+   "desc": "屋頂冷氣機（疊）",
+   "size": [
+    1.34,
+    1.02,
+    2.01
+   ],
+   "tris": 776,
+   "materials": [
+    "P_qCyberpunkGame_LightGrey",
+    "P_qCyberpunkGame_Black",
+    "P_qCyberpunkGame_Orange",
+    "P_qCyberpunkGame_Glow"
+   ],
+   "emissive": [
+    "P_qCyberpunkGame_Glow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius cyberpunk-game-kit",
+     "file": "quaternius/cyberpunk-game-kit/Platforms/AC_Stacked.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/cyberpunkgamekit.html"
+    }
+   ]
+  },
+  {
+   "name": "antenna_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 1
+   },
+   "desc": "屋頂天線",
+   "size": [
+    1.0,
+    0.16,
+    4.14
+   ],
+   "tris": 88,
+   "materials": [
+    "P_qCyberpunkGame_MetalLight"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius cyberpunk-game-kit",
+     "file": "quaternius/cyberpunk-game-kit/Platforms/Antenna_1.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/cyberpunkgamekit.html"
+    }
+   ]
+  },
+  {
+   "name": "barrier_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 10
+   },
+   "desc": "施工柵欄",
+   "size": [
+    2.52,
+    0.5,
+    1.2
+   ],
+   "tris": 136,
+   "materials": [
+    "P_kCityRoads"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney city-kit-roads",
+     "file": "kenney/city-kit-roads/Models/GLB format/construction-fence.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-roads"
+    }
+   ]
+  },
+  {
+   "name": "cone_city_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 4
+   },
+   "desc": "施工錐",
+   "size": [
+    0.6,
+    0.6,
+    0.75
+   ],
+   "tris": 66,
+   "materials": [
+    "P_kCityRoads"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney city-kit-roads",
+     "file": "kenney/city-kit-roads/Models/GLB format/construction-cone.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-roads"
+    }
+   ]
+  }
+ ]
+}

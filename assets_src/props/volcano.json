@@ -1,0 +1,610 @@
+{
+ "theme": "volcano",
+ "glb": "volcano.glb",
+ "generator": "tools/blender/build_props.py",
+ "generated": "2026-11-11",
+ "legend": {
+  "size": "[寬(x), 深(z), 高(y)]，公尺；原點在底部中心，正面朝 +Z",
+  "category": "tree 樹／rock 岩石／building 建築／landmark 地標／deco 點綴／trackside 賽道設施",
+  "use": "far 遠景撒／roadside 路邊（護牆外）／landmark 地標（一條賽道放一兩個）／track 跨在或貼在路面上",
+  "density": "per_ha＝撒的區域裡每公頃幾個；per_100m＝沿賽道每 100 公尺幾個（兩側合計）；per_track＝一條賽道放幾個",
+  "emissive": "發光材質（three.js 端用 bloom 發光；名稱以 P_ 開頭）"
+ },
+ "objects": [
+  {
+   "name": "tree_lava_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 15
+   },
+   "desc": "熔岩植物（奇幻造型）",
+   "size": [
+    2.22,
+    2.21,
+    6.0
+   ],
+   "tris": 1281,
+   "materials": [
+    "P_qPP"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius（poly.pizza 單件：Tree Lava）",
+     "file": "quaternius/polypizza/volcano/Tree_Lava__9gRfmVKx9W.glb",
+     "license": "CC0 1.0",
+     "url": "https://poly.pizza/m/9gRfmVKx9W"
+    }
+   ]
+  },
+  {
+   "name": "tree_lava_b",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 15
+   },
+   "desc": "熔岩植物（另一款）",
+   "size": [
+    2.19,
+    2.05,
+    5.5
+   ],
+   "tris": 1174,
+   "materials": [
+    "P_qPP"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius（poly.pizza 單件：Tree Lava）",
+     "file": "quaternius/polypizza/volcano/Tree_Lava__sTYjmQObr1.glb",
+     "license": "CC0 1.0",
+     "url": "https://poly.pizza/m/sTYjmQObr1"
+    }
+   ]
+  },
+  {
+   "name": "tree_lava_c",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 15
+   },
+   "desc": "熔岩植物（另一款）",
+   "size": [
+    2.67,
+    2.7,
+    5.0
+   ],
+   "tris": 1088,
+   "materials": [
+    "P_qPP"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius（poly.pizza 單件：Tree Lava）",
+     "file": "quaternius/polypizza/volcano/Tree_Lava__wkLmuxEbMW.glb",
+     "license": "CC0 1.0",
+     "url": "https://poly.pizza/m/wkLmuxEbMW"
+    }
+   ]
+  },
+  {
+   "name": "tree_dead_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 20
+   },
+   "desc": "焦黑枯樹",
+   "size": [
+    3.6,
+    5.04,
+    8.0
+   ],
+   "tris": 2360,
+   "materials": [
+    "P_VolcanoCharWood"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/CommonTree_Dead_2.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "tree_dead_b",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 15
+   },
+   "desc": "焦黑枯樹（細）",
+   "size": [
+    1.6,
+    5.43,
+    7.5
+   ],
+   "tris": 820,
+   "materials": [
+    "P_qUltimateNature_White",
+    "P_qUltimateNature_Black"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/BirchTree_Dead_1.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "tree_dead_c",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 15
+   },
+   "desc": "焦黑枯樹幹（矮）",
+   "size": [
+    0.73,
+    3.73,
+    4.5
+   ],
+   "tris": 400,
+   "materials": [
+    "P_VolcanoCharWood"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Willow_Dead_3.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "pine_crooked_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 10
+   },
+   "desc": "扭曲松",
+   "size": [
+    3.91,
+    4.43,
+    7.0
+   ],
+   "tris": 336,
+   "materials": [
+    "P_kGraveyard"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney graveyard-kit",
+     "file": "kenney/graveyard-kit/Models/GLB format/pine-crooked.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/graveyard-kit"
+    }
+   ]
+  },
+  {
+   "name": "rock_a",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 20
+   },
+   "desc": "深色岩石",
+   "size": [
+    1.64,
+    1.78,
+    1.5
+   ],
+   "tris": 72,
+   "materials": [
+    "P_VolcanoRockMid"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Rock_3.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "rock_b",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 15
+   },
+   "desc": "深色岩石（大）",
+   "size": [
+    3.35,
+    4.19,
+    2.6
+   ],
+   "tris": 116,
+   "materials": [
+    "P_VolcanoRockMid"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Rock_6.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "rock_c",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 10
+   },
+   "desc": "岩石（貼圖，壓暗）",
+   "size": [
+    3.28,
+    3.04,
+    2.3
+   ],
+   "tris": 342,
+   "materials": [
+    "P_qStylizedNatureMegakit_Rocks"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius stylized-nature-megakit",
+     "file": "quaternius/stylized-nature-megakit/glTF/Rock_Medium_1.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.itch.io/stylized-nature-megakit"
+    }
+   ]
+  },
+  {
+   "name": "rock_tall_a",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 6
+   },
+   "desc": "高岩柱",
+   "size": [
+    5.19,
+    5.23,
+    6.0
+   ],
+   "tris": 172,
+   "materials": [
+    "P_VolcanoRockMid",
+    "P_VolcanoAsh",
+    "P_VolcanoRock"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/rock_tallB.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  },
+  {
+   "name": "rock_pillar_a",
+   "category": "rock",
+   "use": "far",
+   "density": {
+    "per_ha": 3
+   },
+   "desc": "尖石柱（遠景）",
+   "size": [
+    5.97,
+    6.89,
+    11.0
+   ],
+   "tris": 62,
+   "materials": [
+    "P_VolcanoRockMid",
+    "P_VolcanoRock",
+    "P_VolcanoAsh"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/rock_tallG.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  },
+  {
+   "name": "rocks_a",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 10
+   },
+   "desc": "岩堆",
+   "size": [
+    4.4,
+    4.34,
+    2.5
+   ],
+   "tris": 364,
+   "materials": [
+    "P_kGraveyardDark"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney graveyard-kit",
+     "file": "kenney/graveyard-kit/Models/GLB format/rocks-tall.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/graveyard-kit"
+    }
+   ]
+  },
+  {
+   "name": "rocks_b",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 10
+   },
+   "desc": "岩堆（寬）",
+   "size": [
+    7.2,
+    8.09,
+    3.0
+   ],
+   "tris": 150,
+   "materials": [
+    "P_kCastleDark"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney castle-kit",
+     "file": "kenney/castle-kit/Models/GLB format/rocks-large.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/castle-kit"
+    }
+   ]
+  },
+  {
+   "name": "cliff_a",
+   "category": "rock",
+   "use": "far",
+   "density": {
+    "per_ha": 2
+   },
+   "desc": "懸崖岩壁（一片，可並排成崖）",
+   "size": [
+    12.0,
+    5.02,
+    12.0
+   ],
+   "tris": 32,
+   "materials": [
+    "P_VolcanoRockMid"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/cliff_large_rock.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  },
+  {
+   "name": "lava_rock_a",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 12
+   },
+   "desc": "熔岩石（裂縫發光）",
+   "size": [
+    3.91,
+    3.45,
+    1.94
+   ],
+   "tris": 80,
+   "materials": [
+    "P_VolcanoRock",
+    "P_VolcanoLavaGlow"
+   ],
+   "emissive": [
+    "P_VolcanoLavaGlow"
+   ],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "lava_rock_b",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 12
+   },
+   "desc": "熔岩石（小）",
+   "size": [
+    2.07,
+    2.02,
+    1.2
+   ],
+   "tris": 80,
+   "materials": [
+    "P_VolcanoRock",
+    "P_VolcanoLavaGlow"
+   ],
+   "emissive": [
+    "P_VolcanoLavaGlow"
+   ],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "brazier_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "火盆（鐵盆＋三腳架，火焰發光，賽道邊照明）",
+   "size": [
+    1.2,
+    1.17,
+    2.01
+   ],
+   "tris": 354,
+   "materials": [
+    "P_VolcanoIron",
+    "P_VolcanoFireCore",
+    "P_VolcanoFireGlow"
+   ],
+   "emissive": [
+    "P_VolcanoFireCore",
+    "P_VolcanoFireGlow"
+   ],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "mountain_a",
+   "category": "landmark",
+   "use": "far",
+   "density": {
+    "per_track": 3
+   },
+   "desc": "火山（山頂熔岩發光，遠景）",
+   "size": [
+    25.41,
+    25.98,
+    45.0
+   ],
+   "tris": 628,
+   "materials": [
+    "P_VolcanoRockMid",
+    "P_VolcanoLavaGlow",
+    "P_VolcanoRock"
+   ],
+   "emissive": [
+    "P_VolcanoLavaGlow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius（poly.pizza 單件：Mountain）",
+     "file": "quaternius/polypizza/volcano/Mountain__XY4ej3Zg3I.glb",
+     "license": "CC0 1.0",
+     "url": "https://poly.pizza/m/XY4ej3Zg3I"
+    }
+   ]
+  },
+  {
+   "name": "mountain_b",
+   "category": "landmark",
+   "use": "far",
+   "density": {
+    "per_track": 3
+   },
+   "desc": "山群（遠景）",
+   "size": [
+    51.19,
+    35.26,
+    35.0
+   ],
+   "tris": 717,
+   "materials": [
+    "P_VolcanoRockMid",
+    "P_VolcanoLavaGlow",
+    "P_VolcanoRock"
+   ],
+   "emissive": [
+    "P_VolcanoLavaGlow"
+   ],
+   "source": [
+    {
+     "pack": "Quaternius（poly.pizza 單件：Mountain Group）",
+     "file": "quaternius/polypizza/volcano/Mountain_Group__a52gSEEq8X.glb",
+     "license": "CC0 1.0",
+     "url": "https://poly.pizza/m/a52gSEEq8X"
+    }
+   ]
+  },
+  {
+   "name": "volcano_a",
+   "category": "landmark",
+   "use": "far",
+   "density": {
+    "per_track": 1
+   },
+   "desc": "大火山（火口熔岩湖＋三條熔岩流，底徑 200 m）",
+   "size": [
+    198.63,
+    201.99,
+    65.0
+   ],
+   "tris": 1294,
+   "materials": [
+    "P_VolcanoRock",
+    "P_VolcanoRockLight",
+    "P_VolcanoLavaGlow"
+   ],
+   "emissive": [
+    "P_VolcanoLavaGlow"
+   ],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,691 @@
+{
+ "theme": "sakura",
+ "glb": "sakura.glb",
+ "generator": "tools/blender/build_props.py",
+ "generated": "2026-11-11",
+ "legend": {
+  "size": "[寬(x), 深(z), 高(y)]，公尺；原點在底部中心，正面朝 +Z",
+  "category": "tree 樹／rock 岩石／building 建築／landmark 地標／deco 點綴／trackside 賽道設施",
+  "use": "far 遠景撒／roadside 路邊（護牆外）／landmark 地標（一條賽道放一兩個）／track 跨在或貼在路面上",
+  "density": "per_ha＝撒的區域裡每公頃幾個；per_100m＝沿賽道每 100 公尺幾個（兩側合計）；per_track＝一條賽道放幾個",
+  "emissive": "發光材質（three.js 端用 bloom 發光；名稱以 P_ 開頭）"
+ },
+ "objects": [
+  {
+   "name": "sakura_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "櫻花樹（寬樹冠）",
+   "size": [
+    10.23,
+    10.09,
+    8.5
+   ],
+   "tris": 784,
+   "materials": [
+    "P_JpSakuraBark",
+    "P_JpSakuraDeep",
+    "P_JpSakuraLight",
+    "P_JpSakura",
+    "P_JpSakuraPale"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "sakura_b",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 30
+   },
+   "desc": "櫻花樹（高）",
+   "size": [
+    10.35,
+    9.92,
+    10.5
+   ],
+   "tris": 708,
+   "materials": [
+    "P_JpSakuraBark",
+    "P_JpSakuraPale",
+    "P_JpSakura",
+    "P_JpSakuraLight"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "sakura_c",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "櫻花樹（小、斜）",
+   "size": [
+    7.14,
+    7.21,
+    6.5
+   ],
+   "tris": 588,
+   "materials": [
+    "P_JpSakuraBark",
+    "P_JpSakuraDeep",
+    "P_JpSakuraLight",
+    "P_JpSakura",
+    "P_JpSakuraPale"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "sakura_d",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 25
+   },
+   "desc": "櫻花樹（葉片貼圖版，USN 楓樹改粉紅；近景用）",
+   "size": [
+    7.98,
+    7.44,
+    8.0
+   ],
+   "tris": 2910,
+   "tris_source": 4800,
+   "materials": [
+    "P_qUltimateStylizedNature_MapleTree_Bark",
+    "P_qUltimateStylizedNature_MapleTree_LeavesSakura"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-stylized-nature",
+     "file": "quaternius/ultimate-stylized-nature/glTF/MapleTree_2.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatestylizednature.html"
+    }
+   ]
+  },
+  {
+   "name": "maple_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 15
+   },
+   "desc": "紅葉（楓）樹，跟櫻花混著撒",
+   "size": [
+    8.37,
+    8.74,
+    7.0
+   ],
+   "tris": 628,
+   "materials": [
+    "P_JpMapleBark",
+    "P_JpMapleDeep",
+    "P_JpMapleOrange",
+    "P_JpMaple"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "pine_jp_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 10
+   },
+   "desc": "日本黑松（庭園修剪、扁平針葉團）",
+   "size": [
+    8.07,
+    6.85,
+    8.0
+   ],
+   "tris": 416,
+   "materials": [
+    "P_JpPineBark",
+    "P_JpPineNeedle",
+    "P_JpPineNeedleLight"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "bamboo_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 30
+   },
+   "desc": "竹林一叢（十二根，撒密一點就是竹林）",
+   "size": [
+    6.8,
+    5.96,
+    11.0
+   ],
+   "tris": 1884,
+   "materials": [
+    "P_JpBamboo",
+    "P_JpBambooNode",
+    "P_JpBambooLeaf",
+    "P_JpBambooLeafLight"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "bamboo_b",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "小竹叢（六根）",
+   "size": [
+    3.73,
+    3.76,
+    7.5
+   ],
+   "tris": 672,
+   "materials": [
+    "P_JpBamboo",
+    "P_JpBambooNode",
+    "P_JpBambooLeaf",
+    "P_JpBambooLeafLight"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "torii_a",
+   "category": "landmark",
+   "use": "roadside",
+   "density": {
+    "per_track": 4
+   },
+   "desc": "鳥居（7 m，參道入口）",
+   "size": [
+    7.71,
+    0.75,
+    7.37
+   ],
+   "tris": 552,
+   "materials": [
+    "P_JpVermilion",
+    "P_JpBlack",
+    "P_JpNavy",
+    "P_JpGold"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "torii_large_a",
+   "category": "landmark",
+   "use": "track",
+   "density": {
+    "per_track": 2
+   },
+   "desc": "大鳥居（跨賽道用，柱距 20 m、高 13 m）",
+   "size": [
+    25.69,
+    1.39,
+    13.7
+   ],
+   "tris": 552,
+   "materials": [
+    "P_JpVermilion",
+    "P_JpBlack",
+    "P_JpNavy",
+    "P_JpGold"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "torii_small_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 8
+   },
+   "desc": "小鳥居（千本鳥居，沿路排成隧道）",
+   "size": [
+    3.71,
+    0.36,
+    3.58
+   ],
+   "tris": 552,
+   "materials": [
+    "P_JpVermilion",
+    "P_JpBlack",
+    "P_JpNavy",
+    "P_JpGold"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "lantern_stone_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 4
+   },
+   "desc": "石燈籠（春日型，火袋發光）",
+   "size": [
+    1.44,
+    1.25,
+    2.68
+   ],
+   "tris": 582,
+   "materials": [
+    "P_JpStoneDark",
+    "P_JpStone",
+    "P_JpLanternGlow"
+   ],
+   "emissive": [
+    "P_JpLanternGlow"
+   ],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "lantern_stone_b",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "雪見燈籠（三腳、低矮）",
+   "size": [
+    2.01,
+    1.74,
+    1.55
+   ],
+   "tris": 382,
+   "materials": [
+    "P_JpStone",
+    "P_JpStoneDark",
+    "P_JpLanternGlow"
+   ],
+   "emissive": [
+    "P_JpLanternGlow"
+   ],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "lantern_paper_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 3
+   },
+   "desc": "掛紅提燈的木柱（發光）",
+   "size": [
+    0.55,
+    1.16,
+    2.9
+   ],
+   "tris": 240,
+   "materials": [
+    "P_JpDarkWood",
+    "P_JpBlack",
+    "P_JpChochin"
+   ],
+   "emissive": [
+    "P_JpChochin"
+   ],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "house_a",
+   "category": "building",
+   "use": "roadside",
+   "density": {
+    "per_100m": 1
+   },
+   "desc": "二層町家（格子門面、暖簾）",
+   "size": [
+    8.0,
+    11.0,
+    8.15
+   ],
+   "tris": 910,
+   "materials": [
+    "P_JpStoneBase",
+    "P_JpPlaster",
+    "P_JpDarkWood",
+    "P_JpInterior",
+    "P_JpNoren",
+    "P_JpLanternGlow",
+    "P_JpRoofTile",
+    "P_JpRafter"
+   ],
+   "emissive": [
+    "P_JpLanternGlow"
+   ],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "house_b",
+   "category": "building",
+   "use": "roadside",
+   "density": {
+    "per_100m": 0.6
+   },
+   "desc": "和風平房（緣側、障子、四坡瓦頂）",
+   "size": [
+    11.8,
+    9.8,
+    6.67
+   ],
+   "tris": 1472,
+   "materials": [
+    "P_JpStoneBase",
+    "P_JpWood",
+    "P_JpPlaster",
+    "P_JpDarkWood",
+    "P_JpShoji",
+    "P_JpRoofTile",
+    "P_JpRafter"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "shrine_a",
+   "category": "landmark",
+   "use": "landmark",
+   "density": {
+    "per_track": 1
+   },
+   "desc": "神社拜殿（銅綠屋頂、千木鰹木、注連縄）",
+   "size": [
+    12.0,
+    12.45,
+    9.31
+   ],
+   "tris": 2606,
+   "materials": [
+    "P_JpStoneBase",
+    "P_JpWood",
+    "P_JpVermilion",
+    "P_JpPlaster",
+    "P_JpInterior",
+    "P_JpDarkWood",
+    "P_JpCopperRoof",
+    "P_JpCopperRoofUnder",
+    "P_JpGold",
+    "P_JpRope",
+    "P_JpPaperWhite"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "pagoda_a",
+   "category": "landmark",
+   "use": "landmark",
+   "density": {
+    "per_track": 1
+   },
+   "desc": "五重塔（遠景地標）",
+   "size": [
+    12.0,
+    13.5,
+    31.2
+   ],
+   "tris": 5382,
+   "materials": [
+    "P_JpStoneBase",
+    "P_JpPlaster",
+    "P_JpVermilion",
+    "P_JpInterior",
+    "P_JpBracket",
+    "P_JpRoofTile",
+    "P_JpBronze",
+    "P_JpGold"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "bridge_a",
+   "category": "landmark",
+   "use": "roadside",
+   "density": {
+    "per_track": 1
+   },
+   "desc": "朱紅太鼓橋（12 m，裝飾用，車不能走）",
+   "size": [
+    12.32,
+    3.54,
+    3.71
+   ],
+   "tris": 1676,
+   "materials": [
+    "P_JpWood",
+    "P_JpVermilion",
+    "P_JpGold"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "rock_a",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 10
+   },
+   "desc": "青苔石",
+   "size": [
+    1.72,
+    1.87,
+    1.3
+   ],
+   "tris": 68,
+   "materials": [
+    "P_qUltimateNature_Rock",
+    "P_qUltimateNature_Green"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Rock_Moss_3.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "rock_b",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "庭石（立石）",
+   "size": [
+    1.56,
+    1.57,
+    1.8
+   ],
+   "tris": 172,
+   "materials": [
+    "P_JpGardenStone",
+    "P_JpGardenStoneDark"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/stone_tallB.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  },
+  {
+   "name": "path_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "踏石（一組圓形飛石）",
+   "size": [
+    3.73,
+    3.51,
+    0.2
+   ],
+   "tris": 164,
+   "materials": [
+    "P_JpGardenStone",
+    "P_JpGardenStoneDark"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/path_stoneCircle.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  }
+ ]
+}

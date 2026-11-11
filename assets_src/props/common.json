@@ -1,0 +1,727 @@
+{
+ "theme": "common",
+ "glb": "common.glb",
+ "generator": "tools/blender/build_props.py",
+ "generated": "2026-11-11",
+ "legend": {
+  "size": "[寬(x), 深(z), 高(y)]，公尺；原點在底部中心，正面朝 +Z",
+  "category": "tree 樹／rock 岩石／building 建築／landmark 地標／deco 點綴／trackside 賽道設施",
+  "use": "far 遠景撒／roadside 路邊（護牆外）／landmark 地標（一條賽道放一兩個）／track 跨在或貼在路面上",
+  "density": "per_ha＝撒的區域裡每公頃幾個；per_100m＝沿賽道每 100 公尺幾個（兩側合計）；per_track＝一條賽道放幾個",
+  "emissive": "發光材質（three.js 端用 bloom 發光；名稱以 P_ 開頭）"
+ },
+ "objects": [
+  {
+   "name": "arch_start_a",
+   "category": "trackside",
+   "use": "track",
+   "density": {
+    "per_track": 1
+   },
+   "desc": "起終點拱門（附起跑燈號），跨在路面上",
+   "size": [
+    20.16,
+    3.04,
+    11.1
+   ],
+   "tris": 432,
+   "materials": [
+    "P_kRacing_grey",
+    "P_kRacing_road",
+    "P_kRacing_red"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/overheadLights.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "arch_a",
+   "category": "trackside",
+   "use": "track",
+   "density": {
+    "per_track": 2
+   },
+   "desc": "一般拱門（檢查點、贊助門）",
+   "size": [
+    20.16,
+    3.04,
+    10.69
+   ],
+   "tris": 124,
+   "materials": [
+    "P_kRacing_grey"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/overhead.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "grandstand_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_track": 3
+   },
+   "desc": "有頂看台（10 m 一節，可並排）",
+   "size": [
+    10.0,
+    10.2,
+    11.86
+   ],
+   "tris": 168,
+   "materials": [
+    "P_kRacing_grey",
+    "P_kRacing__defaultMat",
+    "P_kRacing_red",
+    "P_kRacing_road",
+    "P_kRacing_glass"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/grandStandCovered.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "grandstand_b",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_track": 3
+   },
+   "desc": "無頂看台",
+   "size": [
+    10.0,
+    10.0,
+    8.96
+   ],
+   "tris": 128,
+   "materials": [
+    "P_kRacing_grey",
+    "P_kRacing__defaultMat",
+    "P_kRacing_red",
+    "P_kRacing_road"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/grandStand.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "pits_garage_a",
+   "category": "building",
+   "use": "roadside",
+   "density": {
+    "per_track": 4
+   },
+   "desc": "維修區車庫（10 m 一格，可並排）",
+   "size": [
+    10.0,
+    10.9,
+    7.0
+   ],
+   "tris": 96,
+   "materials": [
+    "P_kRacing_grey",
+    "P_kRacing__defaultMat",
+    "P_kRacing_tankco",
+    "P_kRacing_red"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/pitsGarage.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "tent_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 0.3
+   },
+   "desc": "活動帳篷",
+   "size": [
+    5.14,
+    5.14,
+    3.6
+   ],
+   "tris": 86,
+   "materials": [
+    "P_kRacing_red",
+    "P_kRacing_grey"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/tent.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "billboard_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 0.4
+   },
+   "desc": "廣告看板",
+   "size": [
+    8.0,
+    3.81,
+    8.0
+   ],
+   "tris": 136,
+   "materials": [
+    "P_kRacing_bark",
+    "P_kRacing_road",
+    "P_kRacing_tankco",
+    "P_kRacing_grey"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/billboard.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "banner_tower_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 0.3
+   },
+   "desc": "紅色旗塔",
+   "size": [
+    2.78,
+    2.78,
+    9.0
+   ],
+   "tris": 426,
+   "materials": [
+    "P_kRacing__defaultMat",
+    "P_kRacing_grey",
+    "P_kRacing_red"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/bannerTowerRed.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "flag_checker_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_track": 6
+   },
+   "desc": "方格旗（起終點兩側）",
+   "size": [
+    0.79,
+    0.14,
+    5.0
+   ],
+   "tris": 184,
+   "materials": [
+    "P_kRacing_checkers",
+    "P_kRacing__defaultMat",
+    "P_kRacing_grey",
+    "P_kRacing_road"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/flagCheckers.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "flag_red_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 1
+   },
+   "desc": "紅旗",
+   "size": [
+    0.79,
+    0.14,
+    5.0
+   ],
+   "tris": 184,
+   "materials": [
+    "P_kRacing_red",
+    "P_kRacing__defaultMat",
+    "P_kRacing_grey",
+    "P_kRacing_road"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/flagRed.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "light_post_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 1
+   },
+   "desc": "賽道燈柱（燈頭發光）",
+   "size": [
+    0.57,
+    2.05,
+    9.0
+   ],
+   "tris": 198,
+   "materials": [
+    "P_kRacing__defaultMat",
+    "P_kRacing_grey",
+    "P_TrackLampGlow"
+   ],
+   "emissive": [
+    "P_TrackLampGlow"
+   ],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/lightPostModern.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "barrier_red_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 20
+   },
+   "desc": "紅色護欄塊（1.75 m，排成一列）",
+   "size": [
+    1.75,
+    0.86,
+    0.92
+   ],
+   "tris": 28,
+   "materials": [
+    "P_kRacing_red"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/barrierRed.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "barrier_white_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 20
+   },
+   "desc": "白色護欄塊（跟紅色交錯排）",
+   "size": [
+    1.75,
+    0.86,
+    0.92
+   ],
+   "tris": 28,
+   "materials": [
+    "P_kRacing_grey"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/barrierWhite.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "barrier_wall_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 14
+   },
+   "desc": "紅白護牆（7 m 一段）",
+   "size": [
+    7.0,
+    0.86,
+    0.92
+   ],
+   "tris": 76,
+   "materials": [
+    "P_kRacing_grey",
+    "P_kRacing_red"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/barrierWall.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "rail_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 25
+   },
+   "desc": "雙層鋼護欄（4.5 m 一段）",
+   "size": [
+    4.5,
+    0.23,
+    1.26
+   ],
+   "tris": 112,
+   "materials": [
+    "P_kRacing_grey"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/railDouble.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "fence_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 16
+   },
+   "desc": "鐵絲網圍籬（6 m 一段，網子是透明貼圖）",
+   "size": [
+    6.0,
+    0.21,
+    3.0
+   ],
+   "tris": 36,
+   "materials": [
+    "P_kRacing_grey",
+    "P_kRacing_net"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/fenceStraight.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "barrier_jersey_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 10
+   },
+   "desc": "紐澤西水泥護欄（施工段）",
+   "size": [
+    1.73,
+    1.04,
+    1.0
+   ],
+   "tris": 60,
+   "materials": [
+    "P_kCityRoads"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney city-kit-roads",
+     "file": "kenney/city-kit-roads/Models/GLB format/construction-barrier.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/city-kit-roads"
+    }
+   ]
+  },
+  {
+   "name": "cone_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 4
+   },
+   "desc": "三角錐（Kenney）",
+   "size": [
+    0.68,
+    0.68,
+    0.75
+   ],
+   "tris": 108,
+   "materials": [
+    "P_kRacing_pylon"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney racing-kit",
+     "file": "kenney/racing-kit/Models/GLTF format/pylon.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/racing-kit"
+    }
+   ]
+  },
+  {
+   "name": "cone_b",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 4
+   },
+   "desc": "三角錐（Quaternius，反光條）",
+   "size": [
+    0.58,
+    0.58,
+    0.75
+   ],
+   "tris": 134,
+   "materials": [
+    "P_qPP"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius（poly.pizza 單件：Traffic Cone）",
+     "file": "quaternius/polypizza/track/Traffic_Cone__aDIrUbMbW3.glb",
+     "license": "CC0 1.0",
+     "url": "https://poly.pizza/m/aDIrUbMbW3"
+    }
+   ]
+  },
+  {
+   "name": "tires_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 1
+   },
+   "desc": "散落的輪胎堆",
+   "size": [
+    1.78,
+    1.16,
+    1.1
+   ],
+   "tris": 1776,
+   "materials": [
+    "P_qPP_Black"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius（poly.pizza 單件：Tires）",
+     "file": "quaternius/polypizza/track/Tires__mmq7GmG1AK.glb",
+     "license": "CC0 1.0",
+     "url": "https://poly.pizza/m/mmq7GmG1AK"
+    }
+   ]
+  },
+  {
+   "name": "tire_stack_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 6
+   },
+   "desc": "四個疊起來的輪胎（頂上紅）",
+   "size": [
+    0.86,
+    0.82,
+    1.01
+   ],
+   "tris": 400,
+   "materials": [
+    "P_TrackTireBlack",
+    "P_TrackTire_e53935"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "tire_stack_b",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 6
+   },
+   "desc": "四個疊起來的輪胎（頂上白）",
+   "size": [
+    0.86,
+    0.82,
+    1.01
+   ],
+   "tris": 400,
+   "materials": [
+    "P_TrackTireBlack",
+    "P_TrackTire_f5f5f5"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "tire_wall_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 12
+   },
+   "desc": "輪胎牆（5 m 一段，紅白交錯，彎道外側）",
+   "size": [
+    5.2,
+    0.82,
+    0.76
+   ],
+   "tris": 2400,
+   "materials": [
+    "P_TrackTireBlack",
+    "P_TrackTire_f5f5f5",
+    "P_TrackTire_e53935"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "boost_arrow_a",
+   "category": "trackside",
+   "use": "track",
+   "density": {
+    "per_track": 4
+   },
+   "desc": "加速帶（發光箭頭朝 +Z，貼在路面上）",
+   "size": [
+    3.0,
+    6.0,
+    0.04
+   ],
+   "tris": 24,
+   "materials": [
+    "P_TrackBoostBase",
+    "P_TrackBoostGlow"
+   ],
+   "emissive": [
+    "P_TrackBoostGlow"
+   ],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "arrow_sign_a",
+   "category": "trackside",
+   "use": "roadside",
+   "density": {
+    "per_100m": 1
+   },
+   "desc": "立式轉彎箭頭牌（彎道外側）",
+   "size": [
+    3.3,
+    0.66,
+    2.2
+   ],
+   "tris": 40,
+   "materials": [
+    "P_kWatercraft"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney watercraft-kit",
+     "file": "kenney/watercraft-kit/Models/GLB format/arrow-standing.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/watercraft-kit"
+    }
+   ]
+  }
+ ]
+}

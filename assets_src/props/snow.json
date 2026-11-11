@@ -1,0 +1,642 @@
+{
+ "theme": "snow",
+ "glb": "snow.glb",
+ "generator": "tools/blender/build_props.py",
+ "generated": "2026-11-11",
+ "legend": {
+  "size": "[寬(x), 深(z), 高(y)]，公尺；原點在底部中心，正面朝 +Z",
+  "category": "tree 樹／rock 岩石／building 建築／landmark 地標／deco 點綴／trackside 賽道設施",
+  "use": "far 遠景撒／roadside 路邊（護牆外）／landmark 地標（一條賽道放一兩個）／track 跨在或貼在路面上",
+  "density": "per_ha＝撒的區域裡每公頃幾個；per_100m＝沿賽道每 100 公尺幾個（兩側合計）；per_track＝一條賽道放幾個",
+  "emissive": "發光材質（three.js 端用 bloom 發光；名稱以 P_ 開頭）"
+ },
+ "objects": [
+  {
+   "name": "pine_snow_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 50
+   },
+   "desc": "積雪雪松",
+   "size": [
+    7.24,
+    6.72,
+    10.0
+   ],
+   "tris": 1920,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_Snow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/PineTree_Snow_1.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "pine_snow_b",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 50
+   },
+   "desc": "積雪雪松（細高）",
+   "size": [
+    4.5,
+    5.0,
+    12.0
+   ],
+   "tris": 1704,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_Snow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/PineTree_Snow_4.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "pine_snow_c",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "卡通積雪松（Kenney）",
+   "size": [
+    4.34,
+    4.34,
+    7.0
+   ],
+   "tris": 378,
+   "materials": [
+    "P_kHoliday"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney holiday-kit",
+     "file": "kenney/holiday-kit/Models/GLB format/tree-snow-a.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/holiday-kit"
+    }
+   ]
+  },
+  {
+   "name": "pine_snow_d",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "卡通積雪松（Kenney，另一款）",
+   "size": [
+    5.07,
+    5.07,
+    8.0
+   ],
+   "tris": 374,
+   "materials": [
+    "P_kHoliday"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney holiday-kit",
+     "file": "kenney/holiday-kit/Models/GLB format/tree-snow-b.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/holiday-kit"
+    }
+   ]
+  },
+  {
+   "name": "pine_snow_e",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 30
+   },
+   "desc": "圓胖積雪松",
+   "size": [
+    2.85,
+    2.85,
+    6.0
+   ],
+   "tris": 204,
+   "materials": [
+    "P_kPlatformer"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney platformer-kit",
+     "file": "kenney/platformer-kit/Models/GLB format/tree-pine-snow.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/platformer-kit"
+    }
+   ]
+  },
+  {
+   "name": "tree_snow_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 15
+   },
+   "desc": "積雪闊葉樹",
+   "size": [
+    4.2,
+    6.42,
+    8.0
+   ],
+   "tris": 2910,
+   "tris_source": 3050,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_DarkGreen",
+    "P_qUltimateNature_Snow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/CommonTree_Snow_2.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "birch_dead_snow_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 10
+   },
+   "desc": "積雪枯白樺",
+   "size": [
+    1.71,
+    5.79,
+    8.0
+   ],
+   "tris": 876,
+   "materials": [
+    "P_qUltimateNature_White",
+    "P_qUltimateNature_Black",
+    "P_qUltimateNature_Snow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/BirchTree_Dead_Snow_1.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "tree_dead_snow_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "積雪枯樹",
+   "size": [
+    1.27,
+    1.62,
+    6.0
+   ],
+   "tris": 1008,
+   "materials": [
+    "P_qPP_Wood",
+    "P_qPP_Snow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius（poly.pizza 單件：Dead Tree with Snow）",
+     "file": "quaternius/polypizza/snow/Dead_Tree_with_Snow__PILl2nbDNz.glb",
+     "license": "CC0 1.0",
+     "url": "https://poly.pizza/m/PILl2nbDNz"
+    }
+   ]
+  },
+  {
+   "name": "bush_snow_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 50
+   },
+   "desc": "積雪灌木",
+   "size": [
+    1.3,
+    1.66,
+    1.2
+   ],
+   "tris": 460,
+   "materials": [
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_Snow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Bush_Snow_1.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "rock_snow_a",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 15
+   },
+   "desc": "雪地岩石",
+   "size": [
+    1.36,
+    1.44,
+    1.6
+   ],
+   "tris": 118,
+   "materials": [
+    "P_qUltimateNature_Rock",
+    "P_qUltimateNature_Snow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Rock_Snow_2.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "rock_snow_b",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 10
+   },
+   "desc": "雪地岩石（大）",
+   "size": [
+    2.85,
+    3.93,
+    2.6
+   ],
+   "tris": 124,
+   "materials": [
+    "P_qUltimateNature_Rock",
+    "P_qUltimateNature_Snow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Rock_Snow_5.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "rock_snow_c",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 10
+   },
+   "desc": "積雪岩堆（Kenney）",
+   "size": [
+    4.03,
+    3.45,
+    2.2
+   ],
+   "tris": 696,
+   "materials": [
+    "P_kHoliday"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney holiday-kit",
+     "file": "kenney/holiday-kit/Models/GLB format/rocks-large.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/holiday-kit"
+    }
+   ]
+  },
+  {
+   "name": "log_snow_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "積雪倒木",
+   "size": [
+    0.86,
+    3.42,
+    0.8
+   ],
+   "tris": 280,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Snow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/WoodLog_Snow.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "stump_snow_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "積雪樹樁",
+   "size": [
+    1.97,
+    1.49,
+    0.9
+   ],
+   "tris": 258,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_LightWood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_Snow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/TreeStump_Snow.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "snow_pile_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 2
+   },
+   "desc": "雪堆",
+   "size": [
+    4.97,
+    5.57,
+    1.0
+   ],
+   "tris": 132,
+   "materials": [
+    "P_kHoliday"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney holiday-kit",
+     "file": "kenney/holiday-kit/Models/GLB format/snow-pile.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/holiday-kit"
+    }
+   ]
+  },
+  {
+   "name": "snowman_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_track": 6
+   },
+   "desc": "雪人",
+   "size": [
+    1.87,
+    1.16,
+    1.8
+   ],
+   "tris": 446,
+   "materials": [
+    "P_kHoliday"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney holiday-kit",
+     "file": "kenney/holiday-kit/Models/GLB format/snowman.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/holiday-kit"
+    }
+   ]
+  },
+  {
+   "name": "snowman_b",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_track": 4
+   },
+   "desc": "戴帽雪人",
+   "size": [
+    1.58,
+    1.01,
+    2.0
+   ],
+   "tris": 555,
+   "materials": [
+    "P_kHoliday"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney holiday-kit",
+     "file": "kenney/holiday-kit/Models/GLB format/snowman-hat.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/holiday-kit"
+    }
+   ]
+  },
+  {
+   "name": "sled_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_track": 4
+   },
+   "desc": "雪橇",
+   "size": [
+    1.17,
+    1.87,
+    0.7
+   ],
+   "tris": 236,
+   "materials": [
+    "P_kHoliday"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney holiday-kit",
+     "file": "kenney/holiday-kit/Models/GLB format/sled.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/holiday-kit"
+    }
+   ]
+  },
+  {
+   "name": "lantern_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 1
+   },
+   "desc": "木屋旁的路燈（燈罩發光）",
+   "size": [
+    0.91,
+    0.79,
+    3.0
+   ],
+   "tris": 172,
+   "materials": [
+    "P_kHoliday",
+    "P_SnowLampGlow"
+   ],
+   "emissive": [
+    "P_SnowLampGlow"
+   ],
+   "source": [
+    {
+     "pack": "Kenney holiday-kit",
+     "file": "kenney/holiday-kit/Models/GLB format/lantern.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/holiday-kit"
+    }
+   ]
+  },
+  {
+   "name": "ice_block_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 6
+   },
+   "desc": "冰塊",
+   "size": [
+    1.5,
+    1.5,
+    1.5
+   ],
+   "tris": 36,
+   "materials": [
+    "P_qPP"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius（poly.pizza 單件：Ice Block）",
+     "file": "quaternius/polypizza/snow/Ice_Block__dEY0gPZNzG.glb",
+     "license": "CC0 1.0",
+     "url": "https://poly.pizza/m/dEY0gPZNzG"
+    }
+   ]
+  },
+  {
+   "name": "ice_spikes_a",
+   "category": "landmark",
+   "use": "roadside",
+   "density": {
+    "per_track": 6
+   },
+   "desc": "冰晶叢（淡藍微光）",
+   "size": [
+    5.01,
+    5.35,
+    9.31
+   ],
+   "tris": 240,
+   "materials": [
+    "P_SnowIce",
+    "P_SnowIceDeep"
+   ],
+   "emissive": [
+    "P_SnowIce",
+    "P_SnowIceDeep"
+   ],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "cabin_a",
+   "category": "building",
+   "use": "roadside",
+   "density": {
+    "per_track": 6
+   },
+   "desc": "雪地小木屋（窗戶暖光、屋頂積雪、煙囪）",
+   "size": [
+    7.2,
+    6.6,
+    5.37
+   ],
+   "tris": 1110,
+   "materials": [
+    "P_SnowLogDark",
+    "P_SnowLog",
+    "P_SnowDoor",
+    "P_SnowRoofWood",
+    "P_SnowWindowGlow",
+    "P_SnowWhite",
+    "P_SnowStone"
+   ],
+   "emissive": [
+    "P_SnowWindowGlow"
+   ],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  }
+ ]
+}

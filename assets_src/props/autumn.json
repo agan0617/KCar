@@ -1,0 +1,642 @@
+{
+ "theme": "autumn",
+ "glb": "autumn.glb",
+ "generator": "tools/blender/build_props.py",
+ "generated": "2026-11-11",
+ "legend": {
+  "size": "[寬(x), 深(z), 高(y)]，公尺；原點在底部中心，正面朝 +Z",
+  "category": "tree 樹／rock 岩石／building 建築／landmark 地標／deco 點綴／trackside 賽道設施",
+  "use": "far 遠景撒／roadside 路邊（護牆外）／landmark 地標（一條賽道放一兩個）／track 跨在或貼在路面上",
+  "density": "per_ha＝撒的區域裡每公頃幾個；per_100m＝沿賽道每 100 公尺幾個（兩側合計）；per_track＝一條賽道放幾個",
+  "emissive": "發光材質（three.js 端用 bloom 發光；名稱以 P_ 開頭）"
+ },
+ "objects": [
+  {
+   "name": "tree_autumn_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "秋色闊葉樹（橘）",
+   "size": [
+    6.85,
+    10.06,
+    9.0
+   ],
+   "tris": 2888,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Orange"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/CommonTree_Autumn_1.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "tree_autumn_b",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "秋色闊葉樹",
+   "size": [
+    4.54,
+    5.17,
+    8.0
+   ],
+   "tris": 1352,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Orange",
+    "P_qUltimateNature_LightOrange"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/CommonTree_Autumn_4.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "tree_autumn_c",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 30
+   },
+   "desc": "秋色闊葉樹（高）",
+   "size": [
+    3.69,
+    4.52,
+    10.0
+   ],
+   "tris": 1584,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Orange",
+    "P_qUltimateNature_LightOrange"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/CommonTree_Autumn_3.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "birch_autumn_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 25
+   },
+   "desc": "秋色白樺",
+   "size": [
+    3.64,
+    4.2,
+    10.0
+   ],
+   "tris": 1568,
+   "materials": [
+    "P_qUltimateNature_White",
+    "P_qUltimateNature_Black",
+    "P_qUltimateNature_Orange",
+    "P_qUltimateNature_LightOrange"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/BirchTree_Autumn_2.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "pine_autumn_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 25
+   },
+   "desc": "秋色松",
+   "size": [
+    7.2,
+    6.5,
+    11.0
+   ],
+   "tris": 2392,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Orange",
+    "P_qUltimateNature_LightOrange"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/PineTree_Autumn_3.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "willow_autumn_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 10
+   },
+   "desc": "秋色柳（水邊）",
+   "size": [
+    4.7,
+    7.48,
+    8.0
+   ],
+   "tris": 2752,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Orange"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Willow_Autumn_2.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "maple_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 20
+   },
+   "desc": "紅楓（葉片貼圖）",
+   "size": [
+    7.5,
+    5.9,
+    8.0
+   ],
+   "tris": 2909,
+   "tris_source": 3848,
+   "materials": [
+    "P_qUltimateStylizedNature_MapleTree_Bark",
+    "P_qUltimateStylizedNature_MapleTree_Leaves"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-stylized-nature",
+     "file": "quaternius/ultimate-stylized-nature/glTF/MapleTree_1.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatestylizednature.html"
+    }
+   ]
+  },
+  {
+   "name": "maple_b",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 20
+   },
+   "desc": "紅楓（小）",
+   "size": [
+    4.62,
+    4.06,
+    6.0
+   ],
+   "tris": 1256,
+   "materials": [
+    "P_qUltimateStylizedNature_MapleTree_Bark",
+    "P_qUltimateStylizedNature_MapleTree_Leaves"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-stylized-nature",
+     "file": "quaternius/ultimate-stylized-nature/glTF/MapleTree_4.gltf",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatestylizednature.html"
+    }
+   ]
+  },
+  {
+   "name": "oak_fall_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 30
+   },
+   "desc": "卡通秋色橡樹（Kenney）",
+   "size": [
+    3.66,
+    4.22,
+    7.0
+   ],
+   "tris": 196,
+   "materials": [
+    "P_kNature_leafsFall",
+    "P_AutumnTrunk"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/tree_oak_fall.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  },
+  {
+   "name": "tree_fall_b",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 30
+   },
+   "desc": "卡通秋色樹（Kenney）",
+   "size": [
+    5.09,
+    4.57,
+    8.0
+   ],
+   "tris": 402,
+   "materials": [
+    "P_kNature_leafsFall",
+    "P_kNature_woodBirch",
+    "P_kNature__defaultMat"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/tree_detailed_fall.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  },
+  {
+   "name": "tree_fall_c",
+   "category": "tree",
+   "use": "far",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "卡通秋色胖樹（50 面，遠景大量撒）",
+   "size": [
+    3.94,
+    3.41,
+    6.0
+   ],
+   "tris": 50,
+   "materials": [
+    "P_kNature_leafsFall",
+    "P_AutumnTrunk"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/tree_fat_fall.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  },
+  {
+   "name": "tree_fall_d",
+   "category": "tree",
+   "use": "far",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "卡通秋色尖樹（遠景）",
+   "size": [
+    3.33,
+    3.33,
+    9.0
+   ],
+   "tris": 132,
+   "materials": [
+    "P_kNature_woodBirch",
+    "P_kNature_leafsFall"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/tree_cone_fall.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  },
+  {
+   "name": "pine_fall_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 25
+   },
+   "desc": "秋色松（Kenney survival）",
+   "size": [
+    2.91,
+    2.77,
+    9.0
+   ],
+   "tris": 198,
+   "materials": [
+    "P_kSurvival"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney survival-kit",
+     "file": "kenney/survival-kit/Models/GLB format/tree-autumn-tall.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/survival-kit"
+    }
+   ]
+  },
+  {
+   "name": "rock_moss_a",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 12
+   },
+   "desc": "青苔岩",
+   "size": [
+    1.86,
+    2.02,
+    1.4
+   ],
+   "tris": 68,
+   "materials": [
+    "P_qUltimateNature_Rock",
+    "P_qUltimateNature_Green"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Rock_Moss_3.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "rock_moss_b",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "青苔岩（大）",
+   "size": [
+    3.09,
+    3.87,
+    2.4
+   ],
+   "tris": 116,
+   "materials": [
+    "P_qUltimateNature_Rock",
+    "P_qUltimateNature_Green"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Rock_Moss_6.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "stone_a",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 12
+   },
+   "desc": "溪石",
+   "size": [
+    2.14,
+    2.83,
+    1.2
+   ],
+   "tris": 85,
+   "materials": [
+    "P_AutumnStone",
+    "P_AutumnStoneDark"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/stone_largeB.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  },
+  {
+   "name": "log_moss_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "青苔倒木",
+   "size": [
+    1.04,
+    3.1,
+    0.8
+   ],
+   "tris": 614,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_Mushroom_Top",
+    "P_qUltimateNature_Mushroom_Bottom",
+    "P_qUltimateNature_DarkGreen"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/WoodLog_Moss.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "stump_moss_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "青苔樹樁",
+   "size": [
+    1.97,
+    1.49,
+    0.9
+   ],
+   "tris": 232,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_LightWood",
+    "P_qUltimateNature_Green"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/TreeStump_Moss.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "mushroom_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 20
+   },
+   "desc": "紅菇一叢",
+   "size": [
+    0.54,
+    0.51,
+    0.5
+   ],
+   "tris": 144,
+   "materials": [
+    "P_kNature__defaultMat",
+    "P_kNature_colorRed"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/mushroom_redGroup.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  },
+  {
+   "name": "pumpkin_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 0.5
+   },
+   "desc": "南瓜（收成擺飾）",
+   "size": [
+    0.71,
+    0.71,
+    0.6
+   ],
+   "tris": 348,
+   "materials": [
+    "P_kGraveyard"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney graveyard-kit",
+     "file": "kenney/graveyard-kit/Models/GLB format/pumpkin.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/graveyard-kit"
+    }
+   ]
+  },
+  {
+   "name": "leaf_pile_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_100m": 3
+   },
+   "desc": "落葉堆",
+   "size": [
+    2.31,
+    2.12,
+    0.74
+   ],
+   "tris": 120,
+   "materials": [
+    "P_AutumnLeafOrange",
+    "P_AutumnLeafRed",
+    "P_AutumnLeafYellow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "自製（build_props.py 程式產生）",
+     "file": "",
+     "license": "同本 repo",
+     "url": ""
+    }
+   ]
+  },
+  {
+   "name": "bridge_a",
+   "category": "landmark",
+   "use": "roadside",
+   "density": {
+    "per_track": 1
+   },
+   "desc": "木橋（6 m，裝飾）",
+   "size": [
+    6.24,
+    6.24,
+    2.4
+   ],
+   "tris": 220,
+   "materials": [
+    "P_kNature_woodBark",
+    "P_kNature_wood",
+    "P_AutumnStone"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/bridge_wood.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  }
+ ]
+}
