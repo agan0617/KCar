@@ -51,6 +51,41 @@ function roadTexture(th) {
   });
 }
 
+// 加速帶：往前的箭頭（v 方向往前，材質 offset 捲動）
+function boostTexture() {
+  return canvasTex(128, 256, (g, w, h) => {
+    g.fillStyle = '#1a6dff';
+    g.fillRect(0, 0, w, h);
+    for (let k = 0; k < 2; k++) {
+      const y0 = k * h / 2;
+      const grd = g.createLinearGradient(0, y0, 0, y0 + h / 2);
+      grd.addColorStop(0, '#fff6a0'); grd.addColorStop(1, '#ff9a1a');
+      g.fillStyle = grd;
+      g.beginPath();
+      g.moveTo(w * 0.12, y0 + h * 0.16); g.lineTo(w * 0.5, y0 + h * 0.34); g.lineTo(w * 0.88, y0 + h * 0.16);
+      g.lineTo(w * 0.88, y0 + h * 0.06); g.lineTo(w * 0.5, y0 + h * 0.24); g.lineTo(w * 0.12, y0 + h * 0.06);
+      g.closePath(); g.fill();
+    }
+  });
+}
+
+// 捷徑土路：深淺斑點的泥土
+function dirtTexture() {
+  return canvasTex(256, 256, (g, w, h) => {
+    g.fillStyle = '#8a6440';
+    g.fillRect(0, 0, w, h);
+    const rnd = rand(11);
+    for (let i = 0; i < 5000; i++) {
+      const v = rnd();
+      g.fillStyle = v < 0.5 ? `rgba(70,48,28,${0.2 + rnd() * 0.3})` : `rgba(176,140,98,${0.2 + rnd() * 0.3})`;
+      g.fillRect(rnd() * w, rnd() * h, 1 + rnd() * 3, 1 + rnd() * 3);
+    }
+    g.fillStyle = 'rgba(60,40,22,0.35)';
+    g.fillRect(w * 0.22, 0, w * 0.1, h);
+    g.fillRect(w * 0.68, 0, w * 0.1, h);
+  });
+}
+
 function groundTexture(th) {
   const gr = th.ground;
   return canvasTex(256, 256, (g, w, h) => {
@@ -74,7 +109,7 @@ function disposeTree(obj) {
   });
 }
 
-const NO_SHADOW = new Set(['Road', 'Ground', 'Water', 'Ice', 'Lava', 'Choco', 'Cloud', 'AshCloud', 'CurbA', 'CurbB', 'CheckBlack', 'CheckWhite']);
+const NO_SHADOW = new Set(['Boost', 'DirtRoad', 'EdgeSand', 'EdgeSnow', 'EdgeDirt', 'Cliff', 'Fence', 'Road', 'Ground', 'Water', 'Ice', 'Lava', 'Choco', 'Cloud', 'AshCloud', 'CurbA', 'CurbB', 'CheckBlack', 'CheckWhite']);
 // 換色用：卡丁車材質名稱 → 對手設定的欄位
 const RECOLOR = { KartRed: 'kart', Hoodie: 'hoodie', ShibaFur: 'fur', ShibaCream: 'cream' };
 
@@ -174,6 +209,9 @@ export async function createWorld(renderer, onProgress = () => {}) {
       out = m; // GLTFLoader 已經是 MeshStandardMaterial（顏色、粗糙度、金屬度、自發光都照 Blender）
       if (name === 'Road') { out.map = tex.road; out.color.set('#ffffff'); out.roughness = 0.88; }
       if (name === 'Ground') { out.map = tex.ground; out.color.set('#ffffff'); out.roughness = 1; }
+      if (name === 'Boost') { out.map = tex.boost; out.color.set('#ffffff'); out.emissive.set('#3a5cff'); out.emissiveIntensity = 0.6; out.emissiveMap = tex.boost; out.roughness = 0.4; }
+      if (name === 'DirtRoad') { out.map = tex.dirt; out.color.set('#ffffff'); out.roughness = 1; }
+      if (name === 'TunnelLight') { out.emissive.set('#fff1c8'); out.emissiveIntensity = 1.4; }
       if (/^Curb/.test(name)) out.roughness = 0.55;
       if (out.emissiveIntensity > 0 && out.emissive && out.emissive.getHex() !== 0) out.emissiveIntensity = Math.min(1.6, out.emissiveIntensity);
     }
@@ -260,7 +298,7 @@ export async function createWorld(renderer, onProgress = () => {}) {
     carLight.intensity = th.night ? 22 : 0;
     scene.environmentIntensity = th.env ?? 0.55;
     for (const k of ['road', 'ground']) if (tex[k]) tex[k].dispose();
-    tex = { road: roadTexture(th), ground: groundTexture(th) };
+    tex = { road: roadTexture(th), ground: groundTexture(th), boost: tex.boost || boostTexture(), dirt: tex.dirt || dirtTexture() };
     tex.road.anisotropy = maxAniso;
     tex.ground.anisotropy = Math.min(8, maxAniso);
   }
@@ -307,6 +345,7 @@ export async function createWorld(renderer, onProgress = () => {}) {
     for (const o of anim.spinY) o.rotation.y += dt * 0.05;
     for (const b of anim.bob) b.o.position.y = b.y + Math.sin(t * 0.5 + b.ph) * 2.5;
     if (anim.clouds) anim.clouds.rotation.y += dt * 0.004;
+    if (tex.boost) tex.boost.offset.y = -((t * 1.6) % 1); // 加速帶箭頭往前流
     for (const m of anim.lava) m.color.setHSL(0.04 + Math.sin(t * 1.3) * 0.015, 1, 0.5 + Math.sin(t * 2.1) * 0.06);
     // 陰影相機跟著車走（貼齊格點避免陰影閃爍）
     const snap = 2;
