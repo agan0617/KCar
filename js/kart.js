@@ -116,11 +116,17 @@ export class Kart {
   respawn() {
     const tr = this.track;
     const L = tr.length;
-    // 回到最後通過的沿線位置；在跳台缺口裡就往前移到缺口後的路面（不然會再掉下去）
+    // 回到最後通過的沿線位置；在跳台缺口裡、或前方 60m 內就有缺口（從靜止起步飛不過去），
+    // 就往前移到缺口後的路面，不然會一直掉下去
     let i = Math.floor((((this.lastS % L) + L) % L) / tr.step) % tr.n;
+    const ahead = Math.ceil(60 / tr.step);
+    for (let k = 0; k <= ahead; k++) {
+      if (tr.gap[(i + k) % tr.n]) { i = (i + k) % tr.n; break; }
+    }
     let skip = 0;
     while (tr.gap[i] && skip < tr.n) { i = (i + 1) % tr.n; skip++; }
     if (skip) i = (i + 4) % tr.n;
+    this.respawns = (this.respawns || 0) + 1; // 電腦用來知道剛重生過
     const s0 = this.lastS;
     const keepDist = this.dist;
     this.place(i * tr.step, 0);

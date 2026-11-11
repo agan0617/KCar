@@ -60,8 +60,17 @@ export class AutoDriver {
     const s = k.lastS, v = Math.max(5, k.spd);
 
     // 卡住（撞牆停下、倒退）就重生
-    st.stuck = control && k.spd < 2 ? st.stuck + 1 / 60 : 0; // 倒數中不算卡住
-    if (st.stuck > 2.5) { k.respawn(); st.stuck = 0; st.drifting = false; }
+    // 看「往前進了多少」而不是車速：貼著牆磨的時候車速會在 1～3 m/s 跳來跳去，車速判斷抓不到
+    if (!control) { st.stuck = 0; st.progD = k.dist; }
+    else if (k.dist > (st.progD ?? k.dist) + 6) { st.stuck = 0; st.progD = k.dist; }
+    else st.stuck += 1 / 60;
+    if (st.stuck > 3) { k.respawn(); st.stuck = 0; st.progD = k.dist; }
+    // 剛重生（卡住、掉進熔岩或缺口）：甩尾、捷徑、小噴的狀態全部清掉，不然會帶著舊方向再開進去
+    if ((k.respawns || 0) !== (st.respawns || 0)) {
+      st.respawns = k.respawns;
+      st.drifting = false; st.sc = null; st.scWait = false; st.scOn = false; st.wantJet = null; st.skipCorner = false;
+      for (const a of ['drift', 'left', 'right', 'down']) this.set(a, false);
+    }
 
     // 換線：前方 12m 內同一線有車就往旁邊閃
     st.laneT -= 1 / 60;
@@ -107,9 +116,16 @@ export class AutoDriver {
         if (d < bd) { bd = d; bi = i; }
       }
       st.scI = bi;
-      if (bd > 15 * 15 && !st.scWait) { st.sc = null; bi = n; } // 離捷徑太遠（重生、被撞開）：放棄，回主線
+      if (bd < 36) st.scOn = true; // 已經開上捷徑
+      if (st.scOn && bd > 15 * 15) { st.sc = null; st.scOn = false; bi = n; } // 開上去後又離捷徑太遠（被撞開）：放棄，回主線
       const ti = bi + Math.round((5 + v * 0.18) / sc.spacing); // 捷徑窄又彎，看近一點才不會切到草地
-      if (bi >= n - 3) st.sc = null; // 出捷徑了（或放棄）
+      // 前方 25m 的彎度決定能開多快（側向加速度約 28 m/s²）
+      const j = Math.min(n - 1, bi + Math.round(25 / sc.spacing)), j0 = Math.min(n - 2, bi + 1);
+      const ha = Math.atan2(P3[(j0 + 1) * 3] - P3[j0 * 3], P3[(j0 + 1) * 3 + 2] - P3[j0 * 3 + 2]);
+      const hb = Math.atan2(P3[j * 3] - P3[(j - 1) * 3], P3[j * 3 + 2] - P3[(j - 1) * 3 + 2]);
+      const bend = Math.abs(wrap(hb - ha));
+      st.scVmax = bend < 0.05 ? 99 : Math.sqrt(28 * 25 / bend);
+      if (bi >= n - 3) { st.sc = null; st.scOn = false; } // 出捷徑了（或放棄）
       else if (ti < n) { tx = P3[ti * 3]; tz = P3[ti * 3 + 2]; onSc = true; }
       else {
         const p = tr.pointAt(sc.to + (ti - n + 1) * sc.spacing);
@@ -181,7 +197,7 @@ export class AutoDriver {
       } else {
         st.wantJet = null;
         // 捷徑又窄又彎：放慢一點才不會衝出去
-        this.set('up', !(onSc && k.spd > 30));
+        this.set('up', !(onSc && k.spd > (st.scVmax ?? 99)));
       }
       st.nitroWait -= 1 / 60;
       if (k.nitros > 0 && Math.abs(turnAhead) < 0.2 && st.nitroWait <= 0) {
