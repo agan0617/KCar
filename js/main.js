@@ -512,6 +512,7 @@ async function main() {
         case 'nitroReady': hud.popup('集氣完成 +1 氮氣', '#34d6ff', 28, 0.9, 100); sfx.beep(1320, 0.12, 'sine', 0.2); break;
         case 'wall': sfx.bump(e.impact); G.shake = Math.min(0.6, e.impact * 0.05); break;
         case 'bump': if (e.impact > 2) { sfx.bump(e.impact); G.shake = Math.min(0.4, e.impact * 0.04); } break;
+        case 'land': if (e.impact > 2.5) { sfx.bump(Math.min(12, e.impact * 0.8)); G.shake = Math.max(G.shake, Math.min(0.35, (e.impact - 2) * 0.03)); } break;
         case 'start': startBoostFx(); break;
         default: break;
       }
@@ -634,12 +635,33 @@ async function main() {
     const g = v.group, pt = v.parts;
     g.position.set(k.x, k.y, k.z);
     g.rotation.y = k.h;
-    g.rotation.x += (k.pitch - g.rotation.x) * Math.min(1, dt * 10);
+    // 地形俯仰（空中車頭慢慢跟著上下速度擺）
+    const pitchT = k.air ? Math.max(-0.35, Math.min(0.35, -k.vy * 0.025)) : k.pitch;
+    g.rotation.x += (pitchT - g.rotation.x) * Math.min(1, dt * (k.air ? 4 : 10));
+    // 懸吊：車身俯仰（加速抬頭、煞車點頭）、側傾（離心）、上下（落地壓縮）都是彈簧阻尼，會晃一下才停
+    const s = v.susp || (v.susp = { p: 0, pv: 0, r: 0, rv: 0, y: 0, yv: 0, ls: k.spd, air: false, vy: 0 });
+    const idt = 1 / Math.max(dt, 1e-3);
+    const along = Math.max(-80, Math.min(80, (k.spd - s.ls) * idt));
+    s.ls = k.spd;
     const lat = k.yawRate * Math.abs(k.spd);
-    const targetRoll = Math.max(-0.12, Math.min(0.12, -lat * 0.0035)) + (k.drift ? k.driftDir * 0.05 : 0);
-    v.roll += (targetRoll - v.roll) * Math.min(1, dt * 8);
-    g.rotation.z = v.roll;
-    pt.model.position.y = (k.onGrass || k.onCurb) && Math.abs(k.spd) > 3 ? (Math.random() - 0.5) * 0.06 : 0;
+    const pT = k.air ? 0 : Math.max(-0.07, Math.min(0.07, -along * 0.0028));
+    const rT = Math.max(-0.14, Math.min(0.14, -lat * 0.004)) + (k.drift ? k.driftDir * 0.06 : 0);
+    if (s.air && !k.air) s.yv -= Math.min(2.2, 0.35 + s.vy * 0.12); // 落地：往下壓
+    if (!s.air && k.air && k.vy > 0) s.yv += 0.6; // 起跳：彈起
+    s.air = k.air;
+    if (k.air) s.vy = Math.max(0, -k.vy);
+    const sub = Math.min(4, Math.ceil(dt / 0.005)), h = dt / sub;
+    for (let i = 0; i < sub; i++) {
+      s.pv += ((pT - s.p) * 220 - s.pv * 13) * h; s.p += s.pv * h;
+      s.rv += ((rT - s.r) * 160 - s.rv * 11) * h; s.r += s.rv * h;
+      s.yv += (-s.y * 260 - s.yv * 12) * h; s.y += s.yv * h;
+    }
+    s.y = Math.max(-0.22, Math.min(0.18, s.y));
+    g.rotation.z = s.r * 0.35;
+    pt.model.rotation.z = s.r * 0.65;
+    pt.model.rotation.x = s.p;
+    pt.model.scale.y = 1 + Math.max(-0.12, Math.min(0.08, s.y * 0.6));
+    pt.model.position.y = s.y + ((k.onGrass || k.onCurb) && !k.air && Math.abs(k.spd) > 3 ? (Math.random() - 0.5) * 0.06 : 0);
     v.lean += ((k.drift ? -k.driftDir * 0.22 : -k.steer * 0.12) - v.lean) * Math.min(1, dt * 8);
     if (pt.driver) pt.driver.rotation.z = v.lean;
     v.spin += k.spd * dt / 0.31;

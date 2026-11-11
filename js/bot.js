@@ -36,7 +36,7 @@ export class AutoDriver {
     this.input = {
       get steer() { return (self.keys.has('right') ? 1 : 0) - (self.keys.has('left') ? 1 : 0); },
       get throttle() { return self.keys.has('up') ? 1 : 0; },
-      get braking() { return false; },
+      get braking() { return self.keys.has('down'); },
       get driftHeld() { return self.keys.has('drift'); },
       get jet() { return self.edges.has('up'); },
       pressed: (a) => self.edges.has(a),
@@ -80,8 +80,8 @@ export class AutoDriver {
     const p = tr.pointAt(s + look);
     const tx = p.x + -p.tz * this.lane, tz = p.z + p.tx * this.lane;
     const wobble = (1 - sk.line) * 0.06 * Math.sin(this.t * 1.7 + sk.lane);
-    const err = wrap(Math.atan2(tx - k.x, tz - k.z) - k.h) + wobble;
-    const turnAhead = wrap(headAt(s + 40) - headAt(s + 8));
+    const err = wrap(Math.atan2(tx - k.x, tz - k.z) - (k.spd > 3 ? k.phi : k.h)) + wobble; // 用路線方向（回正中車頭還歪著）
+    const turnAhead = wrap(headAt(s + 28 + v * 0.45) - headAt(s + 8)); // 車速越快看越遠（路線跟上車頭要時間）
 
     if (!k.drift && !st.drifting && Math.abs(turnAhead) > 0.75 && k.spd > 18 && !st.skipCorner) {
       if (this.rng() < sk.drift) {
@@ -99,10 +99,19 @@ export class AutoDriver {
       const key = st.dir > 0 ? 'right' : 'left', other = st.dir > 0 ? 'left' : 'right';
       if (!k.drift) { this.set(other, false); this.set(key, true); }
       else {
-        // 甩尾中方向鍵控制的是路線：拿路線方向（phi）跟目標比，太外就內切、太內就外拉
-        const need = -(wrap(Math.atan2(tx - k.x, tz - k.z) - k.phi) + wobble) * st.dir;
-        this.set(key, need > 0.03);
-        this.set(other, need < -0.05);
+        // 甩尾中方向鍵控制車頭轉多快，路線慢半拍跟上（抓地力低）：
+        // 先預估 0.35 秒後的路線方向，再算要車頭轉多快才對得準目標，換成內切／外拉
+        // 純追蹤：要的路線轉速 = 2v·sinα / 前視距離；路線目前轉速 ≈ driftGrip × 側滑角，差多少就多壓車頭
+        const dx = tx - k.x, dz = tz - k.z;
+        const Ld = Math.max(6, Math.hypot(dx, dz));
+        const alpha = wrap(Math.atan2(dx, dz) - k.phi) + wobble;
+        const wantPath = -2 * v * Math.sin(alpha) / Ld * st.dir; // 往彎內為正
+        const pathNow = P.driftGrip * wrap(k.phi - k.h) * st.dir; // 往彎內為正
+        const want = wantPath + 1.6 * (wantPath - pathNow);
+        const rel = (want - P.driftTurn) / Math.max(0.05, P.driftTurnSteer);
+        this.set(key, rel > 0.3);
+        this.set(other, rel < -0.4);
+        this.set('down', rel > 1.6 && sk.line > 0.7);
       }
       const remain = wrap(headAt(s + 25) - k.phi);
       if (k.drift && Math.abs(turnAhead) < 0.35 && Math.abs(remain) < 0.25) {
@@ -116,6 +125,7 @@ export class AutoDriver {
       }
     } else {
       this.set('drift', false);
+      this.set('down', false);
       this.set('left', err > 0.04);
       this.set('right', err < -0.04);
       const w = k.jetWin;

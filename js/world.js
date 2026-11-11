@@ -217,8 +217,14 @@ export async function createWorld(renderer, onProgress = () => {}) {
     const group = new THREE.Group();
     group.add(model);
     group.rotation.order = 'YXZ';
+    // 車身（輪子以外的全部）另外包一層，懸吊的俯仰、側傾、上下只動車身，輪子留在地上
+    const root = model.children.length === 1 && !/^Wheel_/.test(model.children[0].name) && model.children[0].children.length > 1 ? model.children[0] : model;
+    const body = new THREE.Group();
+    body.name = 'Body';
+    for (const c of [...root.children]) if (!/^Wheel_/.test(c.name)) body.add(c);
+    root.add(body);
     const parts = {
-      model,
+      model: body,
       driver: model.getObjectByName('Driver'),
       wheels: ['FL', 'FR', 'RL', 'RR'].map((k) => model.getObjectByName('Wheel_' + k)),
       exhaust: ['Exhaust_L', 'Exhaust_R'].map((k) => model.getObjectByName(k)),

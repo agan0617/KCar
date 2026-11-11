@@ -1,7 +1,9 @@
 // 卡丁車物理（街機式）。
 //
-// 模型：正常行駛時車頭方向 h 由方向鍵控制，速度方向 phi 以「抓地力」的速率追車頭（phi 幾乎等於 h）。
-// 甩尾時反過來：方向鍵控制路線 phi 轉多快（內切急、外拉緩），車頭跟在路線內側一個偏角（側滑角 slip）上。
+// 模型（1.0 起）：車頭方向 h 有轉動慣性（角速度 w 追方向鍵要的轉速），速度方向 phi 以「抓地力」的速率追車頭。
+// 正常行駛抓地力高，phi 幾乎等於 h；甩尾時抓地力降低，車頭先轉、路線慢半拍跟上，側滑角（slip）是自然甩出來的：
+// 往彎內壓＝車頭轉得急、偏角變大、路線跟著收緊；往外拉＝車頭轉得緩、偏角變小、走大圈。
+// 按甩尾鍵先小跳一下（hop）；有上下速度 vy、重力、離地（air）與落地；上下坡會影響車速。
 // 側滑角 × 車速 → 集氣；甩尾放開後車頭轉回路線方向（回正，反打方向更快），在時機窗內「再按 ↑」＝小噴，
 // 回正得越正（側滑角越小）越完美；小噴後再按一次＝雙噴。集滿氣得到一顆氮氣（最多兩顆）。
 //
@@ -21,7 +23,7 @@ const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 // 加了會影響 step() 的欄位，一定要補進這裡，不然連線時預測會一直被校正。
 const STATE_KEYS = ['x', 'y', 'z', 'h', 'phi', 'spd', 'steer', 'hint', 'drift', 'driftDir', 'driftT', 'driftMaxSlip',
   'driftArm', 'recoverT', 'straighten', 'boostT', 'boostAdd', 'boostKind', 'nitroT', 'gauge', 'nitros', 'onGrass', 'onCurb',
-  'pitch', 'yawRate', 'lastS', 'dist', 'topMul', 'sbUsed', 'sbPend'];
+  'pitch', 'yawRate', 'lastS', 'dist', 'topMul', 'sbUsed', 'sbPend', 'w', 'vy', 'air'];
 
 export class Kart {
   constructor(track) {
@@ -76,6 +78,9 @@ export class Kart {
     this.onCurb = false;
     this.pitch = 0;
     this.yawRate = 0;
+    this.w = 0; // 車頭角速度（rad/s，左轉為正）
+    this.vy = 0; // 上下速度
+    this.air = false; // 離地中
     const pr = this.track.project(this.x, this.z, -1, this.proj);
     this.hint = pr.i;
     this.lastS = pr.s;
@@ -118,8 +123,15 @@ export class Kart {
     const thr = control ? inp.throttle : 0;
     const brake = control && inp.braking;
 
-    // ---------------------------------------------------------- 甩尾開始／持續／結束
-    if (control && inp.pressed('drift')) this.driftArm = true;
+    // ---------------------------------------------------------- 小跳＋甩尾開始／持續／結束
+    if (control && inp.pressed('drift')) {
+      this.driftArm = true;
+      if (!this.air && this.spd > 4 && P.hopSpeed > 0) {
+        this.vy = P.hopSpeed;
+        this.air = true;
+        ev.push({ type: 'hop' });
+      }
+    }
     if (!inp.driftHeld) this.driftArm = false;
     if (!this.drift && this.driftArm && steerIn !== 0 && this.spd > P.driftMinSpeed) {
       this.drift = true;
@@ -127,54 +139,69 @@ export class Kart {
       this.driftDir = Math.sign(steerIn);
       this.driftT = 0;
       this.driftMaxSlip = 0;
-      this.h -= this.driftDir * P.driftKick;
+      this.straighten = false;
+      this.w -= this.driftDir * P.driftKick * P.yawResp; // 起甩：車頭被甩進彎一下
       this.jetWin = null;
       ev.push({ type: 'driftStart', dir: this.driftDir });
     }
 
-    // 甩尾模型（0.9.0 起）：甩尾時直接控制「路線」轉多快（phi），車頭（h）只是跟在路線內側一個偏角上。
-    // 方向往內壓＝路線轉得急、往外拉＝路線比平常轉向還緩，所以長彎能一路甩完。
-    // 放開甩尾後是「車頭轉回路線方向」（回正），路線不會因為偏角突然往彎心切；反打方向回正得更快。
+    // ---------------------------------------------------------- 車頭轉動（有慣性）
     const speedAbs = Math.abs(this.spd);
     const h0 = this.h;
+    const ctl = this.air ? P.airControl : 1;
+    let wT, pathTurn = 0;
     if (this.drift) {
       const rel = this.steer * this.driftDir; // +1 內切、-1 外拉
-      // 點煞：甩尾中按煞車，路線往彎內多轉（剛按下那一下先甩一截），代價是掉速（在下面速度段算）
+      // 點煞：甩尾中按煞車，車頭往彎內多甩（剛按下那一下先甩一截），代價是掉速（在下面速度段算）
       const pb = brake ? P.brakeYaw : 0;
       if (control && inp.pressed('down')) {
-        this.phi -= this.driftDir * P.brakeKick * 0.5;
-        this.h -= this.driftDir * P.brakeKick;
+        this.w -= this.driftDir * P.brakeKick * P.yawResp;
         ev.push({ type: 'pointBrake' });
       }
-      const pathYaw = this.driftDir * Math.max(0, P.driftTurn + P.driftTurnSteer * rel + pb);
-      if (this.spd > 0) this.phi -= pathYaw * dt;
-      const want = (P.driftSlip + P.driftSlipSteer * rel) * DEG;
-      const target = this.phi - this.driftDir * want;
-      this.h += wrap(target - this.h) * (1 - Math.exp(-P.driftSlipRate * dt));
+      wT = -this.driftDir * Math.max(0, P.driftTurn + P.driftTurnSteer * rel + pb);
       this.driftT += dt;
-      const s = Math.abs(this.slip);
-      this.driftMaxSlip = Math.max(this.driftMaxSlip, s);
-      if (this.spd > 0) this.spd -= P.driftDrag * Math.sin(s) * dt;
-      const keep = (control && inp.driftHeld) || steerIn * this.driftDir > 0;
-      if (!keep) this.endDrift(true, 'release');
-      else if (this.spd < P.driftMinSpeed * 0.6) this.endDrift(true, 'slow');
     } else {
       const hi = Math.min(1, speedAbs / P.maxSpeed);
       const low = Math.min(1, speedAbs / 5);
       const rate = P.steerRate * (1 - P.steerHighLoss * hi) * low;
-      const yaw = this.steer * rate * (this.spd >= 0 ? 1 : -1);
+      const yaw = -this.steer * rate * (this.spd >= 0 ? 1 : -1);
       this.recoverT += dt;
       if (this.straighten && this.spd >= 0) {
         // 回正中：方向鍵轉的是路線，車頭往路線方向收；反打方向（往甩尾的反方向）收得更快
-        this.phi -= yaw * dt;
         const counter = steerIn * this.driftDir < 0 ? P.counterSteer : 1;
-        const s = wrap(this.h - this.phi) * Math.exp(-P.driftRecover * counter * dt);
-        this.h = this.phi + s;
-        if (Math.abs(s) < 0.5 * DEG) this.straighten = false;
+        pathTurn = yaw;
+        wT = yaw - wrap(this.h - this.phi) * P.driftRecover * counter;
       } else {
         this.straighten = false;
-        this.h -= yaw * dt;
+        wT = yaw;
       }
+    }
+    this.w += (wT - this.w) * (1 - Math.exp(-P.yawResp * ctl * dt));
+    this.h += this.w * dt;
+
+    // ---------------------------------------------------------- 路線（速度方向）追車頭
+    if (this.spd < 0) this.phi = this.h;
+    else if (this.air) {
+      // 空中沒有抓地力，路線不變
+    } else if (this.drift) {
+      this.phi += wrap(this.h - this.phi) * (1 - Math.exp(-P.driftGrip * dt));
+      const max = P.driftSlipMax * DEG;
+      const sl = wrap(this.h - this.phi);
+      if (Math.abs(sl) > max) this.phi = this.h - Math.sign(sl) * max;
+    } else if (this.straighten) {
+      this.phi += pathTurn * dt;
+      if (Math.abs(wrap(this.h - this.phi)) < 0.5 * DEG) this.straighten = false;
+    } else {
+      this.phi += wrap(this.h - this.phi) * (1 - Math.exp(-P.grip * dt));
+    }
+
+    if (this.drift) {
+      const s = Math.abs(this.slip);
+      this.driftMaxSlip = Math.max(this.driftMaxSlip, s);
+      if (this.spd > 0 && !this.air) this.spd -= P.driftDrag * Math.sin(s) * dt;
+      const keep = (control && inp.driftHeld) || steerIn * this.driftDir > 0;
+      if (!keep) this.endDrift(true, 'release');
+      else if (this.spd < P.driftMinSpeed * 0.6) this.endDrift(true, 'slow');
     }
 
     // ---------------------------------------------------------- 小噴／雙噴時機
@@ -232,26 +259,30 @@ export class Kart {
     if (this.nitroT > 0) { top += P.nitroSpeed; this.nitroT -= dt; }
     if (this.onGrass) top *= P.grassTop;
     const boosting = this.boosting;
-    if (brake && this.drift) {
-      this.spd -= P.brakeDrag * dt; // 點煞：比一般煞車輕，主要拿來甩車頭
-    } else if (brake) {
-      if (this.spd > 0.5) this.spd -= P.brake * dt;
-      else this.spd = Math.max(-P.reverseMax, this.spd - P.accel * 0.6 * dt);
-    } else if ((thr || boosting) && this.spd < top) {
-      const r = Math.max(0, this.spd) / top;
-      const a = boosting ? P.boostAccel : P.accel * Math.max(0.2, 1 - r * r);
-      this.spd = Math.min(top, this.spd + a * dt);
-    } else if (!thr && !boosting && !this.drift) {
-      // 甩尾時鬆 ↑ 是基本動作（為了等一下小噴），不額外掉速，只算甩尾本身的損失
-      this.spd -= Math.sign(this.spd) * Math.min(Math.abs(this.spd), P.coastDrag * dt);
+    if (this.air) {
+      // 空中：引擎推不到地，只有一點空氣阻力
+      if (this.spd > top) this.spd -= Math.min(this.spd - top, 2 * dt);
+    } else {
+      if (brake && this.drift) {
+        this.spd -= P.brakeDrag * dt; // 點煞：比一般煞車輕，主要拿來甩車頭
+      } else if (brake) {
+        if (this.spd > 0.5) this.spd -= P.brake * dt;
+        else this.spd = Math.max(-P.reverseMax, this.spd - P.accel * 0.6 * dt);
+      } else if ((thr || boosting) && this.spd < top) {
+        const r = Math.max(0, this.spd) / top;
+        const a = boosting ? P.boostAccel : P.accel * Math.max(0.2, 1 - r * r);
+        this.spd = Math.min(top, this.spd + a * dt);
+      } else if (!thr && !boosting && !this.drift) {
+        // 甩尾時鬆 ↑ 是基本動作（為了等一下小噴），不額外掉速，只算甩尾本身的損失
+        this.spd -= Math.sign(this.spd) * Math.min(Math.abs(this.spd), P.coastDrag * dt);
+      }
+      if (this.spd > top) this.spd = Math.max(top, this.spd - ((this.spd - top) * 1.5 + 2) * dt);
+      if (this.onGrass) this.spd -= Math.sign(this.spd) * Math.min(Math.abs(this.spd), P.grassDrag * 0.25 * dt);
+      // 上坡掉速、下坡加速（pitch 是上一步算的車頭俯仰，上坡為負）
+      if (Math.abs(this.spd) > 1) this.spd += P.slopeGrav * Math.tan(this.pitch) * dt;
     }
-    if (this.spd > top) this.spd = Math.max(top, this.spd - ((this.spd - top) * 1.5 + 2) * dt);
-    if (this.onGrass) this.spd -= Math.sign(this.spd) * Math.min(Math.abs(this.spd), P.grassDrag * 0.25 * dt);
 
-    // 速度方向追車頭（甩尾與回正中是反過來，由上面直接算路線）
-    if (this.spd < 0) this.phi = this.h;
-    else if (!this.drift && !this.straighten) this.phi += wrap(this.h - this.phi) * (1 - Math.exp(-P.grip * dt));
-    this.yawRate = dt > 0 ? -wrap(this.h - h0) / dt : 0;
+    this.yawRate = dt > 0 ? wrap(this.h - h0) / dt : 0;
     this.h = wrap(this.h);
     this.phi = wrap(this.phi);
 
@@ -278,6 +309,8 @@ export class Kart {
         if (this.spd >= 0) { this.phi = Math.atan2(vx, vz); this.spd = ns; }
         else { this.phi = Math.atan2(-vx, -vz); this.spd = -ns; }
         this.h += wrap(this.phi - this.h) * Math.min(1, impact * 1.5) * 0.5;
+        // 撞牆的反作用：車頭被彈離牆面（牆在右邊 → 往左轉）
+        this.w = this.w * (1 - Math.min(1, impact * 1.5)) + sg * impact * P.wallSpin;
         if (this.drift && impact > 0.25) this.endDrift(false, 'wall');
         if (vn > 1.5) ev.push({ type: 'wall', impact: vn });
       }
@@ -286,7 +319,33 @@ export class Kart {
     const ad = Math.abs(pr.d);
     this.onGrass = ad > tr.halfWidth + tr.curb * 0.7;
     this.onCurb = !this.onGrass && ad > tr.halfWidth;
-    this.y = pr.y;
+
+    // ---------------------------------------------------------- 上下：重力、離地、落地
+    const gy = pr.y;
+    if (this.air) {
+      this.vy -= P.gravity * dt;
+      this.y += this.vy * dt;
+      if (this.y <= gy) {
+        const imp = Math.max(0, -this.vy); // 落地時往下的速度
+        this.y = gy;
+        this.vy = 0;
+        this.air = false;
+        ev.push({ type: 'land', impact: imp });
+        if (imp > 8 && this.spd > 0) this.spd *= 1 - Math.min(0.12, (imp - 8) * 0.015);
+      }
+    } else {
+      const need = (gy - this.y) / dt; // 貼地需要的上下速度
+      if (need < this.vy - P.gravity * dt - P.liftSpeed) {
+        // 地面掉得比重力還快（坡頂、跳台邊緣）：飛出去
+        this.air = true;
+        this.vy -= P.gravity * dt;
+        this.y += this.vy * dt;
+        if (this.y < gy) { this.y = gy; this.air = false; this.vy = need; }
+      } else {
+        this.y = gy;
+        this.vy += (need - this.vy) * 0.5;
+      }
+    }
     const gradeF = pr.grade * (Math.sin(this.h) * pr.tx + Math.cos(this.h) * pr.tz);
     this.pitch = -Math.atan(gradeF);
 
