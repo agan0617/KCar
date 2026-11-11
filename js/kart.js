@@ -341,7 +341,7 @@ export class Kart {
       if (this.y <= gy) {
         const imp = Math.max(0, -this.vy); // 落地時往下的速度
         this.y = gy;
-        this.vy = 0;
+        this.vy = -imp; // 保留往下的速度：落在下坡時才不會下一步又被判成離地（一路彈跳）
         this.air = false;
         ev.push({ type: 'land', impact: imp });
         if (imp > 8 && this.spd > 0) this.spd *= 1 - Math.min(0.12, (imp - 8) * 0.015);
@@ -356,7 +356,7 @@ export class Kart {
         if (this.y < gy) { this.y = gy; this.air = false; this.vy = need; }
       } else {
         this.y = gy;
-        this.vy += (need - this.vy) * 0.5;
+        this.vy = need; // 貼地時上下速度就是地面的（只有地面突然往下掉得比重力快才會飛起來）
       }
     }
     if (g) {

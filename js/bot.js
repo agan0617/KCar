@@ -49,7 +49,7 @@ export class AutoDriver {
   }
 
   /** 每個物理步呼叫一次（決策 60Hz）；others：其他車（閃車用） */
-  think(dt, others = []) {
+  think(dt, others = [], control = true) {
     this.edges.clear();
     this.t += dt;
     this.decide -= dt;
@@ -60,7 +60,7 @@ export class AutoDriver {
     const s = k.lastS, v = Math.max(5, k.spd);
 
     // 卡住（撞牆停下、倒退）就重生
-    st.stuck = k.spd < 2 ? st.stuck + 1 / 60 : 0;
+    st.stuck = control && k.spd < 2 ? st.stuck + 1 / 60 : 0; // 倒數中不算卡住
     if (st.stuck > 2.5) { k.respawn(); st.stuck = 0; st.drifting = false; }
 
     // 換線：前方 12m 內同一線有車就往旁邊閃
@@ -128,8 +128,9 @@ export class AutoDriver {
     } else {
       this.set('drift', false);
       this.set('down', false);
-      this.set('left', err > 0.04);
-      this.set('right', err < -0.04);
+      // 空中路線不會變，壓方向只會把車頭轉歪、落地斜著衝出去
+      this.set('left', !k.air && err > 0.04);
+      this.set('right', !k.air && err < -0.04);
       const w = k.jetWin;
       if (st.wantJet != null && w) {
         if (w.stage === 1) {

@@ -18,6 +18,22 @@ const ZoomBlurShader = {
       gl_FragColor = acc / 10.0;
     }`,
 };
+// 調色（高畫質，最後一道，處理的是已經轉成 sRGB 的畫面）：飽和、對比的 S 曲線、四角微暗
+const GradeShader = {
+  uniforms: { tDiffuse: { value: null }, sat: { value: 1.05 }, contrast: { value: 0.12 }, vignette: { value: 0.22 } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float sat; uniform float contrast; uniform float vignette; varying vec2 vUv;
+    void main(){
+      vec4 c = texture2D(tDiffuse, vUv);
+      float l = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
+      c.rgb = max(mix(vec3(l), c.rgb, sat), 0.0);
+      vec3 s = c.rgb * c.rgb * (3.0 - 2.0 * c.rgb);
+      c.rgb = mix(c.rgb, s, contrast);
+      vec2 q = vUv - 0.5;
+      c.rgb *= 1.0 - vignette * smoothstep(0.12, 0.5, dot(q, q));
+      gl_FragColor = c;
+    }`,
+};
 import { VERSION } from './version.js';
 import { P, DEFS, DEFAULTS, togglePanel, panelOpen } from './tuning.js';
 import { Input } from './input.js';
@@ -82,15 +98,15 @@ async function main() {
   const world = await createWorld(renderer, (p) => { hud.showLoading(p); hud.render(); });
 
   // ------------------------------------------------------------ 畫質：高（MSAA＋泛光＋高解析陰影）／省電（直接畫）
-  let composer = null, bloom = null, zoomBlur = null;
+  let composer = null, bloom = null, zoomBlur = null, grade = null;
   let quality = store.get(QUALITY_KEY, 'high');
   function setQuality(q) {
     quality = q;
     store.set(QUALITY_KEY, q);
     const dpr = window.devicePixelRatio || 1;
     renderer.setPixelRatio(Math.min(dpr, q === 'high' ? 2 : 1.25));
-    world.setShadowSize(q === 'high' ? 2048 : 1024);
-    if (composer) { composer.dispose(); composer = null; bloom = null; zoomBlur = null; }
+    world.setQuality(q); // 陰影解析度、範圍、柔邊
+    if (composer) { composer.dispose(); composer = null; bloom = null; zoomBlur = null; grade = null; }
     if (q === 'high') {
       const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
       composer = new EffectComposer(renderer, rt);
@@ -101,6 +117,8 @@ async function main() {
       zoomBlur.enabled = false;
       composer.addPass(zoomBlur);
       composer.addPass(new OutputPass());
+      grade = new ShaderPass(GradeShader);
+      composer.addPass(grade);
       composer.setPixelRatio(renderer.getPixelRatio());
       composer.setSize(innerWidth, innerHeight);
     }
@@ -111,6 +129,7 @@ async function main() {
     const th = world.theme;
     renderer.toneMappingExposure = th.exposure ?? 1;
     if (bloom && th.bloom) [bloom.strength, bloom.radius, bloom.threshold] = th.bloom;
+    if (grade) grade.uniforms.vignette.value = th.night ? 0.3 : 0.22;
   }
   function draw() {
     if (composer) composer.render();

@@ -466,7 +466,7 @@ class Room {
         // 純電腦、或真人斷線／掛機／已完賽：電腦代駕（座位連線表就是「誰在開」的唯一依據）
         if (!r.driver) r.driver = new AutoDriver(k, r.skill);
         if (c) c.consume(now); // 還連著就照樣吃掉輸入（完賽後也是），排隊才不會越堆越長
-        r.driver.think(STEP, karts.filter((o) => o !== k));
+        r.driver.think(STEP, karts.filter((o) => o !== k), tick >= R.goTick);
         inp = r.driver.input;
         r.ctrl = r.bot ? 'b' : 'a';
         if (r.finishT != null) k.topMul = 0.85;

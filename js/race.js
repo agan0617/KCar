@@ -69,7 +69,7 @@ export class Race {
       const k = r.kart;
       if (!r.isPlayer) k.events.length = 0; // 電腦車的事件沒人看，別一直堆
       if (r.driver) {
-        r.driver.think(dt, karts.filter((o) => o !== k));
+        r.driver.think(dt, karts.filter((o) => o !== k), control);
         if (!r.isPlayer) {
           // 輕微追趕機制：落後玩家太多就稍快、領先太多就稍慢（最多 ±5%）
           const gap = pd - k.dist;
