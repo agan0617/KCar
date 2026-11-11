@@ -512,6 +512,9 @@ async function main() {
         case 'nitroReady': hud.popup('集氣完成 +1 氮氣', '#34d6ff', 28, 0.9, 100); sfx.beep(1320, 0.12, 'sine', 0.2); break;
         case 'wall': sfx.bump(e.impact); G.shake = Math.min(0.6, e.impact * 0.05); break;
         case 'bump': if (e.impact > 2) { sfx.bump(e.impact); G.shake = Math.min(0.4, e.impact * 0.04); } break;
+        case 'pad': sfx.whoosh(0.9); G.shake = Math.max(G.shake, 0.12); break;
+        case 'fall': hud.popup(e.hazard ? '掉進去了！' : '掉出賽道！', '#ff9f6b', 40, 1.0, 0); break;
+        case 'respawn': snapCamera(); break;
         case 'land': if (e.impact > 2.5) { sfx.bump(Math.min(12, e.impact * 0.8)); G.shake = Math.max(G.shake, Math.min(0.35, (e.impact - 2) * 0.03)); } break;
         case 'start': startBoostFx(); break;
         default: break;
@@ -657,7 +660,9 @@ async function main() {
       s.yv += (-s.y * 260 - s.yv * 12) * h; s.y += s.yv * h;
     }
     s.y = Math.max(-0.22, Math.min(0.18, s.y));
-    g.rotation.z = s.r * 0.35;
+    // 路面側傾（傾斜彎）：模型的 +x 是車的左手邊，右側高要往負方向轉
+    v.bank = (v.bank || 0) + (-(k.roll || 0) - (v.bank || 0)) * Math.min(1, dt * 12);
+    g.rotation.z = v.bank + s.r * 0.35;
     pt.model.rotation.z = s.r * 0.65;
     pt.model.rotation.x = s.p;
     pt.model.scale.y = 1 + Math.max(-0.12, Math.min(0.08, s.y * 0.6));

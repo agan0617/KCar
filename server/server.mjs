@@ -23,6 +23,7 @@ import { performance } from 'node:perf_hooks';
 import { VERSION } from '../js/version.js';
 import { TRACKS, trackById, aiLevel } from '../js/tracks.js';
 import { Track } from '../js/track.js';
+import { readTrackData } from './load_track.mjs';
 import { Kart } from '../js/kart.js';
 import { P } from '../js/tuning.js';
 import { AutoDriver } from '../js/bot.js';
@@ -304,7 +305,7 @@ function pushRooms() {
 // ------------------------------------------------------------ 賽道資料（快取）
 const trackCache = new Map();
 function loadTrack(id) {
-  if (!trackCache.has(id)) trackCache.set(id, new Track(JSON.parse(readFileSync(join(ROOT, 'assets', id + '_path.json'), 'utf8'))));
+  if (!trackCache.has(id)) trackCache.set(id, new Track(readTrackData(ROOT, id)));
   return trackCache.get(id);
 }
 

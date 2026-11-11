@@ -1,17 +1,25 @@
 // 賽道中心線（Blender 腳本輸出的 *_path.json）：把車的位置投影到中心線上，
 // 得到沿線距離 s、橫向偏移 d（右正）、該處路面高度與切線。
 
+import { Collision } from './collision.js';
+
 export class Track {
   constructor(data) {
     this.name = data.name;
     this.step = data.step;
     this.length = data.length;
-    this.halfWidth = data.halfWidth;
-    this.curb = data.curb;
-    this.wall = data.wall;
-    this.wallT = data.wallThickness;
     const p = data.pts;
     const n = (this.n = p.length / 3);
+    // v2 賽道（TRACK_V2.md）：每個取樣點自己的路寬／側傾／缺口，地面與護牆看碰撞資料
+    this.hw = data.hw ? Float32Array.from(data.hw) : new Float32Array(n).fill(data.halfWidth);
+    this.gap = data.gap ? Uint8Array.from(data.gap) : new Uint8Array(n);
+    this.col = data.col ? new Collision(data.col) : null;
+    this.halfWidth = data.halfWidth ?? Math.min(...this.hw);
+    this.curb = data.curb ?? 1;
+    this.wall = data.wall ?? 99;
+    this.wallT = data.wallThickness ?? 0.7;
+    this.laps = data.laps;
+    this.startS = data.start ?? 0;
     this.x = new Float32Array(n);
     this.y = new Float32Array(n);
     this.z = new Float32Array(n);
@@ -41,7 +49,7 @@ export class Track {
 
   key(a, b) { return a * 100003 + b; }
 
-  nearestIndex(x, z) {
+  nearestIndex(x, z, y) {
     const cx = Math.floor(x / this.cell), cz = Math.floor(z / this.cell);
     let best = Infinity, bi = 0;
     for (let r = 1; r <= 8 && best === Infinity; r++) {
@@ -50,7 +58,8 @@ export class Track {
           const list = this.grid.get(this.key(gx, gz));
           if (!list) continue;
           for (const i of list) {
-            const d = (this.x[i] - x) ** 2 + (this.z[i] - z) ** 2;
+            let d = (this.x[i] - x) ** 2 + (this.z[i] - z) ** 2;
+            if (y !== undefined) d += ((this.y[i] - y) * 3) ** 2; // 立體交叉：同一個平面位置選高度接近的那層
             if (d < best) { best = d; bi = i; }
           }
         }
@@ -63,9 +72,9 @@ export class Track {
    * 投影。hint 是上一幀的取樣索引（-1 表示不知道）。
    * 回傳寫進 out：{ i, s, d, y, tx, tz }
    */
-  project(x, z, hint, out) {
+  project(x, z, hint, out, y) {
     const n = this.n;
-    let center = hint >= 0 ? hint : this.nearestIndex(x, z);
+    let center = hint >= 0 ? hint : this.nearestIndex(x, z, y);
     let best = Infinity;
     const R = hint >= 0 ? 14 : 30;
     for (let k = -R; k <= R; k++) {
@@ -85,7 +94,7 @@ export class Track {
         out.pz = pz;
       }
     }
-    if (hint >= 0 && best > 40 * 40) return this.project(x, z, -1, out);
+    if (hint >= 0 && best > 40 * 40) return this.project(x, z, -1, out, y);
     const i = out.i, j = (i + 1) % n, u = out.u;
     let tx = this.tx[i] * (1 - u) + this.tx[j] * u;
     let tz = this.tz[i] * (1 - u) + this.tz[j] * u;
@@ -99,6 +108,7 @@ export class Track {
     out.s = (i + u) * this.step;
     // 坡度：沿切線方向每公尺升高多少
     out.grade = (this.y[j] - this.y[i]) / this.step;
+    out.hw = this.hw[i] * (1 - u) + this.hw[j] * u;
     return out;
   }
 

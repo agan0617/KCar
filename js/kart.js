@@ -10,8 +10,10 @@
 // 座標：three.js，Y 朝上。前方 = (sin h, cos h)，右手邊 = (-cos h, sin h)，右轉 = h 變小。
 
 import { P } from './tuning.js';
+import { SURF } from './collision.js';
 
 const DEG = Math.PI / 180;
+const KART_R = 0.85; // 車子碰撞半徑
 const wrap = (a) => {
   while (a > Math.PI) a -= 2 * Math.PI;
   while (a < -Math.PI) a += 2 * Math.PI;
@@ -23,7 +25,7 @@ const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 // 加了會影響 step() 的欄位，一定要補進這裡，不然連線時預測會一直被校正。
 const STATE_KEYS = ['x', 'y', 'z', 'h', 'phi', 'spd', 'steer', 'hint', 'drift', 'driftDir', 'driftT', 'driftMaxSlip',
   'driftArm', 'recoverT', 'straighten', 'boostT', 'boostAdd', 'boostKind', 'nitroT', 'gauge', 'nitros', 'onGrass', 'onCurb',
-  'pitch', 'yawRate', 'lastS', 'dist', 'topMul', 'sbUsed', 'sbPend', 'w', 'vy', 'air'];
+  'pitch', 'yawRate', 'lastS', 'dist', 'topMul', 'sbUsed', 'sbPend', 'w', 'vy', 'air', 'surf', 'roll'];
 
 export class Kart {
   constructor(track) {
@@ -81,6 +83,8 @@ export class Kart {
     this.w = 0; // 車頭角速度（rad/s，左轉為正）
     this.vy = 0; // 上下速度
     this.air = false; // 離地中
+    this.surf = 0; // 腳下的地面種類（collision.js 的 SURF）
+    this.roll = 0; // 路面側傾（右側高為正）
     const pr = this.track.project(this.x, this.z, -1, this.proj);
     this.hint = pr.i;
     this.lastS = pr.s;
@@ -110,10 +114,21 @@ export class Kart {
 
   /** 回到最近的賽道中心（卡住時用） */
   respawn() {
-    const pr = this.track.project(this.x, this.z, this.hint, this.proj);
+    const tr = this.track;
+    const L = tr.length;
+    // 回到最後通過的沿線位置；在跳台缺口裡就往前移到缺口後的路面（不然會再掉下去）
+    let i = Math.floor((((this.lastS % L) + L) % L) / tr.step) % tr.n;
+    let skip = 0;
+    while (tr.gap[i] && skip < tr.n) { i = (i + 1) % tr.n; skip++; }
+    if (skip) i = (i + 4) % tr.n;
+    const s0 = this.lastS;
     const keepDist = this.dist;
-    this.place(pr.s, 0);
-    this.dist = keepDist;
+    this.place(i * tr.step, 0);
+    let ds = this.lastS - s0;
+    if (ds < -L / 2) ds += L;
+    else if (ds > L / 2) ds -= L;
+    this.dist = keepDist + Math.max(0, ds);
+    this.events.push({ type: 'respawn' });
   }
 
   step(dt, inp, control) {
@@ -257,7 +272,8 @@ export class Kart {
     let top = P.maxSpeed * this.topMul;
     if (this.boostT > 0) { top += this.boostAdd; this.boostT -= dt; }
     if (this.nitroT > 0) { top += P.nitroSpeed; this.nitroT -= dt; }
-    if (this.onGrass) top *= P.grassTop;
+    if (this.onGrass) top *= P.grassTop * (this.surf === SURF.SAND ? 0.85 : 1);
+    else if (this.surf === SURF.DIRT) top *= P.dirtTop;
     const boosting = this.boosting;
     if (this.air) {
       // 空中：引擎推不到地，只有一點空氣阻力
@@ -290,38 +306,35 @@ export class Kart {
     this.x += Math.sin(this.phi) * this.spd * dt;
     this.z += Math.cos(this.phi) * this.spd * dt;
     const tr = this.track;
-    let pr = tr.project(this.x, this.z, this.hint, this.proj);
+    let pr = tr.project(this.x, this.z, this.hint, this.proj, this.y);
     this.hint = pr.i;
-    const limit = tr.wall - tr.wallT / 2 - 0.85;
-    if (Math.abs(pr.d) > limit) {
-      const sg = Math.sign(pr.d);
-      const rx = -pr.tz, rz = pr.tx;
-      const over = Math.abs(pr.d) - limit;
-      this.x -= rx * sg * over;
-      this.z -= rz * sg * over;
-      let vx = Math.sin(this.phi) * this.spd, vz = Math.cos(this.phi) * this.spd;
-      const vn = (vx * rx + vz * rz) * sg;
-      if (vn > 0) {
-        vx -= rx * sg * vn * (1 + P.wallBounce);
-        vz -= rz * sg * vn * (1 + P.wallBounce);
-        const impact = clamp(vn / Math.max(1, Math.abs(this.spd)), 0, 1);
-        const ns = Math.hypot(vx, vz) * (1 - P.wallLoss * impact);
-        if (this.spd >= 0) { this.phi = Math.atan2(vx, vz); this.spd = ns; }
-        else { this.phi = Math.atan2(-vx, -vz); this.spd = -ns; }
-        this.h += wrap(this.phi - this.h) * Math.min(1, impact * 1.5) * 0.5;
-        // 撞牆的反作用：車頭被彈離牆面（牆在右邊 → 往左轉）
-        this.w = this.w * (1 - Math.min(1, impact * 1.5)) + sg * impact * P.wallSpin;
-        if (this.drift && impact > 0.25) this.endDrift(false, 'wall');
-        if (vn > 1.5) ev.push({ type: 'wall', impact: vn });
+    let gy;
+    const g0 = this.gnd || (this.gnd = { y: 0, nx: 0, ny: 1, nz: 0, surf: 0 });
+    let g = null;
+    if (tr.col) {
+      // v2：護牆是線段、地面是三角形（橋上橋下分得開）
+      tr.col.eachWallHit(this.x, this.z, this.y + 0.3, KART_R, this.wallFn || (this.wallFn = (nx, nz, depth) => this.wallHit(nx, nz, depth)));
+      g = tr.col.ground(this.x, this.z, this.y + (this.air ? 0.4 : 1.0) + Math.max(0, this.vy * dt), g0);
+      this.surf = g ? g.surf : -1;
+      gy = g ? g.y : -Infinity;
+      this.onGrass = this.surf === SURF.GRASS || this.surf === SURF.SAND;
+      this.onCurb = this.surf === SURF.CURB;
+      pr = tr.project(this.x, this.z, this.hint, this.proj, this.y);
+    } else {
+      const limit = tr.wall - tr.wallT / 2 - KART_R;
+      if (Math.abs(pr.d) > limit) {
+        const sg = Math.sign(pr.d);
+        this.wallHit(pr.tz * sg, -pr.tx * sg, Math.abs(pr.d) - limit);
+        pr = tr.project(this.x, this.z, this.hint, this.proj, this.y);
       }
-      pr = tr.project(this.x, this.z, this.hint, this.proj);
+      const ad = Math.abs(pr.d);
+      this.onGrass = ad > tr.halfWidth + tr.curb * 0.7;
+      this.onCurb = !this.onGrass && ad > tr.halfWidth;
+      this.surf = this.onGrass ? SURF.GRASS : this.onCurb ? SURF.CURB : SURF.ROAD;
+      gy = pr.y;
     }
-    const ad = Math.abs(pr.d);
-    this.onGrass = ad > tr.halfWidth + tr.curb * 0.7;
-    this.onCurb = !this.onGrass && ad > tr.halfWidth;
 
     // ---------------------------------------------------------- 上下：重力、離地、落地
-    const gy = pr.y;
     if (this.air) {
       this.vy -= P.gravity * dt;
       this.y += this.vy * dt;
@@ -336,7 +349,7 @@ export class Kart {
     } else {
       const need = (gy - this.y) / dt; // 貼地需要的上下速度
       if (need < this.vy - P.gravity * dt - P.liftSpeed) {
-        // 地面掉得比重力還快（坡頂、跳台邊緣）：飛出去
+        // 地面掉得比重力還快（坡頂、跳台邊緣、路面缺口）：飛出去
         this.air = true;
         this.vy -= P.gravity * dt;
         this.y += this.vy * dt;
@@ -346,8 +359,30 @@ export class Kart {
         this.vy += (need - this.vy) * 0.5;
       }
     }
-    const gradeF = pr.grade * (Math.sin(this.h) * pr.tx + Math.cos(this.h) * pr.tz);
-    this.pitch = -Math.atan(gradeF);
+    if (g) {
+      // 地面法向量 → 沿車頭方向的坡度（俯仰）與左右的側傾
+      const fx = Math.sin(this.h), fz = Math.cos(this.h);
+      if (!this.air) {
+        this.pitch = -Math.atan(-(g.nx * fx + g.nz * fz) / g.ny);
+        this.roll = Math.atan(-(g.nx * -fz + g.nz * fx) / g.ny);
+      }
+    } else if (!tr.col) {
+      const gradeF = pr.grade * (Math.sin(this.h) * pr.tx + Math.cos(this.h) * pr.tz);
+      this.pitch = -Math.atan(gradeF);
+      this.roll = 0;
+    }
+
+    // 加速帶
+    if (this.surf === SURF.BOOST && !this.air && !(this.boostKind === 'pad' && this.boostT > P.padTime * 0.6)) {
+      this.addBoost(P.padSpeed, P.padTime, 'pad');
+      ev.push({ type: 'pad' });
+    }
+    // 掉出賽道、掉進熔岩／水：重生
+    if (tr.col && (this.y < tr.col.killY || (this.surf === SURF.HAZARD && !this.air))) {
+      ev.push({ type: 'fall', hazard: this.surf === SURF.HAZARD });
+      this.respawn();
+      return;
+    }
 
     // 圈數：沿線累積距離（倒車會扣回去）
     const L = tr.length;
@@ -356,6 +391,27 @@ export class Kart {
     else if (ds > L / 2) ds -= L;
     this.dist += ds;
     this.lastS = pr.s;
+  }
+
+  /** 撞牆：法向量 (nx, nz) 從牆指向車，depth 是穿進去多深 */
+  wallHit(nx, nz, depth) {
+    this.x += nx * depth;
+    this.z += nz * depth;
+    let vx = Math.sin(this.phi) * this.spd, vz = Math.cos(this.phi) * this.spd;
+    const vn = -(vx * nx + vz * nz); // 往牆裡衝的速度
+    if (vn <= 0) return;
+    vx += nx * vn * (1 + P.wallBounce);
+    vz += nz * vn * (1 + P.wallBounce);
+    const impact = clamp(vn / Math.max(1, Math.abs(this.spd)), 0, 1);
+    const ns = Math.hypot(vx, vz) * (1 - P.wallLoss * impact);
+    if (this.spd >= 0) { this.phi = Math.atan2(vx, vz); this.spd = ns; }
+    else { this.phi = Math.atan2(-vx, -vz); this.spd = -ns; }
+    this.h += wrap(this.phi - this.h) * Math.min(1, impact * 1.5) * 0.5;
+    // 撞牆的反作用：車頭被彈離牆面（牆在右邊 → 往左轉）
+    const side = nx * -Math.cos(this.h) + nz * Math.sin(this.h); // 法向量在車右手方向的分量：牆在右邊時為負
+    this.w = this.w * (1 - Math.min(1, impact * 1.5)) - Math.sign(side) * impact * P.wallSpin;
+    if (this.drift && impact > 0.25) this.endDrift(false, 'wall');
+    if (vn > 1.5) this.events.push({ type: 'wall', impact: vn });
   }
 
   endDrift(allowJet, reason) {

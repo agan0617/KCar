@@ -270,6 +270,8 @@ export async function createWorld(renderer, onProgress = () => {}) {
       loader.loadAsync(`assets/${id}.glb`, (e) => { if (e.total) progress(e.loaded / e.total); }),
       fetch(`assets/${id}_path.json`).then((r) => r.json()),
     ]);
+    // v2 賽道（有逐點路寬 hw）另有碰撞資料
+    if (path.hw) path.col = await fetch(`assets/${id}_col.json`).then((r) => r.json());
     if (trackObj) { scene.remove(trackObj); disposeTree(trackObj); }
     for (const m of cache.values()) m.dispose();
     cache = new Map();

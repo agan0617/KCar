@@ -72,7 +72,9 @@ export class AutoDriver {
         const ds = o.dist - k.dist;
         if (ds > 0 && ds < 12 && Math.abs((o.proj.d ?? 0) - this.lane) < 2.2) block = true;
       }
-      if (block) this.lane = Math.max(-tr.halfWidth + 2, Math.min(tr.halfWidth - 2, this.lane + (this.rng() < 0.5 ? -3 : 3)));
+      const hw = k.proj.hw ?? tr.halfWidth;
+      if (block) this.lane = Math.max(-hw + 2, Math.min(hw - 2, this.lane + (this.rng() < 0.5 ? -3 : 3)));
+      else if (Math.abs(this.lane) > hw - 1.5) this.lane = Math.sign(this.lane) * Math.max(0, hw - 1.5);
       else this.lane += (sk.lane - this.lane) * 0.2;
     }
 

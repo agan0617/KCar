@@ -8,6 +8,7 @@ import { Net } from '../js/net/client.js';
 import { OnlineRace } from '../js/net/client.js';
 import { AutoDriver, PERFECT_SKILL } from '../js/bot.js';
 import { Track } from '../js/track.js';
+import { readTrackData } from '../server/load_track.mjs';
 import { STEP } from '../js/net/shared.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -18,7 +19,7 @@ const N = Number(process.argv[2] || 2);
 const trackId = process.argv[3] || 'beach';
 const port = process.argv[4] || '8799';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const track = new Track(JSON.parse(readFileSync(join(root, 'assets', trackId + '_path.json'), 'utf8')));
+const track = new Track(readTrackData(root, trackId));
 
 const players = [];
 for (let i = 0; i < N; i++) {

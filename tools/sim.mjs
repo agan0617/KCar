@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { Track } from '../js/track.js';
+import { readTrackData } from '../server/load_track.mjs';
 import { Race } from '../js/race.js';
 import { P } from '../js/tuning.js';
 import { TRACKS, aiLevel } from '../js/tracks.js';
@@ -28,7 +29,7 @@ const GOOD_PLAYER = { speed: 1, drift: 0.9, perfect: 0.45, dj: 0.4, nitro: 0.9, 
 const NO_DRIFT = { drift: 0, perfect: 0, dj: 0 };
 
 function run(meta, mode, playerSkill, seed) {
-  const track = new Track(JSON.parse(readFileSync(join(root, 'assets', meta.id + '_path.json'), 'utf8')));
+  const track = new Track(readTrackData(root, meta.id));
   const race = new Race(track, { mode, laps: meta.laps, difficulty: aiLevel(meta), rng: rng(seed), playerSkill });
   const dt = 1 / 120;
   let t = 0, walls = 0;

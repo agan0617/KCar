@@ -6,10 +6,10 @@ import { Kart } from './kart.js';
 
 // 記哪些欄位（車的外觀、特效、聲音會讀到的；布林存 0／1，boostKind 只分「雙噴」與其他）
 const F = ['x', 'y', 'z', 'h', 'phi', 'spd', 'steer', 'drift', 'driftDir', 'driftT', 'boostT', 'nitroT',
-  'onGrass', 'onCurb', 'pitch', 'yawRate', 'dist', 'gauge', 'nitros', 'dj'];
+  'onGrass', 'onCurb', 'pitch', 'yawRate', 'dist', 'gauge', 'nitros', 'dj', 'roll', 'vy', 'air'];
 const ANGLE = new Set(['h', 'phi']);
-const BOOL = new Set(['drift', 'onGrass', 'onCurb']);
-const STEPPED = new Set(['drift', 'onGrass', 'onCurb', 'driftDir', 'nitros', 'dj']); // 不內插，取較近的那筆
+const BOOL = new Set(['drift', 'onGrass', 'onCurb', 'air']);
+const STEPPED = new Set(['drift', 'onGrass', 'onCurb', 'driftDir', 'nitros', 'dj', 'air']); // 不內插，取較近的那筆
 const N = F.length;
 const RATE = 1 / 30;
 const MAX_SAMPLES = 30 * 60 * 20; // 20 分鐘
