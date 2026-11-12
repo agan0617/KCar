@@ -3,7 +3,7 @@
 用法（在 repo 根目錄）：
   <Blender>\\blender.exe -b --factory-startup -P tools\\blender\\build_props.py -- [主題 ...] [--no-render] [--src <素材目錄>]
 主題：common beach sakura snow city volcano autumn（不寫＝全部）。
-素材目錄預設是 D:\\GameResources\\Art\\（下載的原始素材，不進 git，清單見那邊的 INVENTORY.md；別的位置用 --src 指定）。
+素材目錄預設是 D:\\GameResources\\Art\\KCar\\（下載的原始素材，不進 git，清單見那邊的 INVENTORY.md；別的位置用 --src 指定）。
 
 輸出：
   assets_src/props/<主題>.glb    每個物件是一個頂層 object，名稱 <類別>_<變體>（palm_a、rock_large_a…）
@@ -47,7 +47,7 @@ TEXD = os.path.join(TMP, 'props_tex')
 ALL_THEMES = ['common', 'beach', 'sakura', 'snow', 'city', 'volcano', 'autumn']
 
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
-SRC = r'D:\GameResources\Art'
+SRC = r'D:\GameResources\Art\KCar'
 RENDER = True
 THEMES = []
 i = 0
@@ -1979,7 +1979,7 @@ def write_license():
                 rows.append((th, o['name'], s))
     L = ['# 場景物件的來源與授權', '',
          '`tools/blender/build_props.py` 產生；每次重跑會依各主題 json 重寫這份。',
-         '素材原檔放在 repo 外的 `D:\\GameResources\\Art\\`（路徑相對於那個目錄）。',
+         '素材原檔放在 repo 外的 `D:\\GameResources\\Art\\KCar\\`（路徑相對於那個目錄）。',
          '', 'Kenney、Quaternius 的素材都是 **CC0 1.0**（公眾領域），可商用、免標示；這份清單是為了追溯來源。',
          '標「自製」的是 build_props.py 用程式畫的，沒有第三方素材。', '']
     for th in ALL_THEMES:

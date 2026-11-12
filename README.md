@@ -144,7 +144,7 @@ python tools/check_layout2.py <id>
 ```
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_assets.ps1 -V2                       # 全部賽道＋卡丁車
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_assets.ps1 -V2 -Track snow -NoKart   # 只重產一條
-blender -b --factory-startup -P tools/blender/build_props.py -- [主題...]                          # 重產場景物件庫（素材原檔預設在 D:\GameResources\Art，別處用 --src 指定）
+blender -b --factory-startup -P tools/blender/build_props.py -- [主題...]                          # 重產場景物件庫（素材原檔預設在 D:\GameResources\Art\KCar，別處用 --src 指定）
 ```
 
 新增賽道：照 [TRACK_DESIGN.md](tools/blender/TRACK_DESIGN.md) 寫一個 `<id>_layout.json`、在 [js/tracks.js](js/tracks.js) 加一列、跑上面的指令，再用 `node tools/sim.mjs tt <id>` 與 `race <id>` 驗收。
