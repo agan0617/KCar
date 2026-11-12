@@ -126,7 +126,7 @@ node tools/sim.mjs tt city sc=0           # sc=0／sc=1：自動駕駛不走／�
 - **賽道**由 Blender 腳本 `tools/blender/build_track2.py` 依每條的 `tools/blender/<id>_layout.json` 產生（格式見 [TRACK_V2.md](tools/blender/TRACK_V2.md)、設計守則見 [TRACK_DESIGN.md](tools/blender/TRACK_DESIGN.md)）：逐點路寬與側傾、護牆可有可無、跳台缺口、加速帶、捷徑、立體交叉與高架（自動做橋與橋墩）、隧道、海與熔岩。同一份 layout 同時輸出模型 `assets/<id>.glb`、中心線 `assets/<id>_path.json`（圈數、名次、電腦走線、小地圖）、碰撞 `assets/<id>_col.json`（地面三角形＋護牆線段），三者永遠對得上
 - **物理**用碰撞資料（[js/collision.js](js/collision.js)）：往下找車子高度以下最高的地面（橋上橋下分得開），地面種類決定減速、加速帶、重生；護牆是線段
 - **場景物件庫**：`tools/blender/build_props.py` 把 CC0 素材（Kenney、Quaternius）整理成 `assets_src/props/<主題>.glb`（統一比例、修色、減面），日式物件（櫻花、鳥居、石燈籠、町家、神社、五重塔）是自製的；產生器依主題撒（同一件物件共用 mesh），車開得到的範圍內的樹、石頭、房子會加碰撞。來源清單見 [assets_src/props/LICENSE.md](assets_src/props/LICENSE.md)
-- **天空**是 Poly Haven 的 HDRI 轉成的照片天空（`assets/sky/`），環境光照用同一張產生；**地面、路肩、崖壁、橋、木棧道**用 Poly Haven 照片材質處理成的細節紋路（`assets/tex/`）乘上 Blender 算的頂點色（大片深淺、坡度、磨損帶），兩個尺度混合避免看得出重複；路面是 canvas 畫的邊線與虛線疊在柏油照片上。各主題的天空、霧、燈光在 [js/themes.js](js/themes.js)
+- **天空**是 Poly Haven 的 HDRI 轉成的照片天空（`assets/sky/`），環境光照用同一張產生；**地面、路肩、崖壁、橋、木棧道**用 Poly Haven 照片材質處理成的細節紋路（`assets/tex/`）乘上 Blender 算的頂點色（大片深淺、坡度、磨損帶），兩個尺度混合避免看得出重複；路面是 canvas 畫的邊線與虛線疊在柏油照片上。天空圖與細節紋路由 `tools/art/` 的腳本從原檔產生；各主題的天空、霧、燈光在 [js/themes.js](js/themes.js)
 - 算繪：PBR 材質（車身烤漆是透明漆層），Neutral 色調映射，柔和陰影、車底接觸陰影；
   「高畫質」另有泛光（霓虹、熔岩、車燈）、調色與 4 倍 MSAA，「省電」直接畫。設定裡切換，手機跑不順（連續 4 秒低於 40fps）會自動切到省電
 - 卡丁車與駕駛（戴耳機的柴犬 Komugi，對手是同一個模型換色）由 `tools/blender/build_kart.py` 產生；車身（輪子以外）有懸吊：加速抬頭、煞車點頭、過彎側傾、落地壓縮
@@ -144,7 +144,7 @@ python tools/check_layout2.py <id>
 ```
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_assets.ps1 -V2                       # 全部賽道＋卡丁車
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_assets.ps1 -V2 -Track snow -NoKart   # 只重產一條
-blender -b --factory-startup -P tools/blender/build_props.py -- [主題...]                          # 重產場景物件庫（素材來源目錄用 --src 指定）
+blender -b --factory-startup -P tools/blender/build_props.py -- [主題...]                          # 重產場景物件庫（素材原檔預設在 D:\GameResources\Art，別處用 --src 指定）
 ```
 
 新增賽道：照 [TRACK_DESIGN.md](tools/blender/TRACK_DESIGN.md) 寫一個 `<id>_layout.json`、在 [js/tracks.js](js/tracks.js) 加一列、跑上面的指令，再用 `node tools/sim.mjs tt <id>` 與 `race <id>` 驗收。

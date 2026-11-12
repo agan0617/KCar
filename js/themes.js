@@ -1,6 +1,6 @@
 // 各主題的天空、霧、燈光與地面／路面紋理顏色（模型本身的顏色在 Blender 腳本的 THEMES）。
 // env：環境光照強度；exposure：曝光；bloom：[強度, 半徑, 門檻]（高畫質才有泛光）
-// 天空圖：assets/sky/<主題 id>.jpg（Poly Haven CC0 HDRI 調色後的 equirect，KCar_assets_src/_scripts/make_sky.py（Blender 讀 HDR：hdr2npy.py） 產生；來源寫在各主題的 sky 註解）。
+// 天空圖：assets/sky/<主題 id>.jpg（Poly Haven CC0 HDRI 調色後的 equirect，tools/art/make_sky.py（Blender 讀 HDR：tools/art/hdr2npy.py） 產生；來源寫在各主題的 sky 註解）。
 //   horizon＝天空圖地平線的實際顏色（霧也用它，遠景才會融進天空）；skyTop＝天空圖中段的顏色（沒有天空圖時的漸層備用）；
 //   sunDir＝天空圖裡太陽的方位與高度（陰影方向跟天空對得上；天空的太陽太低時燈光抬高到 30～40 度、加強度，免得地面整片變暗）；skyGain：天空亮度倍率
 // ground.tex：地面照片細節圖（assets/tex/<名稱>.jpg，Poly Haven CC0；乘上 base 與 Blender 頂點色）；

@@ -1,7 +1,7 @@
 # 場景物件的來源與授權
 
 `tools/blender/build_props.py` 產生；每次重跑會依各主題 json 重寫這份。
-素材原檔放在 repo 外的 `KCar_assets_src\`（路徑相對於那個目錄）。
+素材原檔放在 repo 外的 `D:\GameResources\Art\`（路徑相對於那個目錄）。
 
 Kenney、Quaternius 的素材都是 **CC0 1.0**（公眾領域），可商用、免標示；這份清單是為了追溯來源。
 標「自製」的是 build_props.py 用程式畫的，沒有第三方素材。

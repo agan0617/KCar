@@ -21,7 +21,7 @@ function rand(seed) {
   return () => ((s = (s * 16807) % 2147483647) / 2147483647);
 }
 
-// 照片材質（Poly Haven CC0，用 KCar_assets_src/_scripts/make_tex.py 先處理成「細節圖」：線性空間每色版平均 0.5，shader 乘 2 後平均＝1，
+// 照片材質（Poly Haven CC0，用 tools/art/make_tex.py 先處理成「細節圖」：線性空間每色版平均 0.5，shader 乘 2 後平均＝1，
 // 顏色由主題底色×Blender 頂點色決定，照片只給紋路）。值＝每格幾公尺（世界座標 UV）
 const DETAIL = { grass: 3, sand: 4, snow: 5, dirt: 3, rock: 6, ash: 4, leaves: 3, pavement: 4, wood: 3 };
 // 紋路強度（1＝照處理好的細節圖；大於 1 加強明暗起伏，兩層混合後會變淡要補回來）
