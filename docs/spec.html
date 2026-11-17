@@ -1,0 +1,1537 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KCar 企劃規格</title>
+<style>
+:root{
+  --bg:#f7f7f5; --paper:#ffffff; --ink:#1d1f23; --muted:#5d636e; --line:#e2e3e0;
+  --accent:#2f6fde; --accent-soft:#e8f0fd; --warn:#b5590e; --warn-soft:#fdf1e6;
+  --ok:#1f8a4c; --ok-soft:#e6f5ec; --code:#f1f2ef;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16181c; --paper:#1e2126; --ink:#e7e9ec; --muted:#9aa1ad; --line:#30343b;
+    --accent:#7aa7ff; --accent-soft:#1f2c45; --warn:#f0a35e; --warn-soft:#3a2a1b;
+    --ok:#5fd08f; --ok-soft:#1b3326; --code:#262a31;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16181c; --paper:#1e2126; --ink:#e7e9ec; --muted:#9aa1ad; --line:#30343b;
+  --accent:#7aa7ff; --accent-soft:#1f2c45; --warn:#f0a35e; --warn-soft:#3a2a1b;
+  --ok:#5fd08f; --ok-soft:#1b3326; --code:#262a31;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.75 "Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif}
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:32px;max-width:1240px;margin:0 auto;padding:32px 24px}
+nav.toc{position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);overflow:auto;font-size:14px}
+nav.toc .title{font-weight:700;margin-bottom:8px}
+nav.toc ol{list-style:none;padding:0;margin:0}
+nav.toc ol ol{padding-left:14px}
+nav.toc a{display:block;padding:3px 8px;border-radius:6px;color:var(--muted);text-decoration:none}
+nav.toc a:hover{background:var(--accent-soft);color:var(--accent)}
+main{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:40px 48px;min-width:0}
+header.doc h1{font-size:30px;line-height:1.3;margin:0 0 6px}
+header.doc .sub{color:var(--muted);margin:0 0 20px}
+dl.meta{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:0 0 8px;font-size:14px}
+dl.meta dt{color:var(--muted)} dl.meta dd{margin:0}
+h2{font-size:22px;margin:48px 0 12px;padding-top:12px;border-top:2px solid var(--line)}
+h3{font-size:18px;margin:28px 0 8px}
+h4{font-size:16px;margin:20px 0 6px;color:var(--muted)}
+p,ul,ol{margin:8px 0}
+li{margin:3px 0}
+a{color:var(--accent)}
+code{background:var(--code);padding:1px 6px;border-radius:5px;font-size:.9em;font-family:Consolas,"Cascadia Mono",monospace}
+.table-wrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--code);font-weight:600;white-space:nowrap}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.warn{border-left:4px solid var(--warn);background:var(--warn-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-right:4px}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0}
+.flow span{border:1px solid var(--line);background:var(--code);border-radius:8px;padding:4px 12px;font-size:14px}
+.flow b{color:var(--muted);font-weight:400}
+ul.check{list-style:none;padding-left:0}
+ul.check li::before{content:"☐ ";color:var(--muted)}
+footer{margin-top:48px;color:var(--muted);font-size:13px}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;padding:16px}
+  nav.toc{position:static;max-height:none;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px}
+  main{padding:24px 18px}
+}
+@media print{
+  body{background:#fff}
+  .layout{display:block;padding:0}
+  nav.toc{display:none}
+  main{border:none;padding:0}
+  h2{break-after:avoid} table{break-inside:auto} tr{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="目錄">
+  <div class="title">目錄</div>
+  <ol>
+    <li><a href="#process">0. 規格變更流程</a></li>
+    <li><a href="#overview">1. 遊戲概要</a></li>
+    <li><a href="#flow">2. 畫面與遊戲流程</a>
+      <ol>
+        <li><a href="#flow-map">2.1 畫面流程</a></li>
+        <li><a href="#flow-title">2.2 首頁</a></li>
+        <li><a href="#flow-count">2.3 倒數與開跑</a></li>
+        <li><a href="#flow-race">2.4 比賽中</a></li>
+        <li><a href="#flow-pause">2.5 暫停選單</a></li>
+        <li><a href="#flow-result">2.6 成績頁</a></li>
+        <li><a href="#flow-misc">2.7 其他畫面</a></li>
+      </ol>
+    </li>
+    <li><a href="#modes">3. 模式規格</a>
+      <ol>
+        <li><a href="#modes-common">3.1 共通規則</a></li>
+        <li><a href="#modes-race">3.2 競賽</a></li>
+        <li><a href="#modes-time">3.3 計時賽</a></li>
+        <li><a href="#modes-free">3.4 自由練習</a></li>
+        <li><a href="#modes-online">3.5 多人連線</a></li>
+        <li><a href="#modes-best">3.6 個人紀錄</a></li>
+      </ol>
+    </li>
+    <li><a href="#driving">4. 操控與駕駛系統</a>
+      <ol>
+        <li><a href="#drv-input">4.1 輸入</a></li>
+        <li><a href="#drv-speed">4.2 油門、煞車、倒車</a></li>
+        <li><a href="#drv-steer">4.3 轉向</a></li>
+        <li><a href="#drv-drift">4.4 甩尾</a></li>
+        <li><a href="#drv-brake">4.5 點煞</a></li>
+        <li><a href="#drv-recover">4.6 回正</a></li>
+        <li><a href="#drv-jet">4.7 小噴</a></li>
+        <li><a href="#drv-dj">4.8 雙噴</a></li>
+        <li><a href="#drv-nitro">4.9 集氣與氮氣</a></li>
+        <li><a href="#drv-start">4.10 起步噴</a></li>
+        <li><a href="#drv-boost">4.11 加速的疊加規則</a></li>
+        <li><a href="#drv-surface">4.12 地面種類</a></li>
+        <li><a href="#drv-pad">4.13 加速帶</a></li>
+        <li><a href="#drv-wall">4.14 撞牆</a></li>
+        <li><a href="#drv-bump">4.15 車與車碰撞</a></li>
+        <li><a href="#drv-air">4.16 跳躍、坡度、落地</a></li>
+        <li><a href="#drv-respawn">4.17 重生</a></li>
+        <li><a href="#drv-wrong">4.18 逆向</a></li>
+      </ol>
+    </li>
+    <li><a href="#tuning">5. 車輛物理與調參</a></li>
+    <li><a href="#tracks">6. 賽道</a>
+      <ol>
+        <li><a href="#trk-common">6.1 共通規則</a></li>
+        <li><a href="#trk-list">6.2 賽道總覽</a></li>
+        <li><a href="#trk-beach">6.3 椰林海灘</a></li>
+        <li><a href="#trk-sakura">6.4 櫻花古都</a></li>
+        <li><a href="#trk-snow">6.5 雪國山道</a></li>
+        <li><a href="#trk-city">6.6 霓虹夜城</a></li>
+        <li><a href="#trk-volcano">6.7 熔岩火山</a></li>
+      </ol>
+    </li>
+    <li><a href="#ai">7. 電腦車手（AI）</a></li>
+    <li><a href="#hud">8. 介面與操作設定</a></li>
+    <li><a href="#online">9. 多人連線</a>
+      <ol>
+        <li><a href="#net-arch">9.1 架構</a></li>
+        <li><a href="#net-server">9.2 server 啟動與網址</a></li>
+        <li><a href="#net-lobby">9.3 大廳與房間</a></li>
+        <li><a href="#net-start">9.4 開賽流程</a></li>
+        <li><a href="#net-sync">9.5 同步</a></li>
+        <li><a href="#net-idle">9.6 斷線與掛機</a></li>
+        <li><a href="#net-end">9.7 結算</a></li>
+        <li><a href="#net-https">9.8 https 網頁的行為</a></li>
+        <li><a href="#net-proto">9.9 協議</a></li>
+      </ol>
+    </li>
+    <li><a href="#replay">10. 重播</a></li>
+    <li><a href="#av">11. 音效與畫面表現</a></li>
+    <li><a href="#nfr">12. 非功能需求</a></li>
+    <li><a href="#acceptance">13. 驗收標準</a></li>
+    <li><a href="#changelog">附錄. 修訂紀錄</a></li>
+  </ol>
+</nav>
+<main>
+<header class="doc">
+  <h1>KCar 企劃規格</h1>
+  <p class="sub">甩尾集氣、抓小噴時機的 3D 卡丁車競速網頁遊戲</p>
+  <dl class="meta">
+    <dt>規格版本</dt><dd>1.0</dd>
+    <dt>對應遊戲版本</dt><dd>1.0.0（<code>js/version.js</code>）</dd>
+    <dt>最後更新</dt><dd>2026-11-17</dd>
+    <dt>負責人</dt><dd>Ken</dd>
+    <dt>狀態</dt><dd><span class="tag ok">現行</span></dd>
+  </dl>
+</header>
+
+<section id="process">
+<h2>0. 規格變更流程</h2>
+<p>這份是遊戲的<strong>正本規格</strong>：程式照規格做，規格沒寫的行為不算需求。之後任何玩法、數值、畫面的改動，一律依下列順序：</p>
+<div class="flow"><span>① 改規格</span><b>→</b><span>② Ken 確認</span><b>→</b><span>③ 實作</span><b>→</b><span>④ 依驗收標準驗收</span><b>→</b><span>⑤ 發版</span></div>
+<ol>
+  <li><strong>改規格</strong>：在對應章節直接改成新的現行內容；規格版本號 +0.1（大改版 +1.0），在〈修訂紀錄〉加一列，寫改了哪幾節、改什麼、為什麼。</li>
+  <li><strong>Ken 確認</strong>：規格改動經 Ken 點頭才進實作。</li>
+  <li><strong>實作</strong>：程式只做規格寫到的；實作中發現規格不可行或有漏洞，先回頭改規格再繼續，不讓程式和規格分岔。</li>
+  <li><strong>驗收</strong>：依〈驗收標準〉逐條確認，受影響的條目要一起更新。</li>
+  <li><strong>發版</strong>：遊戲版本號與本文件頂部的「對應遊戲版本」同步。</li>
+</ol>
+<div class="note">本文只寫<strong>現行規格</strong>；改了什麼、為什麼改，只寫在〈修訂紀錄〉。</div>
+</section>
+
+<!-- ============================================================ 1 -->
+<section id="overview">
+<h2>1. 遊戲概要</h2>
+<div class="table-wrap"><table>
+<tbody>
+<tr><th>名稱</th><td>KCar</td></tr>
+<tr><th>類型</th><td>3D 卡丁車競速（街機式物理）</td></tr>
+<tr><th>定位</th><td>以「甩尾集氣 → 抓回正時機的小噴 → 接雙噴 → 放氮氣」為核心技巧的卡丁車遊戲。技巧做得越準，圈速越快、越能贏電腦。</td></tr>
+<tr><th>核心體驗</th><td>
+  <ul>
+    <li>過彎按住甩尾，車頭先甩、路線慢半拍跟上；方向往彎內壓轉得急、往外拉走大圈。</li>
+    <li>甩尾集氣，集滿一條得到一顆氮氣（最多兩顆）。</li>
+    <li>放開甩尾後車身回正，在回正得夠正的瞬間再按一次油門＝小噴；接著在時機窗內再按一次＝雙噴。</li>
+    <li>每條賽道都有捷徑、加速帶、跳台或危險區（海、熔岩），風險換時間。</li>
+  </ul>
+</td></tr>
+<tr><th>玩家角色</th><td>玩家駕駛 Komugi（戴耳機的柴犬，紅車）；電腦對手是三兄妹 Mochi（藍）、Azuki（綠）、Kinako（紫），共用同一個模型換色。</td></tr>
+<tr><th>目標玩家</th><td>喜歡技術型卡丁車（甩尾、小噴這類操作）的玩家；鍵盤或手機觸控都能玩，可以單機練習，也可以在同一個區域網路裡最多 4 人連線對戰。</td></tr>
+<tr><th>平台</th><td>
+  <ul>
+    <li>網頁版（GitHub Pages 靜態網站，桌機瀏覽器與手機瀏覽器皆可）</li>
+    <li>Android App 外殼 KCarApp（WebView 包網頁版，另一個 repo）</li>
+    <li>多人連線 server：Node.js 程式，架在玩家自己的電腦上，同時提供遊戲網頁（見第 9 章）</li>
+  </ul>
+</td></tr>
+<tr><th>內容量</th><td>5 條賽道（難度 ★1～★5）、4 種模式（競賽、計時賽、自由練習、多人連線）</td></tr>
+<tr><th>一場多長</th><td>每條賽道一圈約 1.7～2.2 公里、競賽與計時賽固定 3 圈。技巧熟練時一圈約 40～55 秒，一場約 2.5 分鐘（加上 3 秒倒數）。各賽道參考圈速見 6.2。</td></tr>
+<tr><th>單位</th><td>遊戲內 1 單位＝1 公尺；速度單位是公尺／秒（m/s），儀表顯示換算後的 km/h（換算見 8.1）；時間一律是秒。</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section id="flow">
+<h2>2. 畫面與遊戲流程</h2>
+
+<h3 id="flow-map">2.1 畫面流程</h3>
+<p>單機：</p>
+<div class="flow"><span>載入</span><b>→</b><span>首頁（選賽道、選模式）</span><b>→</b><span>倒數 3 秒</span><b>→</b><span>比賽</span><b>→</b><span>成績頁</span><b>→</b><span>重播（可選）</span><b>→</b><span>成績頁</span><b>→</b><span>再跑一次／回首頁</span></div>
+<p>多人連線：</p>
+<div class="flow"><span>首頁</span><b>→</b><span>連線對話框</span><b>→</b><span>房間清單</span><b>→</b><span>房間</span><b>→</b><span>大家載入賽道</span><b>→</b><span>倒數 3 秒</span><b>→</b><span>比賽</span><b>→</b><span>成績頁</span><b>→</b><span>回房間／離開房間</span></div>
+<p>遊戲狀態：載入中 → 首頁 → 倒數 → 比賽 → 暫停（可從倒數或比賽進入）→ 成績 → 重播。</p>
+
+<h4>載入</h4>
+<ul>
+  <li>開啟網頁先建立 2D 介面，畫面中央顯示「載入賽道中… N%」，再建立 3D 場景與四台卡丁車、載入上次選的賽道（第一次是椰林海灘）。</li>
+  <li>首頁換賽道時，背景換成新賽道；載入中首頁照樣顯示，模式按鈕變半透明且按了沒反應，按鈕下方顯示「載入賽道中… N%」。</li>
+  <li>載入途中又換別條，以最後選的那條為準。</li>
+</ul>
+
+<h3 id="flow-title">2.2 首頁</h3>
+<p>背景是目前選定的賽道，鏡頭繞著玩家的車慢慢轉（半徑 18 公尺、高 6 公尺、每秒轉 0.12 弧度）。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>元素</th><th>位置</th><th>內容與行為</th></tr></thead>
+<tbody>
+<tr><td>標題</td><td>上方中央</td><td>「KCar」，下面一行「甩尾 ‧ 小噴 ‧ 氮氣」</td></tr>
+<tr><td>賽道卡片</td><td>標題下方，一排最多 5 張</td><td>每張顯示賽道名稱、星等（★ 實心＝難度、☆ 補滿 5 顆）、「最佳 mm:ss.ss」（該賽道最佳單圈；沒有就顯示「尚無紀錄」）。選中的卡片黃底白框。點一下就換賽道（背景跟著換）。</td></tr>
+<tr><td>模式按鈕</td><td>卡片下方一排（畫面太窄時拆成兩排）</td><td>「競賽（對 3 位電腦）」「計時賽」「自由練習」→ 直接開始該模式的倒數；「多人連線」→ 開連線對話框（已連上 server 時按鈕文字變「多人（已連線）」，按了直接進房間清單或目前的房間）</td></tr>
+<tr><td>紀錄列</td><td>模式按鈕下方</td><td>「這條賽道　最佳單圈 mm:ss.ss　計時賽最佳 mm:ss.ss」，沒有紀錄顯示 <code>--:--.--</code>；載入中隱藏</td></tr>
+<tr><td>操作說明、設定</td><td>右上角</td><td>「操作說明」→ 開操作說明對話框（8.7）；「設定」→ 開設定對話框（8.5、8.8）</td></tr>
+<tr><td>操作提示</td><td>最下方中央</td><td>一行操作提示，依目前的按鍵設定組字；觸控裝置改顯示觸控的說法。改了按鍵後立即更新。</td></tr>
+<tr><td>版本號</td><td>右下角</td><td>「v1.0.0」</td></tr>
+</tbody>
+</table></div>
+<p>選定的賽道會記住，下次開啟直接載入這條。</p>
+
+<h3 id="flow-count">2.3 倒數與開跑</h3>
+<ul>
+  <li>按下模式按鈕：所有車排上起跑格（3.1），進入倒數，倒數長度 <strong>3.0 秒</strong>。</li>
+  <li>畫面中央大字依序顯示「3」「2」「1」，每換一個數字響一聲短嗶（523 Hz）。</li>
+  <li>倒數期間車子不能動（油門、方向全部無效），但可以做起步噴輸入（4.10）。</li>
+  <li>倒數歸零＝GO：比賽計時從 0 開始，畫面顯示綠色「GO!」0.8 秒，響長嗶（1046 Hz）。</li>
+  <li>倒數中可以暫停；繼續後從暫停時剩下的秒數接著倒。</li>
+</ul>
+
+<h3 id="flow-race">2.4 比賽中</h3>
+<p>HUD 元素見 8.1。比賽中的觸發：</p>
+<ul>
+  <li>每完成一圈：中央上方彈出「第 N 圈 mm:ss.ss」（創下這條賽道的最佳單圈時後面加「★」），響 880 Hz 嗶聲；完成倒數第二圈時另外彈出「最後一圈！」。</li>
+  <li>完成最後一圈（競賽、計時賽）：立即進成績頁。</li>
+  <li>按暫停鍵、按右上暫停鈕、或網頁被切到背景（分頁切走、App 切走）：進暫停選單。</li>
+</ul>
+
+<h3 id="flow-pause">2.5 暫停選單</h3>
+<p>單機時比賽完全停止（物理、計時、重播紀錄都停）。選單內容：</p>
+<div class="table-wrap"><table>
+<thead><tr><th>按鈕</th><th>行為</th></tr></thead>
+<tbody>
+<tr><td>繼續</td><td>關閉選單（也會關掉開著的調參面板），回到暫停前的狀態（倒數或比賽）</td></tr>
+<tr><td>重新開始</td><td>同一條賽道、同一模式重新排起跑格、重新倒數</td></tr>
+<tr><td>操作說明</td><td>開操作說明對話框</td></tr>
+<tr><td>設定（按鍵／調參）</td><td>開設定對話框（畫質、按鍵、操控調參入口）</td></tr>
+<tr><td>回首頁</td><td>結束這場，回首頁</td></tr>
+</tbody>
+</table></div>
+<p>標題「暫停」。暫停中再按一次暫停鍵＝繼續。多人連線時的選單不同（見 3.5）。</p>
+
+<h3 id="flow-result">2.6 成績頁</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>競賽</th><th>計時賽</th><th>多人連線</th></tr></thead>
+<tbody>
+<tr><td>標題</td><td>依名次：「冠軍！」（黃字）「第 2 名」「第 3 名」「第 4 名」（白字）</td><td>「完賽！」（黃字）</td><td>同競賽</td></tr>
+<tr><td>副標</td><td colspan="3">賽道名稱</td></tr>
+<tr><td>內容</td><td>四位車手依時間排序，每列「名次　名字　時間」；還沒跑完的車手時間是推估值，前面加「≈」；玩家那列後面加「◀ 你」。下面一行「最快單圈 mm:ss.ss」，破紀錄加「★新紀錄」。</td><td>「總時間 mm:ss.ss」（破紀錄加「★新紀錄」），接著每圈一列「第 N 圈 mm:ss.ss」，最快那圈且破紀錄時加「★最佳單圈」。</td><td>同競賽（不判新紀錄），最後一行「（多人連線：成績不列入個人紀錄）」</td></tr>
+<tr><td>按鈕</td><td colspan="2">「再跑一次」（同賽道同模式重來）、「重播」、「回首頁」</td><td>「回房間」（回首頁並打開房間對話框）、「重播」、「離開房間」（退出房間回首頁，連線保留）</td></tr>
+<tr><td>音效</td><td>第 1 名 1318 Hz、其他 660 Hz 的嗶聲</td><td>無</td><td>同競賽</td></tr>
+</tbody>
+</table></div>
+<p>「重播」按鈕只在這場有重播紀錄時出現（至少 2 筆紀錄，見第 10 章）。推估時間的算法見 3.1。</p>
+
+<h3 id="flow-misc">2.7 其他畫面</h3>
+<ul>
+  <li><strong>直向提示</strong>：觸控裝置直拿（直向）時整個畫面蓋上「請把手機轉成橫向」，轉成橫向才看得到遊戲。</li>
+  <li><strong>載入失敗</strong>：初始化出錯時，顯示「載入失敗：」加錯誤訊息。</li>
+  <li><strong>對話框</strong>：設定、操作說明、多人連線都是蓋在遊戲上的對話框，右上「✕」或點對話框外面關閉，Esc 也能關閉。對話框開著時按鍵不會漏給遊戲。</li>
+</ul>
+</section>
+
+<!-- ============================================================ 3 -->
+<section id="modes">
+<h2>3. 模式規格</h2>
+
+<h3 id="modes-common">3.1 共通規則</h3>
+<h4>起跑格</h4>
+<p>起終點線在每條賽道沿線距離 0 的位置。起跑格以「起終點線往後幾公尺、離中心線往右幾公尺」表示（負值＝往左）：</p>
+<div class="table-wrap"><table>
+<thead><tr><th>格位</th><th class="num">線後距離（m）</th><th class="num">橫向（m）</th><th>單機競賽誰站</th></tr></thead>
+<tbody>
+<tr><td>第 1 格</td><td class="num">8</td><td class="num">−3.2（左）</td><td>Mochi</td></tr>
+<tr><td>第 2 格</td><td class="num">8</td><td class="num">+3.2（右）</td><td>Azuki</td></tr>
+<tr><td>第 3 格</td><td class="num">16</td><td class="num">−3.2（左）</td><td>Kinako</td></tr>
+<tr><td>第 4 格</td><td class="num">16</td><td class="num">+3.2（右）</td><td>玩家</td></tr>
+</tbody>
+</table></div>
+<p>計時賽與自由練習只有玩家一台，站在線後 8 公尺的中心線上。所有車開局靜止、車頭朝賽道前進方向、集氣條與氮氣歸零。</p>
+
+<h4>計圈</h4>
+<ul>
+  <li>每台車累計「沿中心線前進的距離」：往前開加、倒車扣回，重生不會倒扣。</li>
+  <li>起跑時這個距離是負的（線後 8 或 16 公尺），開過起終點線才算第 1 圈開始；累計距離每滿一圈長度算完成一圈。所以第 1 圈的時間包含從起跑格開到線上的那一小段。</li>
+  <li>比賽計時從 GO 開始；每圈時間＝完成這圈的時刻減上一圈完成的時刻。</li>
+  <li>完成的圈數達到規定圈數（3 圈）就算完賽，記下完賽時間。</li>
+</ul>
+
+<h4>名次</h4>
+<ul>
+  <li>比賽中：先完賽的排前面（比完賽時間）；都沒完賽的比累計前進距離，遠的排前面。</li>
+  <li>結算時還沒完賽的車手，用推估完賽時間排：推估時間＝現在時間＋剩餘距離 ÷ 平均速度；平均速度＝累計距離 ÷ 已比時間（兩者分母至少取 1，平均速度至少 1 m/s）。</li>
+</ul>
+
+<h3 id="modes-race">3.2 競賽</h3>
+<div class="table-wrap"><table>
+<tbody>
+<tr><th>參賽</th><td>玩家＋3 位電腦（Mochi、Azuki、Kinako），共 4 台</td></tr>
+<tr><th>圈數</th><td>3 圈</td></tr>
+<tr><th>電腦強度</th><td>依賽道難度與對手順位（第 7 章）</td></tr>
+<tr><th>結束條件</th><td>玩家完成 3 圈的瞬間結束，其他車手當場用推估時間排名次（3.1）</td></tr>
+<tr><th>勝負</th><td>依成績頁排序，第 1 名＝冠軍</td></tr>
+<tr><th>HUD</th><td>有名次大字與四人排行（8.1）、對手頭上名牌、小地圖上的對手點</td></tr>
+<tr><th>紀錄</th><td>完賽時更新最佳單圈與總時間紀錄（3.6）</td></tr>
+</tbody>
+</table></div>
+<p>電腦完賽後極速降到 0.85 倍繼續開。</p>
+
+<h3 id="modes-time">3.3 計時賽</h3>
+<div class="table-wrap"><table>
+<tbody>
+<tr><th>參賽</th><td>只有玩家一台</td></tr>
+<tr><th>圈數</th><td>3 圈</td></tr>
+<tr><th>結束條件</th><td>完成 3 圈</td></tr>
+<tr><th>HUD</th><td>沒有名次、排行與名牌</td></tr>
+<tr><th>紀錄</th><td>完賽時更新最佳單圈與總時間紀錄（3.6）</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="modes-free">3.4 自由練習</h3>
+<div class="table-wrap"><table>
+<tbody>
+<tr><th>參賽</th><td>只有玩家一台</td></tr>
+<tr><th>圈數</th><td>無限，不會自己結束；只能從暫停選單「重新開始」或「回首頁」離開</td></tr>
+<tr><th>HUD</th><td>左上圈數顯示「練習 第 N 圈」（N 從 1 起）；沒有名次與排行</td></tr>
+<tr><th>紀錄</th><td>每完成一圈，若比這條賽道的最佳單圈快就立即寫入；不記總時間</td></tr>
+<tr><th>成績頁、重播</th><td>不會進成績頁，所以沒有重播</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="modes-online">3.5 多人連線</h3>
+<div class="table-wrap"><table>
+<tbody>
+<tr><th>參賽</th><td>最多 4 位真人，空位由電腦補滿，固定 4 台</td></tr>
+<tr><th>座位</th><td>座位 0～3 依序是紅 Komugi、藍 Mochi、綠 Azuki、紫 Kinako 四台車；真人用自己取的名字，電腦用座位的預設名字</td></tr>
+<tr><th>圈數</th><td>賽道設定的圈數（目前都是 3 圈）</td></tr>
+<tr><th>起跑格</th><td>電腦排前面（依座位順序），真人排後面（依座位順序），格位同 3.1</td></tr>
+<tr><th>結束條件</th><td>見 9.7</td></tr>
+<tr><th>操控參數</th><td>一律用預設值（第 5 章的預設欄）；個人調過的參數在比賽中暫時換回預設、離開後還原。鏡頭類參數不影響物理，照個人設定。比賽中按調參鍵只會彈出「連線比賽用預設的操控參數，不能調」。</td></tr>
+<tr><th>暫停</th><td>比賽不會停。選單標題「選單」，按鈕：繼續、操作說明、設定（按鍵／調參）、離開比賽（退出房間回首頁，這台車改由電腦開完）。選單開著時自己的車放開所有鍵繼續跑。</td></tr>
+<tr><th>紀錄</th><td>不列入個人紀錄</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="modes-best">3.6 個人紀錄</h3>
+<p>每條賽道各存兩個值，存在這台裝置（12.3）：</p>
+<div class="table-wrap"><table>
+<thead><tr><th>紀錄</th><th>什麼時候更新</th><th>顯示在哪</th></tr></thead>
+<tbody>
+<tr><td>最佳單圈</td><td>競賽、計時賽完賽時，這場最快的一圈比紀錄快就更新；自由練習每完成一圈就比一次</td><td>首頁賽道卡片、首頁紀錄列、比賽中左上「最佳」</td></tr>
+<tr><td>總時間（首頁顯示為「計時賽最佳」）</td><td>競賽、計時賽完賽時，完賽時間比紀錄快就更新</td><td>首頁紀錄列</td></tr>
+</tbody>
+</table></div>
+<p>多人連線不更新任何紀錄。</p>
+</section>
+
+<!-- ============================================================ 4 -->
+<section id="driving">
+<h2>4. 操控與駕駛系統</h2>
+<p>本章的數值都是預設值，名稱後括號是 <code>js/tuning.js</code> 的參數名（第 5 章有完整表）。物理以固定每秒 120 步計算（每步 1/120 秒），跟畫面幀率無關。</p>
+
+<h3 id="drv-input">4.1 輸入</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>動作</th><th>鍵盤預設</th><th>觸控</th><th>說明</th></tr></thead>
+<tbody>
+<tr><td>油門</td><td>J</td><td>自動油門</td><td>按住加速。甩尾放開後「剛按下」油門＝小噴；小噴後再「剛按下」一次＝雙噴；倒數時按＝起步噴</td></tr>
+<tr><td>煞車／倒車</td><td>K</td><td>「煞」</td><td>甩尾中按＝點煞</td></tr>
+<tr><td>左轉、右轉</td><td>A、D</td><td>◀、▶</td><td>數位輸入：左＝−1、右＝+1、同時按＝0</td></tr>
+<tr><td>甩尾</td><td>空白鍵</td><td>「甩尾」</td><td>按住＋方向起甩</td></tr>
+<tr><td>氮氣</td><td>L</td><td>「氮氣」</td><td>有氮氣時使用</td></tr>
+<tr><td>噴</td><td>（＝油門剛按下）</td><td>「噴」</td><td>觸控專用：小噴、雙噴、起步噴</td></tr>
+<tr><td>回到賽道</td><td>R</td><td>無</td><td>卡住時重生（4.17）；只在比賽中有效，倒數中無效</td></tr>
+<tr><td>暫停</td><td>Esc、P</td><td>右上暫停鈕</td><td>2.5</td></tr>
+<tr><td>操控調參面板</td><td>T</td><td>設定 → 操控調參</td><td>第 5 章</td></tr>
+</tbody>
+</table></div>
+<ul>
+  <li><strong>剛按下</strong>：該動作這一幀從沒按變成按下。同一動作綁兩個鍵時，另一個還按著就不算放開。</li>
+  <li><strong>自動油門</strong>：觸控裝置、且最近 5 秒沒用過鍵盤時，油門一律視為按著；按住「煞」時不自動給油。</li>
+  <li><strong>方向平滑</strong>：車子實際用的方向值以每秒 10（<code>steerResponse</code>）的速率追按鍵值，不會瞬間打滿；但判斷「有沒有按方向」（起甩、反打）看的是按鍵值本身。</li>
+  <li>網頁失去焦點時所有按鍵與觸控放開。</li>
+</ul>
+
+<h3 id="drv-speed">4.2 油門、煞車、倒車</h3>
+<p>先算這一刻的<strong>極速上限</strong>：</p>
+<ul>
+  <li>基本極速 40 m/s（<code>maxSpeed</code>）× 極速倍率（玩家固定 1；電腦見第 7 章）</li>
+  <li>加噴射：小噴、雙噴、加速帶、起步噴期間＋該次的加速量；氮氣期間再＋13 m/s（<code>nitroSpeed</code>）</li>
+  <li>地面修正：草地 ×0.55（<code>grassTop</code>）、沙地與雪地 ×0.55×0.85＝×0.4675、土路 ×0.85（<code>dirtTop</code>）</li>
+</ul>
+<p>在地面上時，速度依下表變化（每秒的變化量）：</p>
+<div class="table-wrap"><table>
+<thead><tr><th>情況</th><th>速度變化</th></tr></thead>
+<tbody>
+<tr><td>甩尾中按煞車（點煞）</td><td>−12 m/s²（<code>brakeDrag</code>），取代一般煞車</td></tr>
+<tr><td>按煞車、車速 &gt; 0.5 m/s</td><td>−28 m/s²（<code>brake</code>）</td></tr>
+<tr><td>按煞車、車速 ≤ 0.5 m/s</td><td>倒車，−12 m/s²（＝加速度 20 × 0.6），倒車極速 8 m/s（<code>reverseMax</code>）</td></tr>
+<tr><td>按油門或噴射中，且低於極速上限</td><td>噴射中（含氮氣）：+34 m/s²（<code>boostAccel</code>），不需要按油門也會加速。一般：+20 m/s²（<code>accel</code>）× max(0.2, 1 − r²)，r＝車速 ÷ 極速上限；加到極速上限為止</td></tr>
+<tr><td>沒油門、沒噴射、沒在甩尾</td><td>往 0 減 4 m/s²（<code>coastDrag</code>）</td></tr>
+<tr><td>沒油門但在甩尾</td><td>不額外減速（只有甩尾本身的損失，4.4）</td></tr>
+<tr><td>超過極速上限（例如噴射結束、開上草地）</td><td>每秒減（超出量 × 1.5 ＋ 2）m/s，降回上限</td></tr>
+<tr><td>在草地、沙地、雪地上</td><td>再往 0 減 2.5 m/s²（<code>grassDrag</code> 10 × 0.25）</td></tr>
+<tr><td>上下坡（車速 &gt; 1 m/s）</td><td>＋6（<code>slopeGrav</code>）× 坡度（俯仰角的正切）m/s²：上坡減速、下坡加速</td></tr>
+</tbody>
+</table></div>
+<p>空中時引擎推不到地：只有超過極速上限時每秒減 2 m/s，其他不變。</p>
+
+<h3 id="drv-steer">4.3 轉向（不甩尾時）</h3>
+<ul>
+  <li>車子有兩個方向：<strong>車頭方向</strong>與<strong>路線方向</strong>（實際移動的方向）。兩者的夾角叫<strong>側滑角</strong>。</li>
+  <li>車頭轉速目標＝−方向值 × 轉向速度；轉向速度＝1.9 rad/s（<code>steerRate</code>）×（1 − 0.6（<code>steerHighLoss</code>）× min(1, 車速 ÷ 極速)）× min(1, 車速 ÷ 5 m/s)。滿速時約 0.76 rad/s；車速 5 m/s 以下轉向成比例變弱；倒車時方向相反。</li>
+  <li>車頭轉速有慣性：每秒以 9（<code>yawResp</code>）的速率追目標（空中只有 0.35 倍，<code>airControl</code>）。</li>
+  <li>路線方向每秒以 10（<code>grip</code>）的速率追車頭方向。倒車時路線方向直接等於車頭方向。</li>
+  <li>設計參考：滿速不甩尾能全速通過的彎，半徑約 50 公尺以上。</li>
+</ul>
+
+<h3 id="drv-drift">4.4 甩尾</h3>
+<h4>起甩</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>規格</th></tr></thead>
+<tbody>
+<tr><td>小跳</td><td>按下甩尾鍵的瞬間，若在地面上且車速 &gt; 4 m/s，車子往上跳（上升速度 3.2 m/s，<code>hopSpeed</code>）</td></tr>
+<tr><td>預備</td><td>按下甩尾鍵後進入「預備起甩」，一直維持到放開甩尾鍵</td></tr>
+<tr><td>觸發條件</td><td>預備中＋有按方向＋車速 &gt; 9 m/s（<code>driftMinSpeed</code>）＋目前沒在甩尾。可以先按甩尾再按方向，也可以同時按</td></tr>
+<tr><td>甩尾方向</td><td>起甩當下按的方向（左或右）</td></tr>
+<tr><td>甩頭</td><td>起甩瞬間車頭轉速額外往彎內加 0.16（<code>driftKick</code>）× 9（<code>yawResp</code>）＝1.44 rad/s</td></tr>
+<tr><td>其他</td><td>起甩時清掉還沒用的小噴時機窗；一次起甩後要放開甩尾鍵再按，才能再起甩</td></tr>
+</tbody>
+</table></div>
+
+<h4>甩尾中</h4>
+<ul>
+  <li>方向值換算成「內外」：往甩尾方向壓＝+1（內切），往反方向拉＝−1（外拉），不按＝0。</li>
+  <li>車頭轉速目標＝max(0, 0.8（<code>driftTurn</code>）＋ 0.45（<code>driftTurnSteer</code>）× 內外 ＋ 點煞加成)，方向往彎內。所以不按方向 0.8 rad/s、內切 1.25 rad/s、外拉 0.35 rad/s；點煞再加 1.1（4.5）。</li>
+  <li>路線方向每秒以 2.4（<code>driftGrip</code>）的速率追車頭（抓地力低，路線慢半拍）；側滑角最大 45°（<code>driftSlipMax</code>），超過就把路線拉到 45°。空中路線不變。</li>
+  <li>甩尾掉速：在地面上每秒減 4（<code>driftDrag</code>）× sin(側滑角) m/s。</li>
+  <li>設計參考：甩尾的路線轉速 0.35～1.25 rad/s，車速 35 m/s 時最急約半徑 25 公尺。</li>
+</ul>
+
+<h4>甩尾結束</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>原因</th><th>條件</th><th>能不能小噴</th></tr></thead>
+<tbody>
+<tr><td>放開</td><td>甩尾鍵放開，<strong>而且</strong>方向沒有往甩尾方向壓（放開甩尾鍵但方向還壓著彎內時，甩尾持續）</td><td>可以（看下面的資格）</td></tr>
+<tr><td>太慢</td><td>車速低於 5.4 m/s（<code>driftMinSpeed</code> × 0.6）</td><td>可以（看下面的資格）</td></tr>
+<tr><td>撞牆</td><td>甩尾中撞牆、撞擊程度 &gt; 0.25（4.14）</td><td>不行</td></tr>
+</tbody>
+</table></div>
+<p><strong>小噴資格</strong>：這次甩尾持續至少 0.35 秒（<code>jetMinDrift</code>），且甩尾過程中最大側滑角超過 8°。有資格才開小噴時機窗（4.7），結束後一律進入回正（4.6）。</p>
+
+<h3 id="drv-brake">4.5 點煞</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>規格</th></tr></thead>
+<tbody>
+<tr><td>觸發</td><td>甩尾中按煞車</td></tr>
+<tr><td>按下瞬間</td><td>車頭轉速額外往彎內加 0.12（<code>brakeKick</code>）× 9 ＝1.08 rad/s</td></tr>
+<tr><td>按住期間</td><td>車頭轉速目標＋1.1 rad/s（<code>brakeYaw</code>）；速度每秒減 12 m/s（<code>brakeDrag</code>），取代一般煞車</td></tr>
+<tr><td>用途</td><td>髮夾彎方向壓到底還轉不過去時，用掉速換更急的轉向</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="drv-recover">4.6 回正</h3>
+<ul>
+  <li>甩尾結束後進入回正：方向鍵改成轉「路線」（照 4.3 的轉向速度），車頭以「側滑角 × 6（<code>driftRecover</code>）」的轉速轉回路線方向。所以放開甩尾後路線不會再往彎心切。</li>
+  <li>回正時往甩尾的反方向按（反打），車頭回正速度 × 2.5（<code>counterSteer</code>）。</li>
+  <li>側滑角小於 0.5° 時回正結束，回到一般轉向；倒車也會立即結束回正。</li>
+</ul>
+
+<h3 id="drv-jet">4.7 小噴</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>規格</th></tr></thead>
+<tbody>
+<tr><td>時機窗</td><td>有小噴資格的甩尾結束時開啟，長 0.55 秒（<code>jetWindow</code>）</td></tr>
+<tr><td>觸發</td><td>時機窗內「剛按下」油門（觸控是「噴」）。按住油門不放不會觸發，所以甩尾時要先放開油門</td></tr>
+<tr><td>品質判定</td><td>看按下當下的側滑角（車身回正的程度）：</td></tr>
+</tbody>
+</table></div>
+<div class="table-wrap"><table>
+<thead><tr><th>品質</th><th>側滑角</th><th class="num">加速量（m/s）</th><th class="num">持續（秒）</th><th>畫面</th></tr></thead>
+<tbody>
+<tr><td>完美</td><td>&lt; 7°（<code>jetPerfect</code>）</td><td class="num">8（<code>jetSpeed</code> × 1）</td><td class="num">0.7</td><td>綠字「完美小噴！」</td></tr>
+<tr><td>普通</td><td>7°～16°（<code>jetGood</code>）</td><td class="num">5.6（× 0.7）</td><td class="num">0.7</td><td>黃字「小噴」</td></tr>
+<tr><td>太早</td><td>≥ 16°</td><td class="num">3.2（× 0.4）</td><td class="num">0.7</td><td>橘字「小噴（太早）」</td></tr>
+</tbody>
+</table></div>
+<ul>
+  <li>持續時間是 <code>jetTime</code> 0.7 秒；加速量怎麼作用見 4.11。</li>
+  <li>觸發後立刻開啟雙噴時機窗（4.8）。</li>
+  <li>0.55 秒內沒按：時機窗關閉，彈出「錯過小噴」。</li>
+</ul>
+
+<h3 id="drv-dj">4.8 雙噴</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>規格</th></tr></thead>
+<tbody>
+<tr><td>時機窗</td><td>小噴觸發的瞬間起算</td></tr>
+<tr><td>成功</td><td>在小噴後 0.12～0.5 秒（<code>djMin</code>～<code>djMax</code>）之間「剛按下」油門／噴：加速量＝小噴基準 8 × 0.5 ＋ 5（<code>djSpeed</code>）＝9 m/s，持續 0.7 秒；彈出「雙噴！」</td></tr>
+<tr><td>太快</td><td>0.12 秒內就按：沒有雙噴，彈出「雙噴太快」，時機窗關閉</td></tr>
+<tr><td>太慢</td><td>超過 0.5 秒：時機窗直接關閉，沒有雙噴</td></tr>
+</tbody>
+</table></div>
+<p>雙噴的加速量不看小噴品質。</p>
+
+<h3 id="drv-nitro">4.9 集氣與氮氣</h3>
+<h4>集氣</h4>
+<ul>
+  <li>只在甩尾中、而且沒有氮氣在作用時集氣。</li>
+  <li>每秒增加：0.5（<code>chargeRate</code>）× 側滑係數 × 速度係數 ×（在草地、沙地、雪地上時 0.4，否則 1）。</li>
+  <li>側滑係數＝側滑角 ÷ 30°，夾在 0.3～1.3；速度係數＝車速 ÷ 極速 40，夾在 0～1.2。</li>
+  <li>例：側滑 30°、滿速 40 m/s 時每秒 0.5，2 秒集滿一條；側滑 39° 以上、滿速時每秒 0.65，約 1.54 秒集滿。</li>
+  <li>集氣條滿 1：氮氣少於 2 顆時氮氣 +1、集氣條歸零，彈出「集氣完成 +1 氮氣」；已有 2 顆時集氣條停在滿格。</li>
+  <li>集氣條與氮氣在每場開局歸零，重生時保留。</li>
+</ul>
+<h4>氮氣</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>規格</th></tr></thead>
+<tbody>
+<tr><td>持有上限</td><td>2 顆</td></tr>
+<tr><td>使用條件</td><td>按氮氣鍵、有氮氣、目前沒有氮氣在作用（作用中按無效，不會疊加）</td></tr>
+<tr><td>效果</td><td>消耗 1 顆；車速立刻 +3 m/s；之後 3 秒（<code>nitroTime</code>）極速上限 +13 m/s（<code>nitroSpeed</code>）、以噴射推力 34 m/s² 加速</td></tr>
+<tr><td>畫面</td><td>彈出「氮氣！」、鏡頭震動、排氣管藍色火焰</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="drv-start">4.10 起步噴</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>按「油門剛按下」或「噴」的時刻</th><th>結果</th></tr></thead>
+<tbody>
+<tr><td>倒數剩 0.25 秒以上</td><td>太早：這場的起步噴機會用掉，沒有起步噴</td></tr>
+<tr><td>倒數最後 0.25 秒內</td><td>GO 的瞬間觸發起步噴</td></tr>
+<tr><td>GO 之後 0.2 秒內（且之前沒按過）</td><td>立刻觸發起步噴</td></tr>
+<tr><td>GO 之後 0.2 秒以上</td><td>沒有作用</td></tr>
+</tbody>
+</table></div>
+<p>每場只有一次機會。效果：加速量 8 m/s（<code>startBoost</code>）、持續 1.0 秒（規則同 4.11）；彈出綠字「起步噴！」。電腦的起步噴見 7.6。</p>
+
+<h3 id="drv-boost">4.11 加速的疊加規則</h3>
+<p>小噴、雙噴、加速帶、起步噴共用一組「噴射」狀態（加速量、剩餘時間、種類），氮氣另外一組、可以同時作用：</p>
+<ul>
+  <li>觸發一次噴射：車速立刻 +（加速量 × 0.45）；噴射期間極速上限＋加速量。</li>
+  <li>新噴射觸發時，加速量取「目前還在作用的加速量」與「新的加速量」較大者；剩餘時間取兩者較長者。</li>
+  <li>噴射或氮氣作用中都算「噴射中」：以 34 m/s² 加速，不按油門也會加速。</li>
+</ul>
+
+<h3 id="drv-surface">4.12 地面種類</h3>
+<p>車子腳下的地面取「車子高度以下最高的那一面」（橋上、橋下分得開）。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>地面</th><th>極速倍率</th><th>額外效果</th></tr></thead>
+<tbody>
+<tr><td>路面</td><td class="num">1</td><td>—</td></tr>
+<tr><td>路緣石</td><td class="num">1</td><td>車身震動、地面隆隆聲</td></tr>
+<tr><td>草地、泥地</td><td class="num">0.55</td><td>再減速 2.5 m/s²；集氣 ×0.4；揚起塵土</td></tr>
+<tr><td>沙地、雪地</td><td class="num">0.4675</td><td>同草地</td></tr>
+<tr><td>土路（捷徑）</td><td class="num">0.85</td><td>—</td></tr>
+<tr><td>加速帶</td><td class="num">1</td><td>4.13</td></tr>
+<tr><td>危險區（海、湖、熔岩）</td><td>—</td><td>在地面上碰到就重生（4.17）</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="drv-pad">4.13 加速帶</h3>
+<ul>
+  <li>路面上往前流動的箭頭區塊。在地面上（非空中）碰到就觸發：加速量 10 m/s（<code>padSpeed</code>）、持續 1.0 秒（<code>padTime</code>），疊加規則同 4.11。</li>
+  <li>停在加速帶上時，上一次加速帶效果剩不到 0.6 秒（<code>padTime</code> × 0.6）才會再觸發。</li>
+</ul>
+
+<h3 id="drv-wall">4.14 撞牆</h3>
+<ul>
+  <li>車子碰撞形狀是半徑 0.85 公尺的圓；護牆是垂直的牆面。碰到牆就把車推出牆外。</li>
+  <li>往牆裡的速度分量反彈（反彈係數 0.3，<code>wallBounce</code>）。</li>
+  <li>撞擊程度＝往牆裡的速度 ÷ 車速（夾在 0～1）；撞完車速 ×（1 − 0.3（<code>wallLoss</code>）× 撞擊程度）。擦牆幾乎不掉速，正面撞最多掉 30%。</li>
+  <li>車頭往新的路線方向轉一部分（min(1, 撞擊程度 × 1.5) × 0.5），並被彈離牆面：車頭轉速被削弱、再加上往牆的反方向「撞擊程度 × 1.5 rad/s（<code>wallSpin</code>）」。</li>
+  <li>甩尾中撞擊程度 &gt; 0.25：甩尾結束、沒有小噴（4.4）。</li>
+  <li>往牆裡的速度 &gt; 1.5 m/s 時有撞擊聲與鏡頭震動。</li>
+  <li>每條賽道可行駛範圍外緣一圈都有牆，車子不可能開出地圖。</li>
+</ul>
+
+<h3 id="drv-bump">4.15 車與車碰撞</h3>
+<ul>
+  <li>兩台車中心水平距離小於 1.7 公尺、高度差不超過 2 公尺就算碰撞（立體交叉上下層不會互撞）。</li>
+  <li>兩台車各被推開一半的重疊量；沿連心線的相對速度以反彈係數 0.35 交換（等重）。</li>
+  <li>相對速度 &gt; 2 m/s 時有碰撞聲與鏡頭震動。</li>
+  <li>碰撞依座位／車手順序逐對計算（單機、server、連線預測三邊順序相同）。</li>
+</ul>
+
+<h3 id="drv-air">4.16 跳躍、坡度、落地</h3>
+<ul>
+  <li><strong>重力</strong> 30 m/s²（<code>gravity</code>）。</li>
+  <li><strong>離地</strong>：地面往下掉得比「重力＋2.5 m/s（<code>liftSpeed</code>）」還快時（坡頂衝太快、跳台邊緣、缺口），車子飛起來。</li>
+  <li><strong>空中</strong>：路線方向不變、車頭轉向只有 0.35 倍、引擎推不到地（4.2）。</li>
+  <li><strong>落地</strong>：往下速度 &gt; 8 m/s 且往前開時，車速 ×（1 − min(0.12, (往下速度 − 8) × 0.015)），最多掉 12%。往下速度 &gt; 2.5 m/s 時有落地聲與鏡頭震動。</li>
+  <li><strong>坡度</strong>：車頭的俯仰角與左右側傾由腳下地面的法向量決定；上下坡的速度影響見 4.2。</li>
+  <li><strong>跳台</strong>：跳台後的缺口沒有路面，要有足夠速度才飛得過；飛距約 v² · sin(2θ) ÷ 30（再加落差修正）。</li>
+</ul>
+
+<h3 id="drv-respawn">4.17 重生</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>規格</th></tr></thead>
+<tbody>
+<tr><td>自動觸發</td><td>在地面上碰到危險區（彈出「掉進去了！」），或掉到該賽道的最低高度以下（彈出「掉出賽道！」）</td></tr>
+<tr><td>手動觸發</td><td>比賽中按「回到賽道」（R）</td></tr>
+<tr><td>重生位置</td><td>最後通過的中心線位置；若那裡在跳台缺口裡、或前方 60 公尺內有缺口，就移到缺口後方約 8 公尺（4 個中心線取樣點）的路面</td></tr>
+<tr><td>重生狀態</td><td>中心線上、車頭朝前進方向、靜止；甩尾、噴射、氮氣作用、時機窗全部清掉；集氣條與氮氣數量保留</td></tr>
+<tr><td>計圈</td><td>累計距離只會往前補（被往前移時加上），不會倒扣</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="drv-wrong">4.18 逆向</h3>
+<p>比賽中車速 &gt; 3 m/s 且沿線往回開時累計逆向時間（往前開時以兩倍速度扣回），累計超過 1.2 秒時畫面上方顯示紅字「逆向！」。</p>
+</section>
+
+<!-- ============================================================ 5 -->
+<section id="tuning">
+<h2>5. 車輛物理與調參</h2>
+<p>所有可調的操控參數集中在 <code>js/tuning.js</code>；遊戲中按 T（或設定裡的「操控調參」）打開調參面板即時調整（5.3）。下表的「預設」就是規格值；「範圍」是調參面板滑桿的最小～最大與步進。</p>
+
+<h3>5.1 可調參數</h3>
+<h4>車速</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>參數</th><th>面板名稱</th><th>意義</th><th class="num">預設</th><th>單位</th><th>範圍（步進）</th></tr></thead>
+<tbody>
+<tr><td><code>maxSpeed</code></td><td>極速</td><td>基本極速</td><td class="num">40</td><td>m/s</td><td>18～55（0.5）</td></tr>
+<tr><td><code>accel</code></td><td>加速度</td><td>一般油門的最大加速度（越接近極速越小）</td><td class="num">20</td><td>m/s²</td><td>4～40（0.5）</td></tr>
+<tr><td><code>brake</code></td><td>煞車</td><td>一般煞車減速度</td><td class="num">28</td><td>m/s²</td><td>5～60（1）</td></tr>
+<tr><td><code>reverseMax</code></td><td>倒車極速</td><td>倒車最高速</td><td class="num">8</td><td>m/s</td><td>2～15（0.5）</td></tr>
+<tr><td><code>coastDrag</code></td><td>放油減速</td><td>沒油門、沒甩尾時的減速度</td><td class="num">4</td><td>m/s²</td><td>0～15（0.5）</td></tr>
+</tbody>
+</table></div>
+<h4>轉向</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>參數</th><th>面板名稱</th><th>意義</th><th class="num">預設</th><th>單位</th><th>範圍（步進）</th></tr></thead>
+<tbody>
+<tr><td><code>steerRate</code></td><td>轉向速度</td><td>低速時的車頭轉速</td><td class="num">1.9</td><td>rad/s</td><td>0.5～4（0.05）</td></tr>
+<tr><td><code>steerHighLoss</code></td><td>高速轉向衰減</td><td>滿速時轉向速度減少的比例</td><td class="num">0.6</td><td>比例</td><td>0～0.9（0.05）</td></tr>
+<tr><td><code>yawResp</code></td><td>車頭轉動反應</td><td>車頭轉速追目標的速率（越低越有慣性）</td><td class="num">9</td><td>1/s</td><td>2～30（0.5）</td></tr>
+<tr><td><code>steerResponse</code></td><td>方向鍵反應</td><td>方向值追按鍵的速率</td><td class="num">10</td><td>1/s</td><td>2～30（0.5）</td></tr>
+<tr><td><code>grip</code></td><td>抓地</td><td>不甩尾時路線追車頭的速率</td><td class="num">10</td><td>1/s</td><td>2～30（0.5）</td></tr>
+</tbody>
+</table></div>
+<h4>甩尾</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>參數</th><th>面板名稱</th><th>意義</th><th class="num">預設</th><th>單位</th><th>範圍（步進）</th></tr></thead>
+<tbody>
+<tr><td><code>driftMinSpeed</code></td><td>可甩尾最低速</td><td>起甩需要的車速；低於它的 0.6 倍甩尾結束</td><td class="num">9</td><td>m/s</td><td>2～20（0.5）</td></tr>
+<tr><td><code>driftKick</code></td><td>起甩甩頭</td><td>起甩瞬間的甩頭量（乘上 <code>yawResp</code> 加到車頭轉速）</td><td class="num">0.16</td><td>rad</td><td>0～0.5（0.01）</td></tr>
+<tr><td><code>driftTurn</code></td><td>甩尾路線轉速</td><td>不按方向時甩尾的車頭轉速目標</td><td class="num">0.8</td><td>rad/s</td><td>0.2～2.5（0.05）</td></tr>
+<tr><td><code>driftTurnSteer</code></td><td>內切／外拉幅度</td><td>內切加、外拉減的轉速</td><td class="num">0.45</td><td>rad/s</td><td>0～1.5（0.05）</td></tr>
+<tr><td><code>driftGrip</code></td><td>甩尾抓地</td><td>甩尾時路線追車頭的速率</td><td class="num">2.4</td><td>1/s</td><td>0.5～10（0.1）</td></tr>
+<tr><td><code>driftSlipMax</code></td><td>甩尾最大偏角</td><td>側滑角上限</td><td class="num">45</td><td>度</td><td>20～70（1）</td></tr>
+<tr><td><code>driftDrag</code></td><td>甩尾掉速</td><td>每秒掉速 ＝ 此值 × sin(側滑角)</td><td class="num">4</td><td>m/s²</td><td>0～20（0.5）</td></tr>
+<tr><td><code>driftRecover</code></td><td>放開後回正速度</td><td>回正時車頭轉速 ＝ 側滑角 × 此值</td><td class="num">6</td><td>1/s</td><td>1～20（0.5）</td></tr>
+<tr><td><code>counterSteer</code></td><td>反打方向回正加快倍數</td><td>回正時反打的倍率</td><td class="num">2.5</td><td>倍</td><td>1～5（0.1）</td></tr>
+<tr><td><code>brakeKick</code></td><td>點煞：按下瞬間甩頭</td><td>點煞瞬間的甩頭量（乘上 <code>yawResp</code>）</td><td class="num">0.12</td><td>rad</td><td>0～0.5（0.01）</td></tr>
+<tr><td><code>brakeYaw</code></td><td>點煞：按住時多轉</td><td>按住點煞時車頭轉速目標加成</td><td class="num">1.1</td><td>rad/s</td><td>0～3（0.05）</td></tr>
+<tr><td><code>brakeDrag</code></td><td>點煞：按住時掉速</td><td>點煞減速度</td><td class="num">12</td><td>m/s²</td><td>0～40（1）</td></tr>
+</tbody>
+</table></div>
+<h4>小噴／雙噴</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>參數</th><th>面板名稱</th><th>意義</th><th class="num">預設</th><th>單位</th><th>範圍（步進）</th></tr></thead>
+<tbody>
+<tr><td><code>jetMinDrift</code></td><td>甩尾多久才有小噴</td><td>小噴資格的最短甩尾時間</td><td class="num">0.35</td><td>秒</td><td>0～1.5（0.05）</td></tr>
+<tr><td><code>jetWindow</code></td><td>小噴時機窗</td><td>甩尾結束後可按小噴的時間</td><td class="num">0.55</td><td>秒</td><td>0.1～1.5（0.05）</td></tr>
+<tr><td><code>jetPerfect</code></td><td>完美：車身偏角 &lt;</td><td>完美小噴的側滑角上限</td><td class="num">7</td><td>度</td><td>1～20（0.5）</td></tr>
+<tr><td><code>jetGood</code></td><td>普通：車身偏角 &lt;</td><td>普通小噴的側滑角上限</td><td class="num">16</td><td>度</td><td>5～40（0.5）</td></tr>
+<tr><td><code>jetSpeed</code></td><td>小噴加速</td><td>完美小噴的加速量（普通 × 0.7、太早 × 0.4）</td><td class="num">8</td><td>m/s</td><td>0～20（0.5）</td></tr>
+<tr><td><code>jetTime</code></td><td>小噴持續</td><td>小噴與雙噴的持續時間</td><td class="num">0.7</td><td>秒</td><td>0.1～2（0.05）</td></tr>
+<tr><td><code>djMin</code></td><td>雙噴最早</td><td>小噴後最早可按雙噴的時間</td><td class="num">0.12</td><td>秒</td><td>0～0.6（0.01）</td></tr>
+<tr><td><code>djMax</code></td><td>雙噴最晚</td><td>小噴後最晚可按雙噴的時間</td><td class="num">0.5</td><td>秒</td><td>0.1～1.2（0.01）</td></tr>
+<tr><td><code>djSpeed</code></td><td>雙噴加速</td><td>雙噴加速量 ＝ <code>jetSpeed</code> × 0.5 ＋ 此值</td><td class="num">5</td><td>m/s</td><td>0～20（0.5）</td></tr>
+</tbody>
+</table></div>
+<h4>集氣／氮氣</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>參數</th><th>面板名稱</th><th>意義</th><th class="num">預設</th><th>單位</th><th>範圍（步進）</th></tr></thead>
+<tbody>
+<tr><td><code>chargeRate</code></td><td>集氣速度</td><td>集氣基準速率（側滑 30°、滿速時每秒集多少條）</td><td class="num">0.5</td><td>條/秒</td><td>0.05～1.5（0.01）</td></tr>
+<tr><td><code>nitroTime</code></td><td>氮氣持續</td><td>一顆氮氣的作用時間</td><td class="num">3</td><td>秒</td><td>0.5～6（0.1）</td></tr>
+<tr><td><code>nitroSpeed</code></td><td>氮氣加速</td><td>氮氣作用時的極速上限加成</td><td class="num">13</td><td>m/s</td><td>0～25（0.5）</td></tr>
+<tr><td><code>boostAccel</code></td><td>噴射推力</td><td>噴射中（含氮氣）的加速度</td><td class="num">34</td><td>m/s²</td><td>5～80（1）</td></tr>
+<tr><td><code>startBoost</code></td><td>起步噴</td><td>起步噴加速量</td><td class="num">8</td><td>m/s</td><td>0～20（0.5）</td></tr>
+</tbody>
+</table></div>
+<h4>跳躍／重量</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>參數</th><th>面板名稱</th><th>意義</th><th class="num">預設</th><th>單位</th><th>範圍（步進）</th></tr></thead>
+<tbody>
+<tr><td><code>hopSpeed</code></td><td>甩尾小跳</td><td>按甩尾鍵時往上跳的速度</td><td class="num">3.2</td><td>m/s</td><td>0～8（0.1）</td></tr>
+<tr><td><code>gravity</code></td><td>重力</td><td>重力加速度</td><td class="num">30</td><td>m/s²</td><td>10～60（1）</td></tr>
+<tr><td><code>liftSpeed</code></td><td>離地門檻</td><td>地面下掉速度超過「重力＋此值」才離地</td><td class="num">2.5</td><td>m/s</td><td>0～6（0.1）</td></tr>
+<tr><td><code>airControl</code></td><td>空中轉向</td><td>空中車頭轉速反應的倍率</td><td class="num">0.35</td><td>倍</td><td>0～1（0.05）</td></tr>
+<tr><td><code>slopeGrav</code></td><td>上下坡影響車速</td><td>坡度對車速的影響（× 坡度正切）</td><td class="num">6</td><td>m/s²</td><td>0～30（0.5）</td></tr>
+</tbody>
+</table></div>
+<h4>草地／護牆</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>參數</th><th>面板名稱</th><th>意義</th><th class="num">預設</th><th>單位</th><th>範圍（步進）</th></tr></thead>
+<tbody>
+<tr><td><code>grassTop</code></td><td>草地極速倍率</td><td>草地上極速倍率（沙地、雪地再 × 0.85）</td><td class="num">0.55</td><td>倍</td><td>0.2～1（0.05）</td></tr>
+<tr><td><code>grassDrag</code></td><td>草地阻力</td><td>草地上額外減速 ＝ 此值 × 0.25</td><td class="num">10</td><td>m/s²（× 0.25）</td><td>0～30（1）</td></tr>
+<tr><td><code>dirtTop</code></td><td>土路（捷徑）極速倍率</td><td>土路上極速倍率</td><td class="num">0.85</td><td>倍</td><td>0.4～1（0.05）</td></tr>
+<tr><td><code>padSpeed</code></td><td>加速帶加速</td><td>加速帶加速量</td><td class="num">10</td><td>m/s</td><td>0～25（0.5）</td></tr>
+<tr><td><code>padTime</code></td><td>加速帶持續</td><td>加速帶持續時間</td><td class="num">1.0</td><td>秒</td><td>0.2～3（0.1）</td></tr>
+<tr><td><code>wallBounce</code></td><td>撞牆反彈</td><td>撞牆反彈係數</td><td class="num">0.3</td><td>比例</td><td>0～1（0.05）</td></tr>
+<tr><td><code>wallLoss</code></td><td>撞牆掉速</td><td>正面撞牆時的最大掉速比例</td><td class="num">0.3</td><td>比例</td><td>0～1（0.05）</td></tr>
+<tr><td><code>wallSpin</code></td><td>撞牆彈開車頭</td><td>撞牆時車頭被彈開的轉速</td><td class="num">1.5</td><td>rad/s</td><td>0～6（0.1）</td></tr>
+</tbody>
+</table></div>
+<h4>鏡頭（不影響物理）</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>參數</th><th>面板名稱</th><th>意義</th><th class="num">預設</th><th>單位</th><th>範圍（步進）</th></tr></thead>
+<tbody>
+<tr><td><code>camDist</code></td><td>距離</td><td>鏡頭在車後的距離</td><td class="num">4.6</td><td>m</td><td>3～12（0.1）</td></tr>
+<tr><td><code>camHeight</code></td><td>高度</td><td>鏡頭離車的高度</td><td class="num">2.1</td><td>m</td><td>1～6（0.1）</td></tr>
+<tr><td><code>camFollow</code></td><td>跟隨速度</td><td>鏡頭方向追車的速率</td><td class="num">5</td><td>1/s</td><td>1～15（0.5）</td></tr>
+<tr><td><code>camLookAhead</code></td><td>看向車前多遠</td><td>注視點在車前的距離</td><td class="num">12</td><td>m</td><td>2～20（0.5）</td></tr>
+<tr><td><code>camLookHeight</code></td><td>看的高度</td><td>注視點的高度（越高車越靠畫面下方）</td><td class="num">2.4</td><td>m</td><td>0～4（0.1）</td></tr>
+<tr><td><code>camDriftMix</code></td><td>甩尾時看車身比例</td><td>甩尾時鏡頭方向偏向車頭的比例（不甩尾固定 0.15）</td><td class="num">0.35</td><td>比例</td><td>0～1（0.05）</td></tr>
+<tr><td><code>fov</code></td><td>視角</td><td>靜止時的垂直視角</td><td class="num">68</td><td>度</td><td>50～90（1）</td></tr>
+<tr><td><code>fovSpeed</code></td><td>車速越快視角越寬</td><td>滿速時多加的視角（隨速度比例的 1.5 次方）</td><td class="num">6</td><td>度</td><td>0～25（1）</td></tr>
+<tr><td><code>fovBoost</code></td><td>噴射時視角再加</td><td>氮氣時加滿額、其他噴射加 0.6 倍</td><td class="num">8</td><td>度</td><td>0～30（1）</td></tr>
+<tr><td><code>camKick</code></td><td>加速時鏡頭被甩開</td><td>急加速或噴射時鏡頭拉遠的距離</td><td class="num">0.7</td><td>m</td><td>0～3（0.1）</td></tr>
+<tr><td><code>camShake</code></td><td>高速震動</td><td>接近極速時鏡頭隨機震動幅度</td><td class="num">0.03</td><td>m</td><td>0～0.1（0.005）</td></tr>
+<tr><td><code>speedFx</code></td><td>速度線／風線濃度</td><td>速度線、風線、動態模糊的強度倍率</td><td class="num">1</td><td>倍</td><td>0～2（0.1）</td></tr>
+</tbody>
+</table></div>
+
+<h3>5.2 固定常數（不在調參面板）</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th class="num">值</th><th>出處</th></tr></thead>
+<tbody>
+<tr><td>物理步長</td><td class="num">1/120 秒</td><td><code>js/main.js</code>、<code>js/net/shared.js</code></td></tr>
+<tr><td>車子碰撞半徑</td><td class="num">0.85 m</td><td><code>js/kart.js</code>、<code>js/race.js</code></td></tr>
+<tr><td>甩尾小跳需要的車速</td><td class="num">&gt; 4 m/s</td><td><code>js/kart.js</code></td></tr>
+<tr><td>小噴資格：最大側滑角</td><td class="num">&gt; 8°</td><td><code>js/kart.js</code></td></tr>
+<tr><td>甩尾因太慢結束</td><td class="num"><code>driftMinSpeed</code> × 0.6</td><td><code>js/kart.js</code></td></tr>
+<tr><td>噴射觸發時的瞬間加速</td><td class="num">加速量 × 0.45</td><td><code>js/kart.js</code></td></tr>
+<tr><td>氮氣觸發時的瞬間加速</td><td class="num">+3 m/s</td><td><code>js/kart.js</code></td></tr>
+<tr><td>氮氣持有上限</td><td class="num">2 顆</td><td><code>js/kart.js</code></td></tr>
+<tr><td>集氣側滑係數</td><td class="num">側滑 ÷ 30°，0.3～1.3</td><td><code>js/kart.js</code></td></tr>
+<tr><td>集氣速度係數</td><td class="num">車速 ÷ 極速，0～1.2</td><td><code>js/kart.js</code></td></tr>
+<tr><td>草地類地面集氣倍率</td><td class="num">0.4</td><td><code>js/kart.js</code></td></tr>
+<tr><td>沙地、雪地相對草地的極速倍率</td><td class="num">0.85</td><td><code>js/kart.js</code></td></tr>
+<tr><td>倒車加速度</td><td class="num"><code>accel</code> × 0.6</td><td><code>js/kart.js</code></td></tr>
+<tr><td>空中超速減速</td><td class="num">2 m/s²</td><td><code>js/kart.js</code></td></tr>
+<tr><td>回正結束的側滑角</td><td class="num">0.5°</td><td><code>js/kart.js</code></td></tr>
+<tr><td>落地掉速門檻／最大掉速</td><td class="num">8 m/s／12%</td><td><code>js/kart.js</code></td></tr>
+<tr><td>撞牆結束甩尾的撞擊程度</td><td class="num">&gt; 0.25</td><td><code>js/kart.js</code></td></tr>
+<tr><td>重生：往前檢查缺口的距離</td><td class="num">60 m</td><td><code>js/kart.js</code></td></tr>
+<tr><td>車與車碰撞反彈係數</td><td class="num">0.35</td><td><code>js/race.js</code></td></tr>
+<tr><td>起步噴持續</td><td class="num">1.0 秒</td><td><code>js/main.js</code>、<code>js/net/shared.js</code></td></tr>
+<tr><td>倒數長度</td><td class="num">3.0 秒（360 步）</td><td><code>js/main.js</code>、<code>js/net/shared.js</code></td></tr>
+</tbody>
+</table></div>
+
+<h3>5.3 調參面板</h3>
+<ul>
+  <li>按 T（或設定對話框的「操控調參」、暫停選單→設定→操控調參）開關，蓋在畫面右側；標題「操控調參」，旁邊註明「T 開關．改了立即生效」。</li>
+  <li>依 5.1 的分組列出每個參數：名稱、滑桿、目前數值。跟預設值不同的數值會標成已修改的樣式。</li>
+  <li>改了立即生效，並存在這台裝置；下次開啟沿用。</li>
+  <li>底部按鈕：「複製參數」（把跟預設不同的參數以 JSON 複製到剪貼簿，無法複製時跳出文字框讓人手動複製；按鈕暫時變「已複製」）、「全部重設」（全部回到預設）、「關閉」。</li>
+  <li>面板開著時，在面板上的按鍵與點擊不會漏給遊戲；按暫停鍵先關面板。</li>
+  <li>多人連線比賽中不能開（3.5）。</li>
+</ul>
+
+<h3>5.4 座標約定</h3>
+<p>Y 軸朝上；車頭方向角 h 的前方向量是 (sin h, cos h)，右手邊是 (−cos h, sin h)，右轉＝h 變小。這個約定只影響實作，不影響玩法。</p>
+</section>
+
+<!-- ============================================================ 6 -->
+<section id="tracks">
+<h2>6. 賽道</h2>
+
+<h3 id="trk-common">6.1 共通規則</h3>
+<ul>
+  <li>每條賽道是一條閉合迴圈，起終點線在沿線距離 0。逆時針或順時針依賽道而定。</li>
+  <li>每條賽道的模型、中心線、碰撞資料由同一份設計檔產生，三者一致（<code>tools/blender/&lt;id&gt;_layout.json</code> → <code>assets/&lt;id&gt;.glb</code>、<code>&lt;id&gt;_path.json</code>、<code>&lt;id&gt;_col.json</code>）。</li>
+  <li><strong>中心線</strong>：每 2 公尺一個取樣點，記錄路面半寬、側傾、是否在缺口上；用來算圈數、名次、電腦走線、小地圖、重生位置。</li>
+  <li><strong>路寬</strong>：逐點不同；路面兩側有路緣石。</li>
+  <li><strong>護牆</strong>：每一段左右可以是護牆、低護欄（物理同護牆）、或不放（開放路肩，開出去是草地／沙地／雪地，大幅減速）。</li>
+  <li><strong>加速帶</strong>：每條 3 個，寬約 4～7 公尺、長 8～12 公尺，效果見 4.13。</li>
+  <li><strong>捷徑</strong>：每條 1 條，較窄；多半是土路（極速 ×0.85），火山的捷徑是一般路面。</li>
+  <li><strong>跳台缺口</strong>：缺口段沒有路面，掉下去就重生到缺口後方（4.17）。</li>
+  <li><strong>危險區</strong>：海、湖、河、熔岩，在地面上碰到就重生。</li>
+  <li><strong>立體交叉</strong>：兩段路上下交叉時分上下層，物理各算各的（橋上橋下的車不會互撞）。</li>
+  <li><strong>隧道</strong>：只有外觀，不影響物理。</li>
+  <li><strong>地圖邊界</strong>：可行駛範圍外緣一圈都有牆；掉到賽道最低高度以下就重生。</li>
+  <li><strong>場景物件</strong>：樹、石頭、房子等依主題撒在路旁；車開得到的範圍內的物件有碰撞。</li>
+  <li>首頁卡片的順序依難度：椰林海灘、櫻花古都、雪國山道、霓虹夜城、熔岩火山。</li>
+</ul>
+
+<h3 id="trk-list">6.2 賽道總覽</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>賽道</th><th>代號</th><th>難度</th><th>主題</th><th class="num">一圈（m）</th><th class="num">圈數</th><th class="num">路面半寬（m）</th><th class="num">高低差（m）</th><th class="num">每圈總爬升（m）</th><th class="num">跳台</th><th class="num">捷徑省（m）</th><th class="num">參考圈速（秒）</th></tr></thead>
+<tbody>
+<tr><td>椰林海灘</td><td><code>beach</code></td><td>★</td><td>熱帶海島（白天）</td><td class="num">1716.7</td><td class="num">3</td><td class="num">7.5～10</td><td class="num">7.9</td><td class="num">12.1</td><td class="num">1</td><td class="num">約 42</td><td class="num">42～48</td></tr>
+<tr><td>櫻花古都</td><td><code>sakura</code></td><td>★★</td><td>春天和風（傍晚）</td><td class="num">1807.1</td><td class="num">3</td><td class="num">7～8.5</td><td class="num">14.2</td><td class="num">14.5</td><td class="num">0</td><td class="num">約 27</td><td class="num">39～46</td></tr>
+<tr><td>雪國山道</td><td><code>snow</code></td><td>★★★</td><td>雪山（陰天）</td><td class="num">2085.6</td><td class="num">3</td><td class="num">6.5～10</td><td class="num">41.4</td><td class="num">42.7</td><td class="num">1</td><td class="num">約 219</td><td class="num">50～55</td></tr>
+<tr><td>霓虹夜城</td><td><code>city</code></td><td>★★★★</td><td>夜晚城市</td><td class="num">1919.8</td><td class="num">3</td><td class="num">7～9</td><td class="num">16.4</td><td class="num">16.8</td><td class="num">0</td><td class="num">約 25</td><td class="num">45～52</td></tr>
+<tr><td>熔岩火山</td><td><code>volcano</code></td><td>★★★★★</td><td>火山（火燒雲）</td><td class="num">2153.4</td><td class="num">3</td><td class="num">5.5～7</td><td class="num">29.3</td><td class="num">36.6</td><td class="num">2</td><td class="num">約 132</td><td class="num">52～55</td></tr>
+</tbody>
+</table></div>
+<div class="note">「參考圈速」是無頭模擬（<code>node tools/sim.mjs tt</code>）中完美自動駕駛（每彎甩尾＋完美小噴＋雙噴）跑 3 圈的圈速範圍，給驗收時對照量級用，不是硬性目標。高低差＝中心線最高點減最低點。</div>
+
+<h3 id="trk-beach">6.3 椰林海灘（★）</h3>
+<p>新手第一條。繞著小島跑一圈，路寬、彎緩，開放路肩多，失誤的代價是開進沙灘減速或掉進海裡。</p>
+<div class="table-wrap"><table>
+<tbody>
+<tr><th>路線</th><td>南邊起跑直線往西（兩側護牆）→ 緩右彎爬上坡頂（過頂後海在正前方）→ 沿西岸下坡接右傾高速掃彎（外側是海）→ 北岸左傾 S 掃彎（左側開放沙灘，衝出去會掉海）→ 架在內灣上的木棧道（兩側護欄）→ 繞燈塔約 150° 的大甩尾（彎心內側加速帶）→ 回程往南，小跳台飛越注入內灣的小溪 → 椰林段：主線往西擺一個大 S，左側加速帶接捷徑 → 最後右髮夾彎（彎心加速帶）回起跑直線</td></tr>
+<tr><th>側傾</th><td>−8°～+10°（高速掃彎）</td></tr>
+<tr><th>路肩</th><td>預設不放護牆、路肩是沙地；起跑直線有護牆、木棧道是護欄</td></tr>
+<tr><th>跳台</th><td>1 個：沿線約 1184 公尺處，缺口約 16 公尺（飛越小溪）</td></tr>
+<tr><th>加速帶</th><td>3 個：燈塔大甩尾彎心內側、捷徑入口（椰林大 S 左側）、最後髮夾彎彎心</td></tr>
+<tr><th>捷徑</th><td>穿過椰林的沙地土路：沿線 1265 → 1527 公尺（主線該段約 262 公尺，捷徑約 220 公尺，省約 42 公尺），半寬 4 公尺</td></tr>
+<tr><th>危險區</th><td>海（外海、木棧道底下的內灣等），掉進去重生</td></tr>
+<tr><th>地標</th><td>燈塔、木棧道、椰林</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="trk-sakura">6.4 櫻花古都（★★）</h3>
+<p>甩尾天堂：四個半徑不同的長甩彎、練換向甩的 S 彎。8 字形路線，先從城下河邊穿過拱橋底下，後半段再從拱橋上跨回來。</p>
+<div class="table-wrap"><table>
+<tbody>
+<tr><th>路線</th><td>起跑直線 → 左緩彎 → 城郭下方的河邊路（右側開放路肩）從拱橋底下穿過 → 右高速掃彎 → 左右 S 彎（換向甩）→ 爬上坡頂看五重塔 → 半徑約 30 公尺、180° 的右髮夾（要內切＋點煞，出口內側加速帶）→ 半徑約 45 公尺、100° 的左彎（捷徑在內側）→ 半徑約 60 公尺、120° 的右長甩（可外拉一路甩完）→ 拱橋跨過剛剛的河邊路（高差 11 公尺）→ 右緩彎 → 半徑約 38 公尺、120° 的左長甩 → 千本鳥居直線 → 半徑約 44 公尺、150° 的左長甩（出口內側加速帶）→ 終點</td></tr>
+<tr><th>側傾</th><td>−6°～+8°</td></tr>
+<tr><th>路肩</th><td>預設兩側護牆、路肩草地；河邊等處開放</td></tr>
+<tr><th>跳台</th><td>無</td></tr>
+<tr><th>加速帶</th><td>3 個：右髮夾出口內側、捷徑出口左側、最後左長甩出口內側</td></tr>
+<tr><th>捷徑</th><td>神社參道石板小路，從 100° 左彎內側切過：沿線 763 → 894 公尺（主線約 131 公尺，捷徑約 104 公尺，省約 27 公尺），半寬 3.5 公尺，土路</td></tr>
+<tr><th>危險區</th><td>城下的河</td></tr>
+<tr><th>地標</th><td>城郭、五重塔、拱橋（立體交叉）、千本鳥居、神社參道</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="trk-snow">6.5 雪國山道（★★★）</h3>
+<p>高低差是主角（每圈爬升約 43 公尺）。之字爬坡、山頂盲彎接大跳台、傾斜的下山掃彎、穿山冰隧道；捷徑橫越結冰湖。</p>
+<div class="table-wrap"><table>
+<tbody>
+<tr><th>路線</th><td>山腳平地起跑直線 → 半徑約 65 公尺右彎開始爬 → 湖邊 S 形繞行：湖邊彎 1 → 左髮夾彎 1（半徑約 22 公尺，內側低處開放雪地、外側護欄）→ 湖邊彎 2 → 之字爬坡 → 髮夾彎 2 → 山頂 180° 盲彎（內側牆擋視線）→ 75 公尺助跑道（加速帶）→ 起跳坡 → 大跳台 → 寬落地區 → 下山傾斜右掃彎（側傾 12°～15°）→ 緩 S 彎 → 冰隧道（下坡）→ 出隧道直衝山腳 → 坡底放平 → 半徑約 55 公尺右彎回起跑直線</td></tr>
+<tr><th>側傾</th><td>−8°～+15°</td></tr>
+<tr><th>路肩</th><td>預設兩側護牆、路肩雪地；部分開放或護欄</td></tr>
+<tr><th>跳台</th><td>1 個大跳台：沿線約 1290 公尺處，缺口約 22 公尺、落差約 7 公尺，底下是深谷水面</td></tr>
+<tr><th>加速帶</th><td>3 個，其中一個在大跳台前的助跑道</td></tr>
+<tr><th>捷徑</th><td>從湖邊彎 1 外側直走，沿結冰湖中間的窄土堤切到湖邊彎 2 出口，省掉一個髮夾彎：沿線 292 → 634 公尺（主線約 342 公尺，捷徑約 123 公尺，省約 219 公尺），半寬 3 公尺，土路，兩側是水</td></tr>
+<tr><th>危險區</th><td>結冰湖兩側的水、大跳台底下的深谷水面</td></tr>
+<tr><th>地標</th><td>結冰湖、山頂盲彎、大跳台、冰隧道</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="trk-city">6.6 霓虹夜城（★★★★）</h3>
+<p>夜晚城市街道，8 字形立體交叉。全程護牆，直角彎多，要靠急煞甩尾與點煞。</p>
+<div class="table-wrap"><table>
+<tbody>
+<tr><th>路線</th><td>起跑直線往東、從高架橋下穿過 → 270° 左轉的圓環匝道（半徑約 80 公尺、側傾 −15°、邊爬邊轉到 10.5 公尺高）→ 從高架上跨過剛走過的街道 → 下高架大直線（約 225 公尺）接直角右彎（急煞甩尾）→ 直角 S 彎（左右）→ 60° 斜向大道（左右）→ 直角右彎（窄巷捷徑可從右側斜切）→ 地下道（下沉約 5.5 公尺）→ 出地下道 120° 右彎（長甩）→ 緩緩接回起跑直線</td></tr>
+<tr><th>側傾</th><td>−15°～0°（圓環匝道）</td></tr>
+<tr><th>路肩</th><td>街道全程護牆、高架是護欄</td></tr>
+<tr><th>跳台</th><td>無</td></tr>
+<tr><th>加速帶</th><td>3 個</td></tr>
+<tr><th>捷徑</th><td>窄巷：沿線 1294 → 1419 公尺（主線約 126 公尺，捷徑約 101 公尺，省約 25 公尺），半寬 3.5 公尺，土路</td></tr>
+<tr><th>危險區</th><td>無</td></tr>
+<tr><th>地標</th><td>270° 圓環匝道、高架立體交叉、下坡大直線、地下道</td></tr>
+<tr><th>夜間</th><td>跟著車走的補光（像路燈照在車上）；霓虹在高畫質下有泛光</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="trk-volcano">6.7 熔岩火山（★★★★★）</h3>
+<p>最難的一條。路窄（半寬 5.5～7 公尺），路旁就是熔岩：兩個飛越熔岩的跳台、連續髮夾彎爬上火山口、岩石拱橋、熔岩湖上的窄石橋捷徑。</p>
+<div class="table-wrap"><table>
+<tbody>
+<tr><th>路線</th><td>起跑後的熔岩池直道（兩側開放路肩）→ 沿熔岩河的下層路 → 跳台 1 飛越熔岩河 → 左甩進之字爬坡（兩個髮夾彎，外側開放沙地）爬上火山口 → 繞火山口約 120° 長甩（內側開放路肩就是火山口熔岩湖）→ 出火山口先平後陡降 → 岩石拱橋跨過熔岩河谷與下層路（高差約 8.7 公尺）→ 谷底接跳台 2 飛越熔岩溪 → 落地後繞熔岩湖的右掃彎（捷徑在這裡）→ 最後一個甩尾彎回起跑直線</td></tr>
+<tr><th>側傾</th><td>−10°～+10°</td></tr>
+<tr><th>路肩</th><td>預設兩側護牆、路肩草地（火山灰外觀）；熔岩邊開放或護欄</td></tr>
+<tr><th>跳台</th><td>2 個：沿線約 426 公尺處（飛越熔岩河）與約 1506 公尺處（飛越熔岩溪），缺口各約 18 公尺</td></tr>
+<tr><th>加速帶</th><td>3 個</td></tr>
+<tr><th>捷徑</th><td>橫越熔岩湖的窄石橋：沿線 1589 → 1959 公尺（主線約 371 公尺，捷徑約 239 公尺，省約 132 公尺），半寬 3.5 公尺，<strong>一般路面</strong>（不減速），兩側沒牆，失誤就掉進熔岩</td></tr>
+<tr><th>危險區</th><td>熔岩池、熔岩河、熔岩溪、火山口熔岩湖、熔岩湖</td></tr>
+<tr><th>地標</th><td>火山口、岩石拱橋、兩個熔岩跳台、熔岩湖石橋</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section id="ai">
+<h2>7. 電腦車手（AI）</h2>
+
+<h3>7.1 原則</h3>
+<ul>
+  <li>電腦用<strong>跟玩家完全相同的車輛物理</strong>，只是「按鍵」由程式決定；會甩尾、點煞、小噴、雙噴、放氮氣、走捷徑。</li>
+  <li>強弱只靠下列技巧參數與極速倍率調整，物理參數不另外給。</li>
+  <li>決策每秒 60 次；物理仍每秒 120 步。</li>
+</ul>
+
+<h3>7.2 強度公式</h3>
+<p>強度由「賽道難度 d（1～5，目前等於星等）」與「對手順位 i（0＝最強 Mochi、1＝Azuki、2＝最弱 Kinako）」決定。令 t ＝ (d − 1) ÷ 4：</p>
+<div class="table-wrap"><table>
+<thead><tr><th>參數</th><th>意義</th><th>公式</th></tr></thead>
+<tbody>
+<tr><td>極速倍率</td><td>乘在基本極速 40 m/s 上</td><td>0.92 ＋ 0.085t − 0.015i</td></tr>
+<tr><td>甩尾率</td><td>遇到該甩的彎會甩的機率</td><td>0.88 ＋ 0.12t − 0.03i</td></tr>
+<tr><td>完美率</td><td>小噴打到完美的機率</td><td>0.25 ＋ 0.6t − 0.1i</td></tr>
+<tr><td>雙噴率</td><td>接雙噴的機率</td><td>0.15 ＋ 0.7t − 0.1i（小於 0 等於 0）</td></tr>
+<tr><td>氮氣率</td><td>有氮氣時每秒判一次會用的機率</td><td>0.7 ＋ 0.3t</td></tr>
+<tr><td>走線準度</td><td>越低越常偏離理想路線、彎前判斷越晚</td><td>0.7 ＋ 0.3t − 0.06i</td></tr>
+<tr><td>捷徑率</td><td>每次經過捷徑入口走捷徑的機率</td><td>max(0, 走線準度 − 0.6) × 2</td></tr>
+<tr><td>偏好車道</td><td>離中心線的橫向位置，避免疊成一線</td><td>Mochi −2.2 m（左）、Azuki +2.2 m（右）、Kinako 0</td></tr>
+</tbody>
+</table></div>
+<p>各賽道的實際值（Mochi／Azuki／Kinako）：</p>
+<div class="table-wrap"><table>
+<thead><tr><th>賽道（d）</th><th>極速倍率</th><th>甩尾率</th><th>完美率</th><th>雙噴率</th><th>氮氣率</th><th>走線準度</th><th>捷徑率</th></tr></thead>
+<tbody>
+<tr><td>椰林海灘（1）</td><td>0.920／0.905／0.890</td><td>0.88／0.85／0.82</td><td>0.25／0.15／0.05</td><td>0.15／0.05／0</td><td>0.70</td><td>0.70／0.64／0.58</td><td>0.20／0.08／0</td></tr>
+<tr><td>櫻花古都（2）</td><td>0.941／0.926／0.911</td><td>0.91／0.88／0.85</td><td>0.40／0.30／0.20</td><td>0.325／0.225／0.125</td><td>0.775</td><td>0.775／0.715／0.655</td><td>0.35／0.23／0.11</td></tr>
+<tr><td>雪國山道（3）</td><td>0.963／0.948／0.933</td><td>0.94／0.91／0.88</td><td>0.55／0.45／0.35</td><td>0.50／0.40／0.30</td><td>0.85</td><td>0.85／0.79／0.73</td><td>0.50／0.38／0.26</td></tr>
+<tr><td>霓虹夜城（4）</td><td>0.984／0.969／0.954</td><td>0.97／0.94／0.91</td><td>0.70／0.60／0.50</td><td>0.675／0.575／0.475</td><td>0.925</td><td>0.925／0.865／0.805</td><td>0.65／0.53／0.41</td></tr>
+<tr><td>熔岩火山（5）</td><td>1.005／0.990／0.975</td><td>1.00／0.97／0.94</td><td>0.85／0.75／0.65</td><td>0.85／0.75／0.65</td><td>1.00</td><td>1.00／0.94／0.88</td><td>0.80／0.68／0.56</td></tr>
+</tbody>
+</table></div>
+<p>設計目標：簡單賽道上打得好的玩家能贏；最難的賽道要接近每彎完美小噴才贏得了。</p>
+
+<h3>7.3 駕駛行為</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>行為</th><th>規格</th></tr></thead>
+<tbody>
+<tr><td>瞄準點</td><td>沿中心線往前看 8 ＋ 車速 ×（0.4 ＋ 0.08 ×（1 − 走線準度））公尺，加上自己的車道偏移；轉向誤差超過 0.04 rad 才按方向。走線準度不滿 1 時方向誤差會加上 ±（1 − 走線準度）× 0.06 rad 的週期擺動。</td></tr>
+<tr><td>判斷要不要甩</td><td>看前方 8 公尺到（28 ＋ 車速 × 0.45）公尺之間的賽道轉角；轉角 &gt; 0.75 rad 且車速 &gt; 18 m/s、不在捷徑上時，以甩尾率決定甩：放開油門、按住甩尾＋彎的方向。決定不甩就這個彎都不甩，直到前方轉角小於 0.3 rad。</td></tr>
+<tr><td>甩尾中</td><td>預估要的路線轉速，換算成內切或外拉：需要比基準多（換算值 &gt; 0.3）就壓彎內、少（&lt; −0.4）就往外拉；換算值 &gt; 1.6 且走線準度 &gt; 0.7 時點煞。</td></tr>
+<tr><td>放開甩尾</td><td>前方轉角 &lt; 0.35 rad 且路線跟 25 公尺外的賽道方向差 &lt; 0.25 rad 時放開。</td></tr>
+<tr><td>小噴</td><td>放開時抽一次：完美率內 → 等側滑角小於 5.6°（完美門檻 × 0.8）才按；否則以剩下機率的 60% → 等側滑角小於 14.4°（普通門檻 × 0.9）才按；其餘 → 立刻按（太早）。</td></tr>
+<tr><td>雙噴</td><td>以雙噴率決定接不接；要接時在小噴後 0.31 秒（雙噴窗中點）按。</td></tr>
+<tr><td>油門</td><td>不甩尾時一律按油門（在捷徑上超過安全車速時放開）。</td></tr>
+<tr><td>空中</td><td>不按方向。</td></tr>
+<tr><td>氮氣</td><td>有氮氣、前方轉角 &lt; 0.2 rad 時，每 1 秒判一次，以氮氣率決定使用。</td></tr>
+<tr><td>閃車</td><td>每 0.5 秒檢查一次：前方 0～12 公尺內、橫向差 2.2 公尺內有車，就往左或右（隨機）換 3 公尺，夾在路面半寬 −2 公尺內；沒擋到時每次以 20% 往偏好車道靠回；車道超出半寬 −1.5 公尺時拉回。</td></tr>
+</tbody>
+</table></div>
+
+<h3>7.4 追趕機制（單機競賽）</h3>
+<ul>
+  <li>每一步依「玩家累計距離 − 電腦累計距離」調整電腦的極速倍率：基本極速倍率 ＋ 差距 ÷ 600，加成夾在 −0.03～+0.05。</li>
+  <li>也就是落後玩家 30 公尺以上極速最多 +5%，領先玩家 18 公尺以上最多 −3%。</li>
+  <li>電腦完賽後極速倍率固定 0.85。</li>
+  <li>多人連線時改以「還連著的真人中跑最遠的那位」為基準，規則相同；沒有連著的真人時不加減。</li>
+</ul>
+
+<h3>7.5 捷徑判斷</h3>
+<ul>
+  <li>離捷徑入口 45～90 公尺之間判一次，以捷徑率決定走不走；過了入口後，下一圈再判一次。</li>
+  <li>決定走時若正在甩尾：離入口 30 公尺內收掉甩尾，直線開進捷徑。</li>
+  <li>捷徑上瞄準捷徑路線上前方（5 ＋ 車速 × 0.18）公尺的點；依前方 25 公尺的彎度限制車速（側向加速度約 28 m/s²），超過就放油門。</li>
+  <li>已經開上捷徑後偏離捷徑路線超過 15 公尺（例如被撞開）就放棄，回主線；開到捷徑尾端回主線。</li>
+</ul>
+
+<h3>7.6 起步噴</h3>
+<p>單機競賽與多人連線中的電腦，每場在 GO 時以「0.3 ＋ 星等 × 0.12」的機率觸發起步噴（加速量 8 m/s、1.0 秒）：★1 42%、★2 54%、★3 66%、★4 78%、★5 90%。</p>
+
+<h3>7.7 卡住與重生</h3>
+<ul>
+  <li>比賽中 3 秒內累計前進不到 6 公尺就自己重生（4.17）。倒數中不計。</li>
+  <li>重生（不論原因）後清掉甩尾、捷徑、小噴的打算，放開甩尾、方向、煞車。</li>
+</ul>
+
+<h3>7.8 多人連線的代駕</h3>
+<ul>
+  <li>空位電腦：照座位順序依序套用順位 0、1、2 的強度（座位 1、2、3 都是電腦時，就是 Mochi 最強、Kinako 最弱）。</li>
+  <li>真人斷線、掛機、離開房間或已完賽時由電腦代駕，強度＝難度 min(5, d＋1)、順位 1。</li>
+</ul>
+</section>
+
+<!-- ============================================================ 8 -->
+<section id="hud">
+<h2>8. 介面（HUD）與操作設定</h2>
+
+<h3>8.1 比賽 HUD</h3>
+<p>HUD 依畫面大小等比縮放（縮放＝min(寬 ÷ 1100, 高 ÷ 620)，夾在 0.62～1.25）。倒數與比賽中顯示，暫停與成績頁隱藏。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>元素</th><th>位置</th><th>內容</th></tr></thead>
+<tbody>
+<tr><td>圈數</td><td>左上面板第 1 行</td><td>「LAP 目前圈／總圈」（黃字，目前圈不超過總圈）；自由練習是「練習 第 N 圈」</td></tr>
+<tr><td>總時間</td><td>左上面板第 2 行</td><td>比賽時間 mm:ss.ss（倒數中 00:00.00）</td></tr>
+<tr><td>本圈、最佳</td><td>左上面板第 3 行</td><td>「本圈 mm:ss.ss　最佳 mm:ss.ss」；最佳是這條賽道的個人最佳單圈</td></tr>
+<tr><td>名次</td><td>左上面板下方（只有競賽與多人）</td><td>大字名次（第 1 金、第 2 銀、第 3 銅、第 4 白）＋「/4」</td></tr>
+<tr><td>排行</td><td>名次下方（只有競賽與多人）</td><td>四列「名次　名字」，前面是車手顏色圓點；玩家那列黃字</td></tr>
+<tr><td>暫停鈕</td><td>右上角</td><td>圓形暫停圖示，點了進暫停選單</td></tr>
+<tr><td>小地圖</td><td>暫停鈕下方</td><td>北朝上的賽道輪廓、黃色起終點線、玩家是指向車頭方向的紅色三角形、其他車是各自顏色的圓點。邊長＝min(190 × 縮放, 畫面高 × 0.36)</td></tr>
+<tr><td>車速</td><td>下方中央</td><td>大字數字＋「km/h」。顯示值＝實際速度（m/s）× 3.6 × 1.8 後四捨五入（極速 40 m/s 顯示 259）；氮氣中藍字、其他噴射中橘字</td></tr>
+<tr><td>集氣條</td><td>車速下方</td><td>橫條顯示集氣進度；右邊兩個圓代表氮氣（有＝亮藍、沒有＝暗）；氮氣作用中集氣條下多一條細條顯示剩餘時間</td></tr>
+<tr><td>小噴時機表</td><td>畫面下方、車速上方（只在時機窗開著時）</td><td>見下方說明</td></tr>
+<tr><td>逆向警告</td><td>畫面上方中央</td><td>紅字「逆向！」（4.18）</td></tr>
+<tr><td>對手名牌</td><td>對手車頂上方</td><td>對手名字（該車顏色），距離鏡頭 90 公尺內才顯示，65～90 公尺逐漸淡出</td></tr>
+<tr><td>倒數</td><td>畫面中央</td><td>「3」「2」「1」黃字、「GO!」綠字</td></tr>
+<tr><td>彈出文字</td><td>畫面上方中央，依類型分幾個高度</td><td>見 8.2；同一高度只留最新的一則</td></tr>
+<tr><td>連線資訊</td><td>多人連線時</td><td>「房間 NNNN　延遲 N ms」，電腦代駕中時加「電腦代駕中（按任何鍵接回）」；每 0.5 秒更新</td></tr>
+</tbody>
+</table></div>
+
+<h4>小噴時機表</h4>
+<ul>
+  <li><strong>小噴階段</strong>：橫條代表側滑角 30°（左端）到 0°（右端）。紅區＝16° 以上（太早）、黃區＝7°～16°（普通）、綠區＝7° 以下（完美）。白色指針標示目前側滑角，車身越正越往右。下方細白條顯示時機窗剩餘時間。上方文字「按 J：小噴（車身回正到綠區最完美）」（顯示目前油門鍵；觸控自動油門時顯示「噴」）。</li>
+  <li><strong>雙噴階段</strong>：橫條代表 0 到 0.6 秒（<code>djMax</code> ＋ 0.1）。紅區＝0～0.12 秒、綠區＝0.12～0.5 秒，白色指針是小噴後經過的時間。上方文字「再按一次：雙噴」。</li>
+  <li>時機窗開著時，觸控的「噴」鈕外圈發亮。</li>
+</ul>
+
+<h3>8.2 彈出文字</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>時機</th><th>文字</th><th>顏色</th></tr></thead>
+<tbody>
+<tr><td>小噴</td><td>完美小噴！／小噴／小噴（太早）</td><td>綠／黃／橘</td></tr>
+<tr><td>雙噴成功</td><td>雙噴！</td><td>淺藍</td></tr>
+<tr><td>雙噴失敗</td><td>雙噴太快／雙噴太慢</td><td>橘</td></tr>
+<tr><td>錯過小噴</td><td>錯過小噴</td><td>半透明白</td></tr>
+<tr><td>使用氮氣</td><td>氮氣！</td><td>淺藍</td></tr>
+<tr><td>集滿一顆氮氣</td><td>集氣完成 +1 氮氣</td><td>青藍</td></tr>
+<tr><td>起步噴</td><td>起步噴！</td><td>綠</td></tr>
+<tr><td>掉進危險區／掉出賽道</td><td>掉進去了！／掉出賽道！</td><td>橘</td></tr>
+<tr><td>完成一圈</td><td>第 N 圈 mm:ss.ss（最佳單圈加「★」）</td><td>白</td></tr>
+<tr><td>進入最後一圈</td><td>最後一圈！</td><td>黃</td></tr>
+<tr><td>多人：自己完賽</td><td>完賽！等其他人跑完…</td><td>黃</td></tr>
+<tr><td>自動降畫質</td><td>畫面不夠順，已自動切到省電畫質（可在設定改回）</td><td>白</td></tr>
+<tr><td>多人比賽中按調參</td><td>連線比賽用預設的操控參數，不能調</td><td>黃</td></tr>
+<tr><td>跟 server 斷線</td><td>跟 server 的連線斷了</td><td>橘</td></tr>
+</tbody>
+</table></div>
+
+<h3>8.3 預設按鍵</h3>
+<p>左手 A、D 轉向、空白鍵甩尾；右手 J 油門（小噴）、K 煞車、L 氮氣。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>動作</th><th>主要</th><th>次要</th></tr></thead>
+<tbody>
+<tr><td>油門</td><td>J</td><td>—</td></tr>
+<tr><td>煞車／倒車</td><td>K</td><td>—</td></tr>
+<tr><td>左轉</td><td>A</td><td>—</td></tr>
+<tr><td>右轉</td><td>D</td><td>—</td></tr>
+<tr><td>甩尾</td><td>空白鍵</td><td>—</td></tr>
+<tr><td>氮氣</td><td>L</td><td>—</td></tr>
+<tr><td>回到賽道</td><td>R</td><td>—</td></tr>
+<tr><td>暫停</td><td>Esc</td><td>P</td></tr>
+<tr><td>操控調參面板</td><td>T</td><td>—</td></tr>
+</tbody>
+</table></div>
+
+<h3>8.4 觸控按鈕</h3>
+<p>觸控裝置在倒數與比賽中顯示；按鈕半徑基準 r＝畫面高 × 0.105，夾在 36～70 像素。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>按鈕</th><th>位置</th><th>大小（半徑）</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td>◀、▶</td><td>左下，並排</td><td>1.05r</td><td>左轉、右轉；手指按著可以在兩鍵之間滑動換向（只有這兩顆可以滑）</td></tr>
+<tr><td>甩尾</td><td>右下角</td><td>1.15r</td><td>按住起甩</td></tr>
+<tr><td>噴</td><td>甩尾鈕左邊</td><td>0.88r</td><td>小噴、雙噴、起步噴</td></tr>
+<tr><td>氮氣</td><td>甩尾鈕上方</td><td>0.88r</td><td>使用氮氣</td></tr>
+<tr><td>煞</td><td>噴鈕上方</td><td>0.62r</td><td>煞車、倒車、點煞</td></tr>
+</tbody>
+</table></div>
+<ul>
+  <li>判定範圍是按鈕半徑的 1.35 倍內最近的那顆；支援多指同時按。</li>
+  <li>油門自動（4.1）。按下時按鈕變亮。</li>
+  <li>隱藏 HUD（暫停、成績）時放開所有觸控按鈕。</li>
+</ul>
+
+<h3>8.5 設定對話框與改鍵</h3>
+<p>從首頁「設定」或暫停選單「設定（按鍵／調參）」開啟，標題「設定」：</p>
+<ul>
+  <li><strong>畫質</strong>：兩個選項「高畫質」（泛光、反鋸齒、高解析陰影）與「省電」（手機跑不順時用），點了立即切換並記住（8.8）。</li>
+  <li><strong>按鍵</strong>：表格每列一個動作（8.3 的九個動作），兩格「主要」「次要」。
+    <ul>
+      <li>點一格 → 格子顯示「按下新按鍵…」→ 下一個按的鍵就是新設定（包括 Esc）。</li>
+      <li>同一個鍵只能屬於一個動作：設定的鍵原本屬於別的動作時，自動從原動作拿掉，並在說明列顯示「「X」原本是「Y」的鍵，已改給「Z」」。</li>
+      <li>有設定的格子旁有「✕」可清空。沒設定顯示「—」。</li>
+    </ul>
+  </li>
+  <li>底部按鈕：「恢復預設」（全部回到 8.3）、「操控調參」（關掉對話框、開調參面板）、「完成」。</li>
+  <li>按鍵設定存在這台裝置；改了之後首頁的操作提示、操作說明、時機表的提示文字都跟著變。</li>
+</ul>
+
+<h3>8.6 暫停選單</h3>
+<p>見 2.5（單機）與 3.5（多人連線）。</p>
+
+<h3>8.7 操作說明對話框</h3>
+<p>從首頁「操作說明」或暫停選單「操作說明」開啟，內容依目前的按鍵設定顯示：</p>
+<ul>
+  <li><strong>鍵盤（目前的設定）</strong>：九個動作與按鍵的對照表，部分動作附一行小字提示（油門：甩尾放開後再按一次＝小噴、接著再按一次＝雙噴、倒數 GO 時按＝起步噴；煞車：甩尾中點一下＝點煞；甩尾：按住＋方向起甩；氮氣：集滿氣後使用；回到賽道：卡住時用）。</li>
+  <li><strong>技巧</strong>：甩尾集氣、小噴、雙噴、點煞、氮氣、起步噴、路外減速與回到賽道，七條說明。</li>
+  <li><strong>手機觸控</strong>：自動油門與六顆按鈕的說明。非觸控裝置另加一行「按鍵可以在首頁或暫停選單的「設定」裡改」。</li>
+  <li>按鈕「知道了」關閉。</li>
+</ul>
+
+<h3>8.8 畫質</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>高畫質</th><th>省電</th></tr></thead>
+<tbody>
+<tr><td>解析度倍率上限</td><td>2</td><td>1.25</td></tr>
+<tr><td>反鋸齒</td><td>4 倍多重取樣</td><td>無後製（直接畫）</td></tr>
+<tr><td>泛光（霓虹、熔岩、車燈）</td><td>有（強度依主題）</td><td>無</td></tr>
+<tr><td>放射狀動態模糊</td><td>有</td><td>無</td></tr>
+<tr><td>調色（飽和、對比、四角微暗）</td><td>有</td><td>無</td></tr>
+<tr><td>陰影</td><td>高解析</td><td>較低</td></tr>
+</tbody>
+</table></div>
+<ul>
+  <li>預設高畫質。</li>
+  <li><strong>自動降級</strong>：高畫質且在比賽中時，每 4 秒算一次平均幀率，低於 40 fps 就切到省電並彈出提示；每次開啟網頁最多自動降一次。玩家在設定裡手動切過畫質後就不再自動降。</li>
+</ul>
+</section>
+
+<!-- ============================================================ 9 -->
+<section id="online">
+<h2>9. 多人連線</h2>
+
+<h3 id="net-arch">9.1 架構</h3>
+<ul>
+  <li><strong>權威 server</strong>：server 架在玩家自己的電腦上（同一個區域網路連線），以每秒 120 步跑整場比賽，物理就是遊戲本身的車輛物理程式（同一份程式碼），client 與 server 天生一致。</li>
+  <li><strong>client 只上傳輸入</strong>，server 不採信 client 回報的位置。</li>
+  <li><strong>人數</strong>：每間房最多 4 位真人；開賽時空位由電腦補滿，固定 4 台車。</li>
+  <li>server 零相依（只用 Node.js 內建功能，不用安裝套件）；需要 Node.js 18 以上。</li>
+</ul>
+
+<h3 id="net-server">9.2 server 啟動與網址</h3>
+<ul>
+  <li>啟動：<code>node server/server.mjs</code>，或雙擊 <code>server\start.bat</code>（找不到 Node.js 會提示安裝）。預設埠 8787，可用 <code>--port</code> 指定。</li>
+  <li>啟動時列出：版本與協議版本、「這台電腦：http://localhost:埠/」、每個區網 IP 的「同網路的其他裝置：http://IP:埠/」、賽道清單與人數上限。</li>
+  <li>同一個埠提供三樣東西：
+    <ul>
+      <li><code>http://主機:埠/</code>：遊戲網頁本身（讀 repo 的檔案，所以 server 與網頁永遠同一版）。拒絕跑出 repo 的路徑與點開頭的路徑。</li>
+      <li><code>ws://主機:埠/ws</code>：連線協議。</li>
+      <li><code>http://主機:埠/version</code>：回傳遊戲名、版本、協議版本、房間數、在線人數、網路模擬設定（JSON）。</li>
+    </ul>
+  </li>
+  <li>測試用網路模擬參數：<code>--lag</code>（單向延遲毫秒）、<code>--jitter</code>（抖動毫秒）、<code>--loss</code>（快照丟包率）。延遲與抖動保持訊息先後順序。</li>
+  <li>Windows 第一次啟動時防火牆會詢問，要允許「私人網路」其他裝置才連得進來。</li>
+</ul>
+
+<h3 id="net-lobby">9.3 大廳與房間</h3>
+<h4>連線對話框（標題「多人連線」）</h4>
+<ul>
+  <li>說明「最多 4 人同場，空位由電腦補滿…」、欄位「名字」（最多 12 字）與「Server」（提示文字是預設 server）、怎麼開 server 的說明。按鈕「取消」「連線」，在欄位裡按 Enter 也可連線。</li>
+  <li>預設 server：網頁本身是 http 且有主機名（也就是 server 供應的網頁）→ 連同一台；否則 → <code>localhost:8787</code>。Server 欄可以填「IP」「IP:埠」或完整網址，沒寫埠就補 8787。</li>
+  <li>名字空白時提示「先取個名字」。連線中按鈕停用、顯示「連線中…」。5 秒沒連上顯示「連不上（逾時）」；連不上顯示「連不上 server：確認 server 有開、位址與埠對不對」；其他錯誤顯示 server 給的訊息。</li>
+  <li>名字與 Server 欄記在這台裝置。</li>
+  <li>server 端的名字處理：去掉空白與 <code>&lt; &gt; &amp; " '</code>，截到 12 字；去完是空的就用「玩家＋編號」。</li>
+</ul>
+<h4>房間清單（標題「多人連線　房間」）</h4>
+<ul>
+  <li>上方「已連上 名字　延遲 N ms」（延遲每 0.5 秒更新）。</li>
+  <li>賽道下拉選單（預設目前首頁選的賽道）＋「開新房間」。</li>
+  <li>房號輸入框（4 位數）＋「加入」。</li>
+  <li>開著的房間清單：每列「房號　賽道名　人數/4 人　房主 名字　狀態（等待中／滿了／比賽中）」＋「加入」鈕（比賽中或滿了時停用）。沒有房間時顯示「還沒有人開房，開一間吧」。清單有變動時 server 主動推送。</li>
+  <li>按鈕「斷線」（斷開連線並關閉對話框）、「關閉」。</li>
+</ul>
+<h4>房間（標題「多人連線　房間」）</h4>
+<ul>
+  <li>房號（4 位數，1000～9999 隨機、不重複）、延遲。</li>
+  <li>賽道：房主在等待中可用下拉選單換賽道（所有人的首頁背景跟著換、順便先載入）；其他人只看得到賽道名與星等。</li>
+  <li>四個座位：顏色圓點＋真人名字（標「房主」「（你）」），空位顯示「電腦 座位預設名」。</li>
+  <li>提示：房主「人到齊就按「開始比賽」，空位電腦補。」、其他人「等房主開始…」、開賽準備中「比賽準備中…」。</li>
+  <li>按鈕「離開房間」（回房間清單）；房主另有「開始比賽」（準備中停用）。</li>
+</ul>
+<h4>房間規則</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>規則</th></tr></thead>
+<tbody>
+<tr><td>座位</td><td>加入時拿最小號的空座位（0～3）</td></tr>
+<tr><td>房主</td><td>開房的人；房主離開時由加入順序最早的人接任</td></tr>
+<tr><td>加入失敗</td><td>「找不到這個房間」／「這間正在比賽，等這場跑完再加入」（開賽準備中或比賽中）／「這間已經滿了（最多 4 人）」</td></tr>
+<tr><td>關房</td><td>房裡沒人就關閉</td></tr>
+<tr><td>換賽道、開始</td><td>只有房主、只在等待中</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="net-start">9.4 開賽流程</h3>
+<ol>
+  <li>房主按「開始比賽」→ 房間進入準備中；server 決定四個座位（有真人的座位是真人，其他是電腦）並通知所有人賽道、圈數、座位。</li>
+  <li>每位玩家載入賽道，載好回報 server。</li>
+  <li>所有人都載好、或 15 秒到了，server 開始比賽並通知大家；所有人一起開始 3 秒倒數（360 步），GO 在第 360 步。</li>
+  <li>起跑格：電腦排前面、真人排後面（3.5）。</li>
+  <li>起步噴規則同單機（4.10），以步數判定。</li>
+</ol>
+
+<h3 id="net-sync">9.5 同步</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>部分</th><th>規格</th></tr></thead>
+<tbody>
+<tr><td>上行（client → server）</td><td>client 每個物理步產生一筆輸入：序號、方向（−1／0／+1）、油門、煞車、甩尾按著、「剛按下」位元（甩尾、煞車、氮氣、噴、回到賽道）。每個畫面幀打包送一次。server 把值夾回合法範圍、丟掉序號沒有變大的輸入。</td></tr>
+<tr><td>server 取輸入</td><td>每步取該玩家佇列最前面的一筆。佇列超過 24 筆時丟到剩 6 筆（被丟的「剛按下」併進下一筆，不會漏）。佇列空時沿用上一筆的「按著的鍵」（不帶剛按下）；0.5 秒沒收到任何輸入就改成全部放開。</td></tr>
+<tr><td>下行（server → client）</td><td>每 4 步（每秒 30 次）送快照：每台車的完整物理狀態、當下按著的鍵、圈數、本圈起點時間、完賽時間、誰在開（真人／代駕／電腦）、各圈時間；另附這位玩家處理到第幾號輸入、佇列長度。連線太慢（寫不出去的資料超過 64 KB）就跳過這張快照。開局、結算等其他訊息一定送到。</td></tr>
+<tr><td>自己的車</td><td>本地預測：按下去立刻動。快照到了就回到 server 的狀態，把還沒被確認的輸入重放一次。最多保留 720 筆（6 秒）未確認輸入。電腦代駕或已完賽時不預測，直接跟快照。</td></tr>
+<tr><td>對手的車</td><td>用快照狀態＋快照裡按著的鍵，以同一套物理前推到跟自己同一時刻（車與車碰撞照算）。</td></tr>
+<tr><td>畫面平滑</td><td>回滾造成的位置與車頭跳動存成「顯示誤差」，以每秒衰減率 10（約 0.1 秒）歸零；畫面、鏡頭、特效都讀加上誤差後的位置。誤差超過 8 公尺（重生、剛開始）直接跳過去。</td></tr>
+<tr><td>時間微調</td><td>目標是 server 端這位玩家的輸入佇列維持 4 筆（約 33 毫秒緩衝）。client 把回報的佇列長度做平滑，模擬速度＝1 ＋（4 − 平滑佇列長度）× 0.01，夾在 0.97～1.03。</td></tr>
+<tr><td>延遲量測</td><td>每 1 秒送一次 ping，延遲以 0.8／0.2 平滑。</td></tr>
+<tr><td>server 計時</td><td>每間房一個迴圈，以實際經過時間追步數（晚到就一次多跑，每次最多 60 步）；落後太多（例如電腦休眠）就不追了，從現在重新起算。一間房模擬出錯只中止那一場（通知「server 模擬出錯，這場中止」），不影響其他房。</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="net-idle">9.6 斷線與掛機</h3>
+<ul>
+  <li>誰在開一台車只看：這個座位有沒有真人連著、而且 3 秒內有沒有收到輸入、而且還沒完賽。有就是真人開，否則電腦代駕（7.8）。</li>
+  <li>網頁切到背景（不再送輸入）超過 3 秒 → 電腦代駕；回到前景恢復送輸入就自動接回。代駕中畫面上顯示「電腦代駕中（按任何鍵接回）」。</li>
+  <li>暫停選單開著時 client 仍送「全部放開」的輸入，所以車子是放開所有鍵、不是電腦代駕。</li>
+  <li>比賽中離開房間（選單「離開比賽」或斷線）：這台車由電腦開完。</li>
+  <li>client 跟 server 的連線斷了：回首頁並彈出「跟 server 的連線斷了」。</li>
+</ul>
+
+<h3 id="net-end">9.7 結算</h3>
+<ul>
+  <li>所有真人都完賽、或已離開 → 2 秒後結算。</li>
+  <li>第一位（還在房裡的）真人完賽後 30 秒 → 結算。</li>
+  <li>比賽時間超過 20 分鐘 → 結算。</li>
+  <li>結算時依 3.1 的名次規則（沒跑完的用推估時間）排序，送出名次、時間、是否完賽、各圈時間。client 顯示成績頁（2.6），房間回到等待中，可以再開一場。</li>
+  <li>自己完賽後畫面彈出「完賽！等其他人跑完…」，車改由電腦以 0.85 倍極速開，直到結算。</li>
+</ul>
+
+<h3 id="net-https">9.8 https 網頁的行為</h3>
+<ul>
+  <li>瀏覽器不准 https 網頁（GitHub Pages、App）連別台電腦的 <code>ws://</code>，只有本機（localhost、127.0.0.1、[::1]）例外。</li>
+  <li>所以在 https 網頁上 Server 欄填的不是本機時，按「連線」不直接連，改把網頁轉到 <code>http://那台主機:埠/#mp=名字</code>（server 供應的網頁，版本一定對得上），訊息顯示「改開 server 的網頁（http://…/）…」。</li>
+  <li>轉過去的網頁讀到網址的 <code>#mp=名字</code>：清掉網址上的這段、記住名字、Server 欄清空（＝連同一台），自動打開連線對話框並直接連線。</li>
+  <li>server 那台電腦自己玩：直接開 GitHub Pages 版，Server 欄留空或填 <code>localhost:8787</code>。</li>
+</ul>
+
+<h3 id="net-proto">9.9 協議</h3>
+<p>WebSocket 文字訊框，內容是 JSON，欄位 <code>t</code> 是訊息類型。協議版本 1。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>方向</th><th>t</th><th>內容</th></tr></thead>
+<tbody>
+<tr><td>C→S</td><td><code>hello</code></td><td>名字、遊戲版本、協議版本。任一不同 → 回 <code>error</code>：「版本不一樣：server 是 vX，你的遊戲是 vY。請重新整理網頁（Ctrl＋F5），或改開 server 給的網址。」</td></tr>
+<tr><td>C→S</td><td><code>list</code>／<code>create</code>／<code>join</code>／<code>leave</code>／<code>track</code>／<code>start</code></td><td>房間清單、開房（賽道）、加入（房號）、離開、房主換賽道、房主開賽</td></tr>
+<tr><td>C→S</td><td><code>loaded</code></td><td>賽道載好了</td></tr>
+<tr><td>C→S</td><td><code>in</code></td><td>這一幀的輸入：<code>[[序號, 方向, 油門, 煞車, 甩尾, 剛按下位元], …]</code></td></tr>
+<tr><td>C→S／S→C</td><td><code>ping</code>／<code>pong</code></td><td>量延遲</td></tr>
+<tr><td>S→C</td><td><code>welcome</code></td><td>玩家編號、處理後的名字、版本；連上後接著送一次房間清單</td></tr>
+<tr><td>S→C</td><td><code>rooms</code></td><td>房間清單（房號、賽道、人數、上限、狀態、房主名字）；只推給還沒進房的人</td></tr>
+<tr><td>S→C</td><td><code>room</code></td><td>房間狀態（每次變動整份重送）</td></tr>
+<tr><td>S→C</td><td><code>error</code></td><td>錯誤訊息</td></tr>
+<tr><td>S→C</td><td><code>prep</code></td><td>開賽準備：賽道、圈數、四個座位（誰是真人）</td></tr>
+<tr><td>S→C</td><td><code>go</code></td><td>開始倒數；GO 在第 360 步、每步 1/120 秒</td></tr>
+<tr><td>S→C</td><td><code>snap</code></td><td>快照（每秒 30 次，9.5）</td></tr>
+<tr><td>S→C</td><td><code>result</code></td><td>結算：賽道、名次、時間、各圈</td></tr>
+</tbody>
+</table></div>
+<div class="warn">車輛物理每一步用到的狀態欄位都必須在快照狀態清單裡（<code>js/kart.js</code> 的 <code>STATE_KEYS</code>），否則連線時預測會一直被校正。</div>
+</section>
+
+<!-- ============================================================ 10 -->
+<section id="replay">
+<h2>10. 重播</h2>
+<h3>10.1 錄製</h3>
+<ul>
+  <li>每場比賽（單機三種模式與多人連線）開局時開始錄，倒數、比賽中都錄；多人連線時選單開著也繼續錄（比賽沒停）。單機暫停時不錄。</li>
+  <li>每 1/30 秒（以畫面時間計）記一筆，每台車記畫面要用的狀態：位置、車頭與路線方向、車速、方向值、甩尾狀態與方向、甩尾時間、噴射與氮氣剩餘時間、是否在草地或路緣石、俯仰、側傾、轉速、累計距離、集氣條、氮氣數、是否雙噴中、上下速度、是否在空中；另記當下的比賽時間。</li>
+  <li>多人連線錄的是自己畫面上看到的那份（含預測與平滑後的結果）。</li>
+  <li>上限 20 分鐘（36000 筆），超過不再記。</li>
+  <li><strong>只留最後一場</strong>，放在記憶體，開新的一場、重新整理網頁就沒了。一場 3 圈約 1～2 MB。</li>
+</ul>
+<h3>10.2 播放</h3>
+<ul>
+  <li>成績頁按「重播」進入，從開跑前 1.5 秒開始播（跳過大部分倒數），預設跟拍玩家的車。</li>
+  <li>兩筆紀錄之間內插（角度走最短方向；甩尾、草地、路緣石、甩尾方向、氮氣數、雙噴、空中這些開關類欄位不內插，取較近的那筆）。</li>
+  <li>畫面照常顯示車子、特效、鏡頭、風線；HUD 隱藏。播放速度 2 倍以下時有聲音。</li>
+  <li>播到底自動停住；停住後按播放從開跑前 1.5 秒重新播。</li>
+</ul>
+<h3>10.3 控制列</h3>
+<p>畫面下方的控制列：</p>
+<div class="table-wrap"><table>
+<thead><tr><th>元素</th><th>操作</th><th>鍵盤</th></tr></thead>
+<tbody>
+<tr><td>標題列</td><td>「重播」、「賽道名　第 N／總 圈　第 N 名」（跟拍那台的圈數、依距離算的名次）、「離開重播（Esc）」</td><td>Esc＝離開重播，回成績頁</td></tr>
+<tr><td>播放／暫停</td><td>⏸／▶</td><td>空白鍵</td></tr>
+<tr><td>時間軸</td><td>拖曳跳到任意時刻</td><td>← → 倒退／前進 5 秒</td></tr>
+<tr><td>時間</td><td>「m:ss / m:ss」（比賽時間／全長）</td><td>—</td></tr>
+<tr><td>速度</td><td>0.25×、0.5×、1×、2×、4×，目前速度標示</td><td>—</td></tr>
+<tr><td>跟拍</td><td>◀ 顏色點＋名字（玩家加「（你）」）▶，切換跟拍的車</td><td>↑ 上一台、↓ 下一台</td></tr>
+</tbody>
+</table></div>
+<p>控制列上的操作不會漏給遊戲。跳時間或換車時鏡頭直接跳到位；跳時間時另外清掉胎痕。</p>
+</section>
+
+<!-- ============================================================ 11 -->
+<section id="av">
+<h2>11. 音效與畫面表現</h2>
+<h3>11.1 音效</h3>
+<p>全部即時合成，不用音檔；第一次開始比賽時啟動音效。主音量 0.55。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>聲音</th><th>規格</th></tr></thead>
+<tbody>
+<tr><td>引擎</td><td>鋸齒波＋半頻方波經低通；音高 55 ＋ 110s ＋ 90 × max(0, s − 0.6) Hz（s＝車速 ÷ 34，最多 1.6），噴射中再 +30 Hz；比賽中才有聲</td></tr>
+<tr><td>胎聲</td><td>甩尾中（不在草地）的尖銳噪音，側滑越大越響越高</td></tr>
+<tr><td>噴射聲</td><td>噴射或氮氣作用中的噪音</td></tr>
+<tr><td>路面隆隆聲</td><td>在草地、路緣石上且車速 &gt; 3 m/s</td></tr>
+<tr><td>風切聲</td><td>隨車速變大、變尖</td></tr>
+<tr><td>咻聲</td><td>小噴（完美較響）、雙噴、氮氣、加速帶、起步噴</td></tr>
+<tr><td>碰撞聲</td><td>撞牆、撞車、重落地，越重越響</td></tr>
+<tr><td>嗶聲</td><td>倒數 523 Hz、GO 1046 Hz、完成一圈 880 Hz、集滿氮氣 1320 Hz、結果第 1 名 1318 Hz／其他 660 Hz</td></tr>
+</tbody>
+</table></div>
+<h3>11.2 畫面表現</h3>
+<ul>
+  <li><strong>3D 場景</strong>：每條賽道依主題有自己的天空（照片天空）、霧、燈光、地面與路面紋理；夜城有跟車的補光。加速帶箭頭往前流動、熔岩發光。</li>
+  <li><strong>卡丁車</strong>：同一模型四種配色。車身有懸吊：加速抬頭、煞車點頭、過彎側傾、落地壓縮、起跳彈起，都會晃一下才停；傾斜彎上車身跟著路面傾斜；在草地或路緣石上車身微震。駕駛身體隨方向與甩尾傾斜，前輪隨方向轉。</li>
+  <li><strong>甩尾特效</strong>：後輪火花（橘色；甩尾滿 0.35 秒後變淺藍，表示已有小噴資格的時間）、白煙、胎痕；草地揚塵。</li>
+  <li><strong>噴射火焰</strong>：小噴、加速帶、起步噴是橘色火焰，雙噴較長（1.3 倍），氮氣是藍色、最長（1.6 倍）。</li>
+  <li><strong>鏡頭</strong>：低而近的追車鏡頭，方向主要跟路線（甩尾時看得到車身打橫）；視角隨車速放寬、噴射再加寬；急加速與噴射時鏡頭被甩遠；接近極速有細微震動；撞擊、氮氣、加速帶有震動（參數在 5.1 鏡頭）。</li>
+  <li><strong>速度感</strong>：車速超過極速 60% 出現從兩側刷過的風線，越快越濃；超過 80% 或噴射中出現放射狀速度線；高畫質另有放射狀動態模糊（中間清楚、四周糊），接近極速開始、噴射時最強。</li>
+</ul>
+</section>
+
+<!-- ============================================================ 12 -->
+<section id="nfr">
+<h2>12. 非功能需求</h2>
+<h3>12.1 效能</h3>
+<ul>
+  <li>物理固定每秒 120 步，與畫面幀率無關；單幀時間超過 0.1 秒時以 0.1 秒計（避免卡頓後一次跑太多步）。</li>
+  <li>高畫質的最低可接受幀率是 40 fps，低於就自動降到省電（8.8）。</li>
+  <li>觸控裝置解析度倍率上限較低（見 8.8），降低手機負擔。</li>
+  <li>多人連線 server 一台電腦可同時開多間房，每間房獨立迴圈。</li>
+</ul>
+<h3>12.2 支援環境</h3>
+<ul>
+  <li>支援 WebGL 與 ES 模組（含 import map）的現代瀏覽器：桌機 Chrome、Edge、Firefox、Safari；手機瀏覽器（橫向）。</li>
+  <li>Android App 外殼 KCarApp（WebView 包網頁版）。</li>
+  <li>輸入：鍵盤、觸控（多指）。</li>
+  <li>多人連線 server：Node.js 18 以上，Windows／其他作業系統皆可。</li>
+  <li>部署：靜態網站，沒有建置步驟；任何靜態伺服器都能開 <code>index.html</code>。</li>
+</ul>
+<h3>12.3 存檔（這台裝置的瀏覽器儲存空間）</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>鍵名</th><th>內容</th><th>預設</th></tr></thead>
+<tbody>
+<tr><td><code>kcar.best.v2</code></td><td>各賽道的個人紀錄：{ 賽道代號: { 最佳單圈, 總時間 } }</td><td>空</td></tr>
+<tr><td><code>kcar.track</code></td><td>上次選的賽道代號</td><td><code>beach</code></td></tr>
+<tr><td><code>kcar.keys.v2</code></td><td>按鍵設定：{ 動作: [主要, 次要] }</td><td>8.3</td></tr>
+<tr><td><code>kcar.tuning.v1</code></td><td>操控參數（全部參數的目前值）</td><td>5.1 預設</td></tr>
+<tr><td><code>kcar.quality</code></td><td>畫質：<code>high</code>／<code>low</code></td><td><code>high</code></td></tr>
+<tr><td><code>kcar.name</code></td><td>多人連線的名字</td><td>空</td></tr>
+<tr><td><code>kcar.server</code></td><td>多人連線的 Server 欄</td><td>空</td></tr>
+</tbody>
+</table></div>
+<ul>
+  <li>無法使用儲存空間時（私密模式等）遊戲照常運作，一律用預設值、不存檔。</li>
+  <li>讀到的調參存檔只採用目前存在的參數、而且是數字的值；按鍵存檔只採用目前存在的動作。</li>
+  <li>重播只在記憶體，不存檔。</li>
+</ul>
+<h3>12.4 版本號</h3>
+<ul>
+  <li>遊戲版本號在 <code>js/version.js</code>（目前 1.0.0），首頁右下角顯示「v1.0.0」。改了遊戲就跳一號。</li>
+  <li>多人連線握手時比對 client 與 server 的版本號與協議版本，不同就拒絕（9.9）。</li>
+  <li>改了 <code>style.css</code> 時，<code>index.html</code> 裡引用它的 <code>?v=</code> 參數也要改，避免讀到舊快取。</li>
+</ul>
+</section>
+
+<!-- ============================================================ 13 -->
+<section id="acceptance">
+<h2>13. 驗收標準</h2>
+<p>每條都要能實際操作確認。數值類條目用調參面板確認預設值、或用 <code>node tools/sim.mjs</code> 等工具量測。</p>
+
+<h3>13.1 遊戲概要（第 1 章）</h3>
+<ul class="check">
+  <li>開網頁版首頁可以看到 5 條賽道、4 個模式按鈕。</li>
+  <li>首頁右下角的版本號與 <code>js/version.js</code> 一致，也與本文件頂部「對應遊戲版本」一致。</li>
+  <li>手機橫向可以完整遊玩一場競賽。</li>
+</ul>
+
+<h3>13.2 畫面與流程（第 2 章）</h3>
+<ul class="check">
+  <li>點不同的賽道卡片，背景換成該賽道，載入中模式按鈕變半透明且按了不會開始。</li>
+  <li>重新整理後，首頁停在上次選的賽道。</li>
+  <li>開始比賽後倒數依序顯示 3、2、1，各響一聲，GO! 顯示約 0.8 秒；倒數中按油門車子不動。</li>
+  <li>比賽中按 Esc、P、右上暫停鈕、或切到別的分頁，都會進暫停選單；單機暫停時總時間停止。</li>
+  <li>暫停選單五顆按鈕各自行為符合 2.5。</li>
+  <li>競賽完成 3 圈立即進成績頁，標題依名次正確，未完賽的對手時間前有「≈」。</li>
+  <li>計時賽成績頁顯示總時間與 3 圈的圈速。</li>
+  <li>手機直拿時顯示「請把手機轉成橫向」。</li>
+</ul>
+
+<h3>13.3 模式（第 3 章）</h3>
+<ul class="check">
+  <li>競賽起跑時玩家在最後一排右側，三台電腦依 3.1 的格位排列。</li>
+  <li>計時賽與自由練習只有一台車，站在線後中央。</li>
+  <li>第 1 圈要先開過起終點線才開始累計；圈數顯示正確、最多顯示到「LAP 3/3」。</li>
+  <li>自由練習不會自己結束，每圈破紀錄時首頁卡片的最佳單圈立即更新。</li>
+  <li>競賽或計時賽破紀錄時成績頁出現「★新紀錄」，回首頁卡片與紀錄列已更新。</li>
+  <li>多人連線比完不影響首頁紀錄。</li>
+</ul>
+
+<h3>13.4 操控與駕駛（第 4 章）</h3>
+<ul class="check">
+  <li>平地全油門，儀表最高穩定在 259 km/h 左右。</li>
+  <li>車速 9 m/s（儀表約 58 km/h）以下按甩尾＋方向不會起甩；以上會起甩，且按下甩尾時車子小跳一下。</li>
+  <li>甩尾中放開甩尾鍵但方向繼續壓彎內，甩尾不結束；兩者都放開才結束。</li>
+  <li>甩尾不到 0.35 秒就放開，不出現小噴時機表；超過 0.35 秒且有明顯側滑，放開後出現時機表。</li>
+  <li>時機表綠區按油門出現「完美小噴！」、黃區「小噴」、紅區「小噴（太早）」；0.55 秒不按出現「錯過小噴」。</li>
+  <li>甩尾時一直按著油門不放，放開甩尾後不會觸發小噴。</li>
+  <li>小噴後 0.12～0.5 秒內再按出現「雙噴！」；0.12 秒內按出現「雙噴太快」。</li>
+  <li>甩尾中按煞車，車頭明顯往彎內多甩、車速下降。</li>
+  <li>連續甩尾可以集滿氣、HUD 右側氮氣圓點亮起，第 3 顆不會出現（最多 2 顆，集氣條停在滿格）。</li>
+  <li>按氮氣：氮氣數 −1、儀表變藍、排氣管藍火約 3 秒；作用中再按不消耗。</li>
+  <li>倒數剩 1 秒以上就按油門，GO 時沒有起步噴；倒數最後一刻按，GO 時出現「起步噴！」；GO 後立刻按也有。</li>
+  <li>開上草地、沙地明顯減速；開上捷徑土路小幅減速。</li>
+  <li>碰到加速帶車速明顯提升並有咻聲。</li>
+  <li>正面撞牆掉速並被彈開；甩尾中重撞牆，甩尾結束且不出現時機表。</li>
+  <li>開進海或熔岩，出現「掉進去了！」並在最後通過的路面重生；在跳台缺口掉下去時重生到缺口後方。</li>
+  <li>按 R 重生到中心線、車子靜止，氮氣數量不變、圈數不倒退。</li>
+  <li>逆向開約 1.2 秒後出現「逆向！」，轉回正向後消失。</li>
+</ul>
+
+<h3>13.5 物理與調參（第 5 章）</h3>
+<ul class="check">
+  <li>調參面板（全部重設後）每個參數的數值與 5.1 的預設欄完全一致。</li>
+  <li>拖動任一滑桿立即影響駕駛手感，數值標成已修改；重新整理後仍保留。</li>
+  <li>「複製參數」只複製跟預設不同的值；「全部重設」後全部回預設。</li>
+  <li>面板開著時按 Esc 先關面板而不是暫停。</li>
+</ul>
+
+<h3>13.6 賽道（第 6 章）</h3>
+<ul class="check">
+  <li>五條賽道都能從首頁載入並跑完 3 圈。</li>
+  <li>每條賽道的一圈長度與 6.2 表一致（以中心線資料檢查）。</li>
+  <li>每條賽道都看得到 3 個加速帶、1 條捷徑；椰林海灘 1 個跳台、雪國山道 1 個、熔岩火山 2 個。</li>
+  <li>霓虹夜城、櫻花古都的立體交叉上下層車子不會互撞、不會掉到另一層。</li>
+  <li><code>node tools/sim.mjs tt</code> 每條賽道「甩尾＋完美小噴」的圈速落在 6.2 參考圈速附近，且比「不甩尾」快。</li>
+</ul>
+
+<h3>13.7 電腦車手（第 7 章）</h3>
+<ul class="check">
+  <li>競賽中電腦會甩尾、小噴、放氮氣，且有時走捷徑；★5 賽道走捷徑的次數明顯多於 ★1。</li>
+  <li>玩家大幅落後時電腦會被追上一些（追趕機制），玩家大幅領先時電腦略慢。</li>
+  <li>電腦撞牆卡住 3 秒內會自己重生。</li>
+  <li><code>node tools/sim.mjs race beach volcano 4</code>：椰林海灘（★1）上「普通」自動駕駛多數場次拿第 1；熔岩火山（★5）上「普通」自動駕駛拿不到第 1，且與最強電腦的時間差為正（電腦較快）。</li>
+</ul>
+
+<h3>13.8 介面與設定（第 8 章）</h3>
+<ul class="check">
+  <li>HUD 各元素位置與內容符合 8.1；計時賽與自由練習沒有名次與排行。</li>
+  <li>小地圖上玩家三角形方向與車頭一致，對手點顏色正確。</li>
+  <li>設定裡把油門改成 W 後，W 可加速、J 不再加速；首頁提示、操作說明、時機表文字都顯示 W。</li>
+  <li>把 J 設給甩尾時，出現「原本是「油門」的鍵」提示，油門那格變空。</li>
+  <li>「恢復預設」後按鍵回到 8.3。</li>
+  <li>觸控裝置：自動油門有效、按「煞」時不給油；◀ ▶ 可以滑動換向；時機窗開著時「噴」鈕發亮。</li>
+  <li>切換高畫質／省電立即生效且重新整理後保留；高畫質下刻意壓低效能時會自動切到省電並提示。</li>
+</ul>
+
+<h3>13.9 多人連線（第 9 章）</h3>
+<ul class="check">
+  <li><code>node server/server.mjs</code> 啟動後列出本機與區網網址；<code>/version</code> 回傳版本與房數。</li>
+  <li>同一台電腦開 GitHub Pages 版、Server 欄留空可以連上。</li>
+  <li>另一台裝置在 https 網頁填 server 的 IP，會轉到 server 的 http 網頁並自動連線。</li>
+  <li>開房得到 4 位數房號，另一人用房號或清單加入，座位與顏色正確，房主有「開始比賽」。</li>
+  <li>非房主不能換賽道；房主換賽道，所有人的背景跟著換。</li>
+  <li>2 位真人開賽時另 2 個座位由電腦補，起跑時電腦在前排。</li>
+  <li>比賽中切到別的分頁 3 秒以上，其他人看到這台車繼續開（電腦代駕），切回來後自己的畫面顯示代駕提示並自動接回。</li>
+  <li>比賽中按暫停：比賽不停，選單沒有「重新開始」，自己的車放開所有鍵。</li>
+  <li>所有真人完賽約 2 秒後所有人同時看到成績頁；只有一人完賽時最多再等 30 秒結算。</li>
+  <li>版本不同的 client 連線會被拒絕並顯示版本不一樣的訊息。</li>
+  <li><code>node server/server.mjs --port 8799 --lag 40 --jitter 20 --loss 0.05</code> 配合 <code>node tools/nettest.mjs 4 volcano 8799</code> 能跑完一場。</li>
+  <li>關掉 server 時 client 回首頁並顯示「跟 server 的連線斷了」。</li>
+</ul>
+
+<h3>13.10 重播（第 10 章）</h3>
+<ul class="check">
+  <li>競賽、計時賽、多人連線比完，成績頁都有「重播」；按了從開跑前約 1.5 秒開始播，跟拍自己。</li>
+  <li>空白鍵暫停／播放；← → 跳 5 秒；↑ ↓ 換跟拍的車；拖時間軸可跳；五種速度都有效。</li>
+  <li>控制列顯示的圈數、名次隨播放更新；播完停住，再按播放從頭播。</li>
+  <li>Esc 或「離開重播」回到成績頁，「重播」鈕仍在；開新比賽後舊紀錄被取代。</li>
+</ul>
+
+<h3>13.11 音效與畫面（第 11 章）</h3>
+<ul class="check">
+  <li>引擎聲隨車速升高；甩尾有胎聲與火花，甩尾滿 0.35 秒後火花變淺藍。</li>
+  <li>小噴、雙噴、氮氣各有對應的火焰顏色與長度。</li>
+  <li>接近極速出現風線、速度線；高畫質下有動態模糊、省電下沒有。</li>
+</ul>
+
+<h3>13.12 非功能（第 12 章）</h3>
+<ul class="check">
+  <li>私密瀏覽模式下遊戲可以正常開始與完賽。</li>
+  <li>清空網站資料後，所有設定回到預設、紀錄為空。</li>
+  <li>用靜態伺服器（例如 <code>python -m http.server</code>）開 <code>index.html</code> 可以正常遊玩。</li>
+</ul>
+</section>
+
+<section id="changelog">
+<h2>附錄. 修訂紀錄</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>規格版本</th><th>日期</th><th>遊戲版本</th><th>章節</th><th>內容</th></tr></thead>
+<tbody>
+<tr><td>1.0</td><td>2026-11-17</td><td>1.0.0</td><td>全部</td><td>依現行遊戲整理成第一版正式規格（基準版）。</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<footer>KCar 企劃規格 · 規格版本 1.0 · 2026-11-17</footer>
+</main>
+</div>
+</body>
+</html>
