@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>甩尾競速遊戲市場調研</title>
+<style>
+:root{
+  --bg:#f7f7f5; --paper:#ffffff; --ink:#1d1f23; --muted:#5d636e; --line:#e2e3e0;
+  --accent:#2f6fde; --accent-soft:#e8f0fd; --warn:#b5590e; --warn-soft:#fdf1e6;
+  --ok:#1f8a4c; --ok-soft:#e6f5ec; --code:#f1f2ef;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16181c; --paper:#1e2126; --ink:#e7e9ec; --muted:#9aa1ad; --line:#30343b;
+    --accent:#7aa7ff; --accent-soft:#1f2c45; --warn:#f0a35e; --warn-soft:#3a2a1b;
+    --ok:#5fd08f; --ok-soft:#1b3326; --code:#262a31;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16181c; --paper:#1e2126; --ink:#e7e9ec; --muted:#9aa1ad; --line:#30343b;
+  --accent:#7aa7ff; --accent-soft:#1f2c45; --warn:#f0a35e; --warn-soft:#3a2a1b;
+  --ok:#5fd08f; --ok-soft:#1b3326; --code:#262a31;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.75 "Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif}
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:32px;max-width:1240px;margin:0 auto;padding:32px 24px}
+nav.toc{position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);overflow:auto;font-size:14px}
+nav.toc .title{font-weight:700;margin-bottom:8px}
+nav.toc ol{list-style:none;padding:0;margin:0}
+nav.toc ol ol{padding-left:14px}
+nav.toc a{display:block;padding:3px 8px;border-radius:6px;color:var(--muted);text-decoration:none}
+nav.toc a:hover{background:var(--accent-soft);color:var(--accent)}
+main{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:40px 48px;min-width:0}
+header.doc h1{font-size:30px;line-height:1.3;margin:0 0 6px}
+header.doc .sub{color:var(--muted);margin:0 0 20px}
+dl.meta{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;margin:0 0 8px;font-size:14px}
+dl.meta dt{color:var(--muted)} dl.meta dd{margin:0}
+h2{font-size:22px;margin:48px 0 12px;padding-top:12px;border-top:2px solid var(--line)}
+h3{font-size:18px;margin:28px 0 8px}
+h4{font-size:16px;margin:20px 0 6px;color:var(--muted)}
+p,ul,ol{margin:8px 0}
+li{margin:3px 0}
+a{color:var(--accent)}
+code{background:var(--code);padding:1px 6px;border-radius:5px;font-size:.9em;font-family:Consolas,"Cascadia Mono",monospace}
+.table-wrap{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--code);font-weight:600;white-space:nowrap}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.warn{border-left:4px solid var(--warn);background:var(--warn-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-right:4px}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0}
+.flow span{border:1px solid var(--line);background:var(--code);border-radius:8px;padding:4px 12px;font-size:14px}
+.flow b{color:var(--muted);font-weight:400}
+ul.check{list-style:none;padding-left:0}
+ul.check li::before{content:"☐ ";color:var(--muted)}
+footer{margin-top:48px;color:var(--muted);font-size:13px}
+.game{border:1px solid var(--line);border-radius:10px;padding:4px 18px 10px;margin:16px 0}
+.game h4{color:var(--ink);font-size:17px;margin:14px 0 4px}
+.game .meta{color:var(--muted);font-size:14px;margin:0 0 6px}
+ol.src{font-size:14px;word-break:break-all}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;padding:16px}
+  nav.toc{position:static;max-height:none;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px}
+  main{padding:24px 18px}
+}
+@media print{
+  body{background:#fff}
+  .layout{display:block;padding:0}
+  nav.toc{display:none}
+  main{border:none;padding:0}
+  h2{break-after:avoid} table{break-inside:auto} tr{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="目錄">
+  <div class="title">目錄</div>
+  <ol>
+    <li><a href="#scope">0. 範圍與可信度</a></li>
+    <li><a href="#market">1. 市場現況</a></li>
+    <li><a href="#anatomy">2. 甩尾系統的五個環節</a>
+      <ol>
+        <li><a href="#a-start">2.1 怎麼起甩</a></li>
+        <li><a href="#a-control">2.2 甩尾中控制什麼</a></li>
+        <li><a href="#a-reward">2.3 甩尾換到什麼</a></li>
+        <li><a href="#a-stack">2.4 加速怎麼疊加</a></li>
+        <li><a href="#a-penalty">2.5 失誤怎麼罰</a></li>
+      </ol>
+    </li>
+    <li><a href="#mobile">3. 手機觸控怎麼處理甩尾</a></li>
+    <li><a href="#ceiling">4. 技術天花板從哪裡來</a></li>
+    <li><a href="#onboard">5. 新手曲線的做法</a></li>
+    <li><a href="#vehicle">6. 車輛與付費對手感的影響</a></li>
+    <li><a href="#reviews">7. 玩家評價的規律</a></li>
+    <li><a href="#tradeoffs">8. 設計時要先回答的取捨</a></li>
+    <li><a href="#games">附錄 A. 各作品重點</a>
+      <ol>
+        <li><a href="#g-cn">華語／亞洲手遊</a></li>
+        <li><a href="#g-global">全球手遊</a></li>
+        <li><a href="#g-console">主機／PC</a></li>
+      </ol>
+    </li>
+    <li><a href="#unknown">附錄 B. 查不到或不確定</a></li>
+    <li><a href="#sources">附錄 C. 來源</a></li>
+  </ol>
+</nav>
+<main>
+<header class="doc">
+  <h1>甩尾競速遊戲市場調研</h1>
+  <p class="sub">以甩尾操控為核心的競速遊戲：手機為主，兼看主機與 PC</p>
+  <dl class="meta">
+    <dt>調研日期</dt><dd>2026-11-17</dd>
+    <dt>範圍</dt><dd>18 款作品：華語手遊 5、全球手遊 8、主機／PC 6</dd>
+    <dt>用途</dt><dd>KCar 從頭研究遊戲設計的參考資料</dd>
+    <dt>負責人</dt><dd>Ken</dd>
+  </dl>
+</header>
+
+<section id="scope">
+<h2>0. 範圍與可信度</h2>
+<ul>
+  <li>調研分三路：華語／亞洲手遊、全球手遊、主機與 PC。每款查九項：基本資料、操作配置、甩尾機制與數值、加速資源、進階技巧、新手與輔助、車輛與付費、玩家評價、設計觀察。</li>
+  <li><strong>數字</strong>：精確數值（秒數、門檻）只有瑪利歐賽車、CTR、Speedstorm 有官方或社群實測；其他作品多半只查到攻略描述。</li>
+  <li><strong>時效</strong>：華語攻略大多是 2018～2023 年寫的，現行版本可能已經改過。</li>
+  <li><strong>已另外核實</strong>：瑪利歐賽車 Tour、KartRider: Drift 的停服日期。</li>
+  <li>namu.wiki、GameFAQs、fandom、萌娘百科、B站專欄擋爬蟲，所以跑跑、CTR、QQ飛車的精確數值缺口較大，見附錄 B。</li>
+</ul>
+<div class="note">本文只整理市場上的做法與規律，不含對 KCar 的修改建議。文中「觀察」「分析」是調研者的歸納，其餘都附來源。</div>
+</section>
+
+<section id="market">
+<h2>1. 市場現況</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>作品</th><th>平台</th><th>狀態</th><th>市場表現</th></tr></thead>
+<tbody>
+<tr><td>瑪利歐賽車 8 豪華版</td><td>Switch</td><td><span class="tag ok">營運中</span></td><td>6956 萬套（2025-09），系列最暢銷</td></tr>
+<tr><td>瑪利歐賽車 World</td><td>Switch 2</td><td><span class="tag ok">2025-06 上市</span></td><td>約 1400 萬套（2025 年底）</td></tr>
+<tr><td>CTR Nitro-Fueled</td><td>主機</td><td><span class="tag">2020-09 停止更新</span></td><td>超過 1000 萬套；Metacritic 80～84</td></tr>
+<tr><td>Sonic Racing CrossWorlds</td><td>主機、PC</td><td><span class="tag ok">2025-09 上市</span></td><td>首月超過 100 萬套，SEGA 說未達預期；Metacritic 76～88</td></tr>
+<tr><td>跑跑卡丁車 PC 原作</td><td>PC</td><td><span class="tag warn">台服 2023-01、韓服 2023-03 停服</span>；中國版仍在營運</td><td>全球註冊超過 3.8 億（2020）</td></tr>
+<tr><td>KartRider: Drift</td><td>PC、主機、手機</td><td><span class="tag warn">全面停運</span>：全球服 2025-02-27，韓台 PC 服 2025-10-16</td><td>上線不到 3 年就全面停運</td></tr>
+<tr><td>QQ飛車 端遊</td><td>PC</td><td><span class="tag ok">2008 年起營運中</span></td><td>早期同時在線 200～300 萬（說法不一）</td></tr>
+<tr><td>QQ飛車手遊</td><td>手機</td><td><span class="tag ok">2017 年起營運中</span></td><td>上線首週 DAU 2000 萬；營收查不到</td></tr>
+<tr><td>跑跑卡丁車 Rush+</td><td>手機</td><td><span class="tag ok">營運中</span></td><td>查不到</td></tr>
+<tr><td>王牌競速（網易）</td><td>手機</td><td><span class="tag ok">營運中</span></td><td>查不到</td></tr>
+<tr><td>巔峰極速（網易＋Codemasters）</td><td>手機</td><td><span class="tag ok">營運中</span></td><td>查不到</td></tr>
+<tr><td>瑪利歐賽車 Tour</td><td>手機</td><td><span class="tag warn">2026-09-30 停服</span>，沒有離線版</td><td>終身營收約 2.7 億美元、下載約 2.76 億；移除轉蛋後營收下滑</td></tr>
+<tr><td>Asphalt Legends（舊名 Asphalt 9）</td><td>手機、主機</td><td><span class="tag ok">營運中</span>，2024 年起跨平台</td><td>查不到</td></tr>
+<tr><td>Disney Speedstorm</td><td>手機、主機</td><td><span class="tag ok">營運中</span>，2026 年仍按季更新</td><td>查不到</td></tr>
+<tr><td>CarX Drift Racing 2</td><td>手機</td><td><span class="tag ok">營運中</span>，已有 3 代</td><td>系列下載超過 5000 萬</td></tr>
+<tr><td>Hot Lap League</td><td>手機、Switch、PC</td><td><span class="tag ok">買斷制</span></td><td>App Store 4.7 分；Steam 大多好評</td></tr>
+</tbody>
+</table></div>
+<h3>觀察</h3>
+<ul>
+  <li><strong>主機穩</strong>：瑪利歐系列銷量遙遙領先，CTR、Sonic 是第二梯隊。</li>
+  <li><strong>手機靠長營運</strong>：QQ飛車手遊是華語區最大的甩尾手遊。</li>
+  <li><strong>授權 IP 手遊也會收</strong>：瑪利歐賽車 Tour 營收衰退後停服，時間點跟新內容停止、移除轉蛋重疊，不能歸因到操控。</li>
+  <li><strong>KartRider: Drift 是反面案例</strong>：跨平台大作不到 3 年停運；西方評測反覆批評「照搬 2004 年的手感，沒有為新手重新設計」。</li>
+</ul>
+</section>
+
+<section id="anatomy">
+<h2>2. 甩尾系統的五個環節</h2>
+<p>每一款的甩尾都可以拆成五個環節：起甩、甩尾中控制、兌現、疊加、失誤懲罰。各環節市面上有幾種做法。</p>
+
+<h3 id="a-start">2.1 怎麼起甩</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>做法</th><th>代表作</th><th>特點</th></tr></thead>
+<tbody>
+<tr><td>專用甩尾鍵＋方向</td><td>跑跑、QQ飛車、Speedstorm</td><td>主動、明確</td></tr>
+<tr><td>先跳一下（hop），落地進甩尾</td><td>瑪利歐、CTR</td><td>起甩有「儀式感」，順便給玩家一點修正車頭的時間</td></tr>
+<tr><td>按煞車或手煞車兼用</td><td>Asphalt、Beach Buggy 2、CarX、巔峰極速</td><td>少一顆鍵；偏擬真</td></tr>
+<tr><td>轉向一段時間就自動甩</td><td>瑪利歐 Tour 簡易甩尾、Sonic Racing（Apple Arcade）、王牌競速自動模式</td><td>單指可玩；天花板低</td></tr>
+<tr><td>一鍵按住和放開</td><td>Drift Boss 這類超休閒</td><td>整個遊戲就是一個時機判定</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="a-control">2.2 甩尾中控制什麼</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>做法</th><th>代表作</th></tr></thead>
+<tbody>
+<tr><td>往內推或往外拉，收緊或放寬弧線</td><td>瑪利歐、CTR、Speedstorm（越緊掉速越多，最寬時正常加速）</td></tr>
+<tr><td>角度管理（量表要維持綠色）</td><td>巔峰極速、CarX</td></tr>
+<tr><td>甩尾中點煞或手煞車，改變角度</td><td>QQ飛車停滯漂移（大幅減速、集氣較多）、CarX</td></tr>
+<tr><td>換向甩、直線左右甩（snaking）來集氣</td><td>CTR、Sonic、瑪利歐</td></tr>
+<tr><td>幾乎不能控制</td><td>瑪利歐 Tour 自動甩、超休閒類</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="a-reward">2.3 甩尾換到什麼（兌現方式）</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>流派</th><th>規則</th><th>代表作</th><th>關鍵數字</th></tr></thead>
+<tbody>
+<tr><td><strong>蓄力型</strong></td><td>甩越久升越多段，放開就自動加速</td><td>瑪利歐、Sonic、Speedstorm</td><td>瑪利歐 8 豪華版三段加速 0.621／1.674／2.633 秒；Speedstorm 甩約 1.5 秒集滿</td></tr>
+<tr><td><strong>時機型</strong></td><td>甩尾中或結束後，要在某個時點按鍵</td><td>CTR（每次甩尾最多 3 次）、跑跑和 QQ 的小噴</td><td>跑跑切漂：第一段約 0.7～0.8 秒接第二段；QQ 小漂約 0.4 秒</td></tr>
+<tr><td><strong>資源型</strong></td><td>集氣存成氮氣，自己決定什麼時候放</td><td>跑跑、QQ、Asphalt、Speedstorm</td><td>Speedstorm 加速條集滿才能用；Asphalt 第二下按在藍區是完美氮氣</td></tr>
+<tr><td><strong>分數型</strong></td><td>甩尾本身被評分</td><td>CarX（雙車追走 100 分制）、瑪利歐 Tour（連段分數）</td><td>瑪利歐 Tour 連段時間窗 1.4～2.4 秒</td></tr>
+</tbody>
+</table></div>
+<p>沒有純粹單一流派的作品：</p>
+<div class="table-wrap"><table>
+<thead><tr><th>作品</th><th>組合</th></tr></thead>
+<tbody>
+<tr><td>跑跑、QQ飛車</td><td>時機（小噴）＋資源（氮氣）</td></tr>
+<tr><td>CTR</td><td>時機（3 次加速）＋資源（隱藏的加速儲量）</td></tr>
+<tr><td>瑪利歐</td><td>蓄力＋少量時機（空中特技）</td></tr>
+<tr><td>Asphalt</td><td>把時機要求從甩尾移到「放氮氣」</td></tr>
+</tbody>
+</table></div>
+
+<h3 id="a-stack">2.4 加速怎麼疊加</h3>
+<ul>
+  <li><strong>QQ飛車</strong>：小噴和氮氣的施放順序決定疊加效果，三種固定組合 CW、WCW、CWW，其中 CWW 最快。手遊與端遊的疊加規則不同。</li>
+  <li><strong>CTR</strong>：每次加速都存一點隱藏儲量，不中斷地連續甩尾就能一直維持高速，像節奏遊戲的連段。</li>
+  <li><strong>瑪利歐</strong>：不能存，當場兌現。</li>
+  <li><strong>Sonic</strong>：戒指提高極速，撞到就掉。</li>
+</ul>
+
+<h3 id="a-penalty">2.5 失誤怎麼罰</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>懲罰方式</th><th>代表作</th><th>結果</th></tr></thead>
+<tbody>
+<tr><td>清空累積</td><td>CTR：撞牆、在地面煞車就清空儲量</td><td>張力最大，挫折感也最大</td></tr>
+<tr><td>取消這次蓄力</td><td>Speedstorm：騰空、撞牆就取消</td><td>逼玩家選起甩的位置</td></tr>
+<tr><td>這次加速打折</td><td>跑跑小噴太早；CTR 按太晚會回火</td><td>單次損失</td></tr>
+<tr><td>慢慢扣</td><td>Sonic：撞了掉戒指</td><td>最溫和</td></tr>
+<tr><td>甩太久反而虧</td><td>KartRider: Drift 被評「甩過頭收益不值得」</td><td>評價偏負面</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="mobile">
+<h2>3. 手機觸控怎麼處理甩尾</h2>
+<ol>
+  <li><strong>油門幾乎都自動</strong>。例外是擬真類：巔峰極速的攻略建議手動油門，Hot Lap League 後來才加上手動油門選項。</li>
+  <li><strong>左手轉向、右手動作是標準配置</strong>。陀螺儀都只是選配，評價兩極：瑪利歐 Tour 被嫌靈敏度太低，Hot Lap League 的玩家說一定要有。</li>
+  <li><strong>時機要求被改寫</strong>：
+    <ul>
+      <li>全球手遊多半把「放開的時機」改成「持續多久」的門檻（Speedstorm 1.5 秒、瑪利歐 Tour 依轉向時間累積），精準時機移到放氮氣（Asphalt）。</li>
+      <li>華語手遊反而保留時機：QQ飛車保留小噴時機窗與疊噴順序，把技術深度押在「按鍵時機＋組合順序」，用手機上做得到的點按，取代做不到的細膩類比操作。</li>
+    </ul>
+  </li>
+  <li><strong>輔助一律有封頂</strong>：
+    <ul>
+      <li>瑪利歐的智慧轉向：集氣慢 2.5 倍，而且拿不到最高段。</li>
+      <li>瑪利歐 Tour 的簡易甩尾：早期拿不到最高段。</li>
+      <li>Asphalt 的 TouchDrive：自動油門和轉向，玩家只選路線；但「不是自動贏按鈕」。</li>
+      <li>王牌競速：自動模式拿掉甩尾鍵和加速鍵（代價查不到）。</li>
+      <li>巔峰極速：不做自動化，改用彎道提示、漂移浮標、輔助線教玩家，熟練後再關。</li>
+    </ul>
+  </li>
+  <li><strong>輕度化之後，玩家會要回主動按鍵</strong>：瑪利歐 Tour 從單指滑動，後來追加了甩尾按鈕與手動甩尾選項。</li>
+  <li><strong>手機最大的客訴是虛擬鍵判定，不是甩尾規則</strong>：
+    <ul>
+      <li>Speedstorm：甩完後手指被當成還按著，直接撞牆；左右鍵太近。</li>
+      <li>CarX：箭頭鍵偶爾按了沒反應。</li>
+      <li>QQ飛車：有玩家說方向鍵有緩衝，小幅輸入不靈敏。</li>
+    </ul>
+  </li>
+</ol>
+<p>觸控起甩的三種型（全球手遊歸納）：</p>
+<div class="table-wrap"><table>
+<thead><tr><th>型</th><th>代表作</th><th>觀察</th></tr></thead>
+<tbody>
+<tr><td>合成型：轉向或按住一段時間就自動甩</td><td>瑪利歐 Tour 簡易甩尾、Sonic Racing</td><td>越輕度、越單指的作品越偏這型</td></tr>
+<tr><td>煞車鍵兼用型</td><td>Asphalt、Beach Buggy 2、CarX</td><td>少一顆鍵</td></tr>
+<tr><td>專用甩尾鍵</td><td>Speedstorm、瑪利歐 Tour 後來追加的按鈕</td><td>玩家會要求有能主動控制的鍵</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="ceiling">
+<h2>4. 技術天花板從哪裡來</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>作品</th><th>高手和新手的差距</th></tr></thead>
+<tbody>
+<tr><td>QQ飛車</td><td>20 種以上有名字的指法（雙噴、CWW、WCW、斷位、空噴、落地噴、氮氣延續、撞牆點噴…），靠組合數堆出深度</td></tr>
+<tr><td>跑跑</td><td>集氣速度（點飄、拖飄、斷飄補氣），加上每個彎的小噴、雙噴</td></tr>
+<tr><td>CTR</td><td>整圈維持加速儲量不中斷（直線也甩、U 型迴轉保留儲量）</td></tr>
+<tr><td>瑪利歐</td><td>每個彎拿到第幾段、soft drift（搖桿推在彎內側上角，集氣更快）、路線</td></tr>
+<tr><td>瑪利歐 World</td><td>把集氣延伸到直線（蓄力跳），再當成上牆、上欄杆的入口，甩尾變成整套移動系統</td></tr>
+<tr><td>Asphalt</td><td>氮氣時機、360 旋轉、Shockwave 管理</td></tr>
+<tr><td>巔峰極速、CarX</td><td>控速、角度、走線，和主機擬真賽車同一思路</td></tr>
+</tbody>
+</table></div>
+<h3>觀察</h3>
+<ul>
+  <li><strong>三條路</strong>：天花板最高的是「資源＋時機」混合（QQ、跑跑、CTR），代價是新手和高手速度差巨大；蓄力型（瑪利歐）天花板較低，但輔助能做得最乾淨。</li>
+  <li><strong>甩尾逐漸不只用在彎道</strong>：瑪利歐 World 的蓄力跳、CTR 的直線甩尾、Sonic 的直線左右甩，都讓甩尾在直線上也有事做。</li>
+</ul>
+</section>
+
+<section id="onboard">
+<h2>5. 新手曲線的做法</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>做法</th><th>代表作</th></tr></thead>
+<tbody>
+<tr><td>駕照分級，逐級解鎖技巧挑戰</td><td>QQ飛車（初、中、高級各兩階）、Rush+</td></tr>
+<tr><td>教學影片＋練習地圖</td><td>QQ飛車（雙噴、CWW、WCW 各有影片）</td></tr>
+<tr><td>賽道上直接提示甩尾點</td><td>KartRider: Drift（最佳起甩、收甩區）、Rush+、Asphalt（急彎箭頭）、巔峰極速（浮標）</td></tr>
+<tr><td>用回饋取代說明：火花顏色、排氣顏色、輪子發光、量表</td><td>瑪利歐、CTR、Speedstorm、巔峰極速</td></tr>
+<tr><td>輔助但封頂</td><td>瑪利歐、瑪利歐 Tour、Asphalt</td></tr>
+<tr><td>先用好開的車學</td><td>巔峰極速（低階車寬容）</td></tr>
+</tbody>
+</table></div>
+<div class="warn">
+<strong>反面案例</strong>
+<ul>
+  <li><strong>KartRider: Drift</strong>：教學只教「甩尾能過急彎」，沒教甩尾能集氣、能出加速。</li>
+  <li><strong>CTR</strong>：電腦太兇，普通難度也很難拿第一，被評「對休閒玩家不友善」。</li>
+</ul>
+</div>
+</section>
+
+<section id="vehicle">
+<h2>6. 車輛與付費對手感的影響</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>作品</th><th>做法</th><th>結果</th></tr></thead>
+<tbody>
+<tr><td>瑪利歐 8 豪華版</td><td>集氣門檻綁車輛的隱藏數值</td><td>選車就改變甩尾手感</td></tr>
+<tr><td>瑪利歐 World</td><td>改回所有車同一門檻</td><td>差異收回到操作上</td></tr>
+<tr><td>瑪利歐 Tour</td><td>付費主要加分數倍率，不影響手感</td><td>爭議較小</td></tr>
+<tr><td>Asphalt</td><td>操控被稱讚</td><td>付費壓力被一致批評</td></tr>
+<tr><td>Rush+</td><td>高級車與普通車速度差太大</td><td>被抱怨</td></tr>
+<tr><td>Sonic</td><td>用道具改寫甩尾規則（加開第 4 段、反打直接滿段）</td><td>手感可以客製</td></tr>
+<tr><td>Hot Lap League</td><td>買斷制</td><td>避開付費影響手感的問題</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="reviews">
+<h2>7. 玩家評價的規律</h2>
+<ul>
+  <li><strong>甩尾規則本身很少被罵</strong>。被罵的是：
+    <ul>
+      <li>虛擬鍵判定</li>
+      <li>付費與經濟系統（Asphalt、Sonic Racing Apple Arcade 版）</li>
+      <li>太複雜而且沒教（KartRider: Drift）</li>
+      <li>手遊版手感跟端遊不同（Rush+ 國服的集氣判定、拉車頭）</li>
+    </ul>
+  </li>
+  <li><strong>被稱讚的是</strong>：精準、有重量感（瑪利歐 World、Sonic CrossWorlds）；技巧勝過運氣（CTR）；物理手感好（Hot Lap League）。</li>
+  <li><strong>兩個值得注意的點</strong>：
+    <ul>
+      <li>Sonic CrossWorlds 找了《頭文字D》街機版的老班底調甩尾物理，評價是「更重、更好控」。</li>
+      <li>瑪利歐 World 被評「轉向比 8 代不寬容，方向要先下定」，正反評價都有。</li>
+    </ul>
+  </li>
+</ul>
+</section>
+
+<section id="tradeoffs">
+<h2>8. 設計時要先回答的取捨</h2>
+<p>從市場整理出來，每款作品都對這幾題做了選擇：</p>
+<ol>
+  <li>甩尾的兌現方式：蓄力、時機、資源、分數，或怎麼混合？</li>
+  <li>時機要求放在哪：起甩、甩尾中、放開後，還是使用加速時？</li>
+  <li>天花板靠什麼堆：組合數、連段維持、路線，還是角度控制？</li>
+  <li>失誤怎麼罰：清空、取消、打折，還是慢慢扣？</li>
+  <li>新手靠什麼接住：輔助封頂、賽道提示、回饋可視化，還是分級教學？</li>
+  <li>手機上的輸入：專用鍵、煞車兼用，還是按住即甩？判定怎麼避免黏鍵、誤觸？</li>
+  <li>甩尾只在彎道用，還是延伸到直線和空中？</li>
+  <li>車輛數值要不要改變甩尾手感？付費碰不碰手感？</li>
+</ol>
+</section>
+
+<section id="games">
+<h2>附錄 A. 各作品重點</h2>
+
+<h3 id="g-cn">華語／亞洲手遊</h3>
+
+<div class="game">
+<h4>QQ飛車手遊</h4>
+<p class="meta">騰訊（天美）｜2017 年底上市｜營運中｜海外版 Garena Speed Drifters</p>
+<ul>
+  <li><strong>操作</strong>：左右方向鍵＋漂移、氮氣、小噴三顆鍵；設定可選要不要開煞車，漂移中按煞車可改路線。</li>
+  <li><strong>甩尾</strong>：方向＋漂移鍵起漂；「小漂」約按 0.4 秒。漂移換兩樣：集氣條滿得一管氮氣；漂移完小噴鍵亮起，在時窗內按得短加速。延遲太久會「吞小噴」。</li>
+  <li><strong>加速</strong>：氮氣（長加速）、小噴、空噴（滯空時）、落地噴（落地時）。疊噴＝小噴動力＋氮氣動力；氮氣前最多 1 個小噴參與疊加。</li>
+  <li><strong>進階</strong>：雙噴、斷位雙噴、甩尾雙噴、CW、CWW（加成最高）、WCW、氮氣延續、落地噴卡氣、側身漂移、停滯漂移（集氣效率高）、撞牆點噴等。</li>
+  <li><strong>新手</strong>：駕照分初、中、高級；訓練介面有雙噴、CWW、WCW 教學影片。</li>
+  <li><strong>評價</strong>：有玩家說方向鍵有緩衝，小幅輸入不靈敏。</li>
+  <li><strong>分析</strong>：保留端遊「漂移→集氣→氮氣」骨架，加上手機專屬的「小噴按鍵」節奏點，技術深度由按鍵時機與組合順序承擔。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>跑跑卡丁車 Rush+</h4>
+<p class="meta">Nexon｜約 2020 年｜營運中｜國服「跑跑卡丁車官方競速版」（騰訊代理）</p>
+<ul>
+  <li><strong>操作</strong>：自動油門；左半螢幕方向、右半螢幕加速與漂移；可自訂佈局，有陀螺儀選項。評測認為「左右方向＋左右各一個漂移鍵」的四鍵佈局過彎最緊。</li>
+  <li><strong>甩尾</strong>：漂移鍵＋方向，再輕點反方向穩住；漂移乾淨給藍焰加速，集氣滿給氮氣。甩尾後減速比 PC 版大，切漂要「薄」。</li>
+  <li><strong>新手</strong>：駕照考試、故事模式兼教學；賽道提示哪個彎該甩。</li>
+  <li><strong>評價</strong>：操控還原度接近端遊；抱怨拉車頭僵硬、集氣判定與端遊不同、高級車速度差太大。</li>
+  <li><strong>分析</strong>：用自動油門＋「1～2 次按鍵完成漂移」降低門檻，代價是老玩家覺得手感變了。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>王牌競速</h4>
+<p class="meta">網易｜約 2020～2021 年｜營運中</p>
+<ul>
+  <li><strong>操作</strong>：自動、滑動漂移、手動三種模式；可自訂鍵位。自動模式拿掉漂移和渦輪鍵，系統判斷彎道，按方向就自動漂移。</li>
+  <li><strong>系統</strong>：渦輪、漂移、氮氣，加上每輛車的「王牌特技」（飛行、閃現等），賽中充能後釋放。</li>
+  <li><strong>分析</strong>：把差異化從漂移深度移到技能系統，漂移變成選配。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>巔峰極速 Racing Master</h4>
+<p class="meta">網易＋Codemasters｜偏擬真｜營運中</p>
+<ul>
+  <li><strong>操作</strong>：虛擬按鍵、重力轉向；自動或手動油門可選（攻略建議新手用手動油門）。</li>
+  <li><strong>甩尾</strong>：按方向再點手煞車進入受控滑行；畫面中央弧形量表要維持綠色，紅色就要反打或放油門。玩家分「綠漂」（穩定，緩彎、連續彎）與「紅漂」（大角度，U 彎）。</li>
+  <li><strong>新手</strong>：彎道提示、漂移浮標、行車輔助線可開關；低階車比較寬容。</li>
+  <li><strong>分析</strong>：用可視量表把擬真的過度轉向翻成手機看得懂的回饋。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>KartRider: Drift（手機版）</h4>
+<p class="meta">Nexon／Nitro Studio｜2023-01 上線｜2025 年全面停運</p>
+<ul>
+  <li>物理以端遊跑跑 1 代為基礎；標榜「以漂移決定技術」。</li>
+  <li>2024-08 起只保留韓台 PC；全球服 2025-02-27、韓台 PC 服 2025-10-16 關閉；之後改做「跑跑卡丁車經典」。</li>
+</ul>
+</div>
+
+<h3 id="g-global">全球手遊</h3>
+
+<div class="game">
+<h4>瑪利歐賽車 Tour</h4>
+<p class="meta">任天堂（與 DeNA 等合作）｜2019-09｜2026-09-30 停服</p>
+<ul>
+  <li><strong>操作</strong>：直式單指；預設點螢幕＝跳、滑動＝甩尾；可開陀螺儀；智慧轉向可開關與調強度；後來追加甩尾按鈕。</li>
+  <li><strong>甩尾</strong>：預設簡易甩尾，轉向一段時間自動甩、可集前兩段；最高段（Ultra）早期只有手動甩尾拿得到。</li>
+  <li><strong>分數</strong>：以分數＋連段排名；兩事件間隔約 1.4～2.4 秒算連段；連段上限 50cc 5、100cc 10、150cc／200cc 15。</li>
+  <li><strong>付費</strong>：主要影響分數倍率，不影響手感；Gold Pass 月訂閱。</li>
+  <li><strong>分析</strong>：把系列招牌技巧壓成「會轉就會甩」，競爭感改由分數系統承擔。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>Asphalt Legends（舊名 Asphalt 9）</h4>
+<p class="meta">Gameloft｜2018｜營運中，2024 年起跨平台</p>
+<ul>
+  <li><strong>操作</strong>：手動或 TouchDrive。TouchDrive 自動油門與轉向，玩家負責甩尾、氮氣，岔路滑螢幕選路線。</li>
+  <li><strong>甩尾</strong>：轉向時按住煞車起甩，按越久存越多氮氣；按兩下甩尾鍵＝360 旋轉，也加氮氣。</li>
+  <li><strong>氮氣</strong>：按一下一般氮氣；第二下落在藍區＝完美氮氣，太晚＝較弱的橘色；全滿時按兩下＝Shockwave。</li>
+  <li><strong>評價</strong>：操控被稱讚，付費壓力被一致批評；TouchDrive 上市時有老玩家嫌不夠投入。</li>
+  <li><strong>分析</strong>：把賽車拆成「選路線＋時機」，甩尾從過彎技術變成攢資源的動作。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>Disney Speedstorm</h4>
+<p class="meta">Gameloft｜手機版 2024-07｜營運中</p>
+<ul>
+  <li><strong>操作</strong>：左手轉向，右手甩尾、跳、加速、技能；自動油門。</li>
+  <li><strong>甩尾</strong>：轉向時按住甩尾；方向鍵收緊或放寬弧線（越緊掉速越多）；連續甩約 1.5 秒集滿，輪子逐漸發光；結束得到瞬間加速＋加速燃料；騰空或撞牆取消蓄力。</li>
+  <li><strong>開發日誌</strong>：甩尾要好上手，挑戰在時機與精準轉向；輪子發光的回饋是封測後依意見加的。</li>
+  <li><strong>評價</strong>：Laughing Place 說直覺；Pocket Gamer 3.5／5，批評左右鍵太近、甩完被判定成還按著而撞牆。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>CarX Drift Racing 2</h4>
+<p class="meta">CarX Technologies｜擬真甩尾代表｜營運中，已有 3 代</p>
+<ul>
+  <li><strong>操作</strong>：轉向可選虛擬方向盤、箭頭鍵、陀螺儀；手煞車起甩；支援手把。</li>
+  <li><strong>甩尾</strong>：物理擬真；評分看角度、速度、貼線；雙車追走用 100 分制，仿真實比賽。</li>
+  <li><strong>天花板</strong>：換邊甩、貼線、追走；調校（例如前輪束角）直接改變甩尾特性。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>Beach Buggy Racing 2</h4>
+<p class="meta">Vector Unit｜2018-12｜營運中</p>
+<ul>
+  <li>傾斜或點按操控；油門加轉向時點一下煞車起甩，放掉任一個就結束。</li>
+  <li>甩尾放在道具與車手技能之後，不是核心。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>Hot Lap League</h4>
+<p class="meta">Ultimate Studio｜2022｜買斷 4.99 美元</p>
+<ul>
+  <li>計時賽排行榜導向，150 多條賽道；柔性轉向、多種觸控配置，後來加傾斜、手動油門、手把、120fps。</li>
+  <li>App Store 4.7 分；玩家稱讚物理手感，也有人嫌力滑觸發方式彆扭、想要直覺的甩尾鍵。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>一鍵甩尾超休閒（Drift Boss、Tap Drift）</h4>
+<ul>
+  <li>按住往一邊甩、放開往另一邊；每個彎都是時機測試，失敗就結束。Tap Drift 被形容成「甩尾版 Guitar Hero」。</li>
+  <li>沒有加速資源，甩尾成敗就是存活條件。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>Sonic Racing（Apple Arcade）</h4>
+<p class="meta">SEGA｜2019 年底</p>
+<ul>
+  <li>自動油門；觸控轉向三種選項；點方向轉彎、按住就往那個方向甩，轉向和甩尾合在同一個輸入。</li>
+  <li>評價集中在進度系統很磨（為免費遊玩設計，拿掉付費後沒重新平衡），不在甩尾。</li>
+</ul>
+</div>
+
+<h3 id="g-console">主機／PC</h3>
+
+<div class="game">
+<h4>跑跑卡丁車（PC 原作）</h4>
+<p class="meta">Nexon｜韓服 2004｜台、韓服 2023 停服｜全球註冊超過 3.8 億</p>
+<ul>
+  <li><strong>操作</strong>：方向鍵；Shift＝甩尾；甩完放開 ↑ 再重按＝瞬間加速（小噴）。</li>
+  <li><strong>甩尾</strong>：沒有 hop。輕點 Shift 是短甩（微調車頭，不能接小噴）；按住較久是完整甩，可接小噴。甩尾集氣，滿了得到氮氣。</li>
+  <li><strong>切漂</strong>：第一段甩約 0.7～0.8 秒後輕點 Shift 反折，再重按 ↑ 出小噴；第一段太短或第二段太長都出不了。</li>
+  <li><strong>進階</strong>：小噴、點飄、拖飄（放氮氣時甩尾，集氣效率高）、點拖集氣、斷飄補氣、雙噴、連噴、反向集氣；社群認為集氣速度是高手分水嶺。</li>
+  <li><strong>分析</strong>：甩尾拆成兩種報酬——即時的小噴（技巧）與可存放的氮氣（資源）；每個彎都在做資源管理加時機判斷。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>KartRider: Drift（PC、主機）</h4>
+<p class="meta">Nexon／Nitro Studio｜2023-01｜全球服 2025-02-27、韓台 PC 服 2025-10-16 關閉</p>
+<ul>
+  <li>機制與 2004 年原作一致；畫面標出最佳起甩、收甩區。</li>
+  <li><strong>批評</strong>：太容易甩過頭、加速收益常不值得；「甩→斷甩→反打」太複雜；教學沒教集氣與加速；沒有為新手重新設計。</li>
+  <li><strong>辯護</strong>：忠於原作；部分評測給 8／10。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>QQ飛車 端遊</h4>
+<p class="meta">騰訊｜2008-01 公測｜營運中</p>
+<ul>
+  <li>Shift＝漂移；沿用跑跑「甩尾集氣、氮氣、小噴」骨架。雙噴：甩尾後拉回車頭快速點兩下小噴，漂移半徑太小觸發不了；小漂觸發雙噴角度約 45 度（依車而異）。</li>
+  <li><strong>指法組合</strong>：CW（漂移→氮氣→小噴）、WCW（雙噴第一段→第二段→氮氣→小噴）、CWW（雙噴第一段→氮氣→第二段→小噴，最快）。</li>
+  <li><strong>進階</strong>：斷位漂移、段位雙噴、側身漂移、快速出彎、牽引、甩尾點飄、側卡、超級起步、撞牆漂移、撞牆點噴、拖飄、超級飄等 20 種以上。</li>
+  <li><strong>分析</strong>：往「指法組合」方向深化，天花板變成背指法與按鍵精度。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>瑪利歐賽車 8 豪華版</h4>
+<p class="meta">任天堂｜Switch｜2017｜6956 萬套</p>
+<ul>
+  <li><strong>甩尾</strong>：按 R 跳一下，落地帶方向進甩尾。內部計數器每幀最多 +5；智慧轉向自動甩時每幀最多 +2（慢 2.5 倍）。</li>
+  <li><strong>三段</strong>：藍 → 橘 → 紫；官方教學的加速時間 0.621／1.674／2.633 秒，實際依車輛的隱藏 Mini-Turbo 數值而變。紫火必須關智慧轉向。</li>
+  <li><strong>參考</strong>：前代 Wii U 版門檻 270（藍）、570（橘），以每幀 +5、60fps 推算約 0.9 秒出藍、1.9 秒出橘。</li>
+  <li><strong>進階</strong>：soft drift（搖桿推在彎內側上角，同角度集氣更快）、空中特技加速。</li>
+  <li><strong>分析</strong>：蓄力型，放開就兌現；技術在甩得又快又貼線；輔助有封頂代價。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>瑪利歐賽車 World</h4>
+<p class="meta">任天堂｜Switch 2｜2025-06｜約 1400 萬套</p>
+<ul>
+  <li>三段保留，最高段改彩虹火；集氣門檻所有車相同；移除自動甩尾；集到一段時車身微微脈動。</li>
+  <li><strong>蓄力跳</strong>：直線按住甩尾鍵充能（藍→黃→彩虹），落地小加速；充能中轉向受限且減速。蓄力跳是上牆、上欄杆的入口，可以串成連段。</li>
+  <li><strong>評價</strong>：甩尾更精準、更有滿足感；也有人說轉向比 8 代不寬容，開放世界移動段很少有甩尾加速的機會。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>CTR Nitro-Fueled</h4>
+<p class="meta">Beenox／Activision｜2019｜超過 1000 萬套</p>
+<ul>
+  <li><strong>甩尾</strong>：按住 R1 跳，落地帶方向進入 powerslide。量表變紅、排氣變黑、輪胎發金光時按 L1 加速，每次最多 3 次；按太晚回火，量表滿溢就失敗。加速品質分 Good／Great／Perfect。</li>
+  <li><strong>儲量</strong>：隱藏計時器，連續甩尾可幾乎無限延續；撞牆、撞人、掉出賽道、在地面煞車清空；空中煞車與 U 型迴轉保留。</li>
+  <li><strong>火焰分級</strong>：紅（單次）、橘（有儲量）、黃（加速墊）、藍（超級加速墊，最快）。</li>
+  <li><strong>評價</strong>：技巧勝過運氣；對休閒玩家不友善（電腦太兇）。</li>
+  <li><strong>分析</strong>：時機＋資源混合，像節奏遊戲的連段；新手與高手速度差極大。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>Sonic Racing CrossWorlds</h4>
+<p class="meta">Sonic Team／SEGA｜2025-09｜首月超過 100 萬套</p>
+<ul>
+  <li>甩尾量表 3 段，道具可加開第 4 段（附無敵）；反打可拿 2～3 段；起跳前先集氣，落地帶著集氣。</li>
+  <li>戒指提高極速，撞到就掉；跳台空中特技給加速。</li>
+  <li>甩尾物理由《頭文字D》街機版老班底調校；評價「更重、更好控」。</li>
+</ul>
+</div>
+
+<div class="game">
+<h4>補充：街機甩尾</h4>
+<ul>
+  <li><strong>Ridge Racer</strong>：點一下煞車再踩油門入甩；PSP 版以後甩尾非常寬容；技巧在判斷該不該甩。</li>
+  <li><strong>頭文字D Arcade Stage</strong>：推廣了甩尾文化；具體入甩操作本次查不到來源。</li>
+</ul>
+</div>
+</section>
+
+<section id="unknown">
+<h2>附錄 B. 查不到或不確定</h2>
+<ul>
+  <li><strong>營收</strong>：QQ飛車手遊、Rush+、王牌競速、巔峰極速、Speedstorm、Asphalt 的營收和下載量都查不到。</li>
+  <li><strong>QQ飛車手遊</strong>：時機窗秒數、小噴持有上限、有沒有自動漂移類輔助；Speed Drifters 與國服的差異。</li>
+  <li><strong>跑跑</strong>：集氣條長度、氮氣上限顆數與秒數。</li>
+  <li><strong>CTR</strong>：時機窗幀數、儲量單位與上限、各火焰速度。</li>
+  <li><strong>瑪利歐 World</strong>：所有數值（門檻、加速秒數、蓄力跳數值）；豪華版各車對應的確切門檻。</li>
+  <li><strong>王牌競速</strong>：漂移細節、自動模式的代價。</li>
+  <li><strong>Sonic CrossWorlds</strong>：「第 4 段」只在攻略站看到；火花顏色、各段秒數。</li>
+  <li><strong>不一致</strong>：QQ飛車端遊早期同時在線 200 萬或 300 萬；Asphalt 的 360 與氮氣按兩下說法有出入。</li>
+  <li><strong>未核對</strong>：幾款的上市日期是憑記憶寫的（QQ飛車手遊、Rush+、王牌競速、巔峰極速、Sonic Racing Apple Arcade 版）。</li>
+</ul>
+</section>
+
+<section id="sources">
+<h2>附錄 C. 來源</h2>
+<h3>瑪利歐賽車</h3>
+<ol class="src">
+  <li><a href="https://www.mariowiki.com/Mini-Turbo">Mini-Turbo（Super Mario Wiki）</a></li>
+  <li><a href="https://www.mariowiki.com/Charge_Jump">Charge Jump（Super Mario Wiki）</a></li>
+  <li><a href="https://www.mariowiki.com/Mario_Kart_Tour">Mario Kart Tour（Super Mario Wiki）</a></li>
+  <li><a href="https://www.mariowiki.com/Smart_Steering">Smart Steering（Super Mario Wiki）</a></li>
+  <li><a href="https://kotaku.com/everything-you-didn-t-know-about-drifting-in-mario-kart-1819196173">Kotaku：瑪利歐甩尾</a></li>
+  <li><a href="https://www.nintendolife.com/guides/mario-kart-8-deluxe-drifting-guide-how-to-drift-slipstream-and-boost">Nintendo Life：MK8D 甩尾指南</a></li>
+  <li><a href="https://www.gematsu.com/2026/07/mario-kart-tour-to-end-service-on-september-30">Gematsu：Mario Kart Tour 停服</a></li>
+  <li><a href="https://www.nintendolife.com/news/2026/10/mario-kart-tour-races-across-the-finish-line-with-an-estimated-usd268-5-million-in-lifetime-revenue">Nintendo Life：Mario Kart Tour 終身營收</a></li>
+  <li><a href="https://gamingbolt.com/mario-kart-world-has-sold-over-14-million-copies-since-launch">GamingBolt：MK World 銷量</a></li>
+  <li><a href="https://www.techradar.com/gaming/nintendo/mario-kart-world-review">TechRadar：MK World 評測</a></li>
+  <li><a href="https://gamingreinvented.com/review/mario-kart-world-a-very-different-generation-of-mario-kart">Gaming Reinvented：MK World 評測</a></li>
+  <li><a href="https://kotaku.com/mario-kart-world-rail-wall-charge-jump-ride-switch-2-1851784648">Kotaku：MK World 新機制</a></li>
+</ol>
+<h3>CTR、Sonic、街機</h3>
+<ol class="src">
+  <li><a href="https://www.gamesatlas.com/crash-team-racing/features/advanced-turbo-and-boosting-guide-for-crash-team-racing-nitro-fueled">GamesAtlas：CTR NF 進階加速</a></li>
+  <li><a href="https://support.activision.com/crash-team-racing/articles/crash-team-racing-nitro-fueled-gameplay-tips">Activision 官方：CTR NF 遊戲提示</a></li>
+  <li><a href="https://www.powerpyx.com/crash-team-racing-nitro-fueled-boost-mechanics-explained/">PowerPyx：CTR NF 加速機制</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Crash_Team_Racing_Nitro-Fueled">Wikipedia：CTR Nitro-Fueled</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Sonic_Racing:_CrossWorlds">Wikipedia：Sonic Racing CrossWorlds</a></li>
+  <li><a href="https://www.drifted.com/initial-d-veterans-provided-the-drifting-physics-for-sonic-racing-crossworlds/">Drifted：頭文字D 班底調校 CrossWorlds</a></li>
+  <li><a href="https://mp1st.com/reviews/sonic-racing-crossworlds-review-speed-of-sound">MP1st：CrossWorlds 評測</a></li>
+  <li><a href="https://giantbomb.com/wiki/Franchises/Ridge_Racer">Giant Bomb：Ridge Racer</a></li>
+</ol>
+<h3>跑跑卡丁車</h3>
+<ol class="src">
+  <li><a href="https://en.wikipedia.org/wiki/Crazyracing_Kartrider">Wikipedia：Crazyracing Kartrider</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/KartRider:_Drift">Wikipedia：KartRider: Drift</a></li>
+  <li><a href="https://www.gamemeca.com/view.php?gid=1767208">GameMeca：KartRider: Drift 韓服停服</a></li>
+  <li><a href="https://purexbox.com/news/2024/08/kartrider-drift-dev-suddenly-announces-early-2025-closure-on-xbox">Pure Xbox：KartRider: Drift 宣布關閉</a></li>
+  <li><a href="https://www.ithome.com/0/861/214.htm">IT之家：KartRider: Drift 停運公告</a></li>
+  <li><a href="https://www.ggemguide.com/guides/online/1141/">ggemguide：跑跑切漂教學</a></li>
+  <li><a href="https://commonsensegamer.com/kartrider-drift-complete-guide-to-drifting/">CommonSenseGamer：KartRider: Drift 甩尾指南</a></li>
+  <li><a href="https://wccftech.com/review/kartrider-drift-an-arcade-racing-game-worth-trying/">wccftech：KartRider: Drift 評測</a></li>
+  <li><a href="https://forum.xboxera.com/t/review-kartrider-drift/15584">XboxEra：KartRider: Drift 評測</a></li>
+  <li><a href="https://www.pocketgamer.com/kartrider-rush/kartrider-rush-hints-and-tips-to-help-you-scorch-the-track">Pocket Gamer：Rush+ 技巧</a></li>
+  <li><a href="https://www.taptap.cn/review/14994023">TapTap：跑跑官方競速版評價（2019）</a></li>
+  <li><a href="https://forums.kartrider.nexon.net/discussion/comment/1492">Nexon 論壇：Rush+ 手感討論</a></li>
+</ol>
+<h3>QQ飛車</h3>
+<ol class="src">
+  <li><a href="https://www.taptap.cn/moment/384892738899804220">TapTap：QQ飛車手遊技巧（2025）</a></li>
+  <li><a href="https://speedm.qq.com/m/m201712/greenhand.shtml">QQ飛車手遊官方新手指引</a></li>
+  <li><a href="https://game.xiaomi.com/viewpoint/1359077112_1646101867431_15">小米遊戲中心：氮氣延續</a></li>
+  <li><a href="https://game.xiaomi.com/viewpoint/1359077112_1638847968040_13">小米遊戲中心：疊噴機制</a></li>
+  <li><a href="https://fcsy.qq.com/webplat/info/news_version3/28528/33593/33805/m19692/201804/707459.shtml">官方：落地噴卡氣（2018）</a></li>
+  <li><a href="https://www.w3xue.com/exp/article/20235/84121.html">w3xue：QQ飛車端遊按鍵指法</a></li>
+  <li><a href="https://baike.baidu.com/item/QQ%E9%A3%9E%E8%BD%A6%E5%8F%8C%E5%96%B7%E6%8A%80%E5%B7%A7/15422299">百度百科：QQ飛車雙噴技巧</a></li>
+  <li><a href="https://www.gamersky.com/handbooksy/201908/1212804.shtml">遊民星空：QQ飛車漂移技巧</a></li>
+</ol>
+<h3>其他手遊</h3>
+<ol class="src">
+  <li><a href="https://shouyou.gamersky.com/news/202105/1390165.shtml">遊民星空：王牌競速製作人專訪（2021）</a></li>
+  <li><a href="https://game.xiaomi.com/viewpoint/1403972829_1646637394915_16">小米遊戲中心：王牌競速評測（2022）</a></li>
+  <li><a href="https://www.pocketgamer.com/articles/086320/racing-master-how-to-drift">Pocket Gamer：巔峰極速甩尾</a></li>
+  <li><a href="https://www.taptap.cn/moment/831298780564292085">TapTap：巔峰極速攻略</a></li>
+  <li><a href="https://disneyspeedstorm.com/news/disney-speedstorm-dev-diary-drift-mechanics">Disney Speedstorm 甩尾開發日誌</a></li>
+  <li><a href="https://www.pocketgamer.com/disney-speedstorm/review">Pocket Gamer：Speedstorm 評測</a></li>
+  <li><a href="https://www.laughingplace.com/w/disney-entertainment/disney-speedstorm-mobile-review/">Laughing Place：Speedstorm 手機版評測</a></li>
+  <li><a href="https://www.pocketgamer.com/articles/076788/r/">Pocket Gamer：Asphalt 9 操控</a></li>
+  <li><a href="https://mobilematters.gg/asphalt-9/asphalt-legends-unite-guide-to-nitro">Asphalt 氮氣指南</a></li>
+  <li><a href="https://apps.apple.com/app/id1198510863">App Store：CarX Drift Racing 2</a></li>
+  <li><a href="https://www.pocketgamer.com/carx-drift-racing-2/carx-drift-racing-2-tuning-guide/">Pocket Gamer：CarX DR2 調校指南</a></li>
+  <li><a href="https://steamcommunity.com/app/1230800/discussions/0/1749023887610617512">Steam：Beach Buggy Racing 2 甩尾說明</a></li>
+  <li><a href="https://apps.apple.com/us/app/hot-lap-league/id1526090084">App Store：Hot Lap League</a></li>
+  <li><a href="https://www.drifted.com/tap-drift/">Drifted：Tap Drift</a></li>
+  <li><a href="https://www.ragnartornquist.com/blog/2020/1/22/apple-arcade-review-16-sonic-racing">Sonic Racing（Apple Arcade）評測</a></li>
+</ol>
+</section>
+
+<footer>甩尾競速遊戲市場調研 · 2026-11-17</footer>
+</main>
+</div>
+</body>
+</html>
