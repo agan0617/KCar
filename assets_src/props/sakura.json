@@ -2,7 +2,7 @@
  "theme": "sakura",
  "glb": "sakura.glb",
  "generator": "tools/blender/build_props.py",
- "generated": "2026-11-11",
+ "generated": "2026-11-17",
  "legend": {
   "size": "[寬(x), 深(z), 高(y)]，公尺；原點在底部中心，正面朝 +Z",
   "category": "tree 樹／rock 岩石／building 建築／landmark 地標／deco 點綴／trackside 賽道設施",
@@ -547,30 +547,24 @@
    "density": {
     "per_track": 1
    },
-   "desc": "五重塔（遠景地標）",
+   "desc": "佛塔（遠景地標，AI 生成）",
    "size": [
-    12.0,
-    13.5,
-    31.2
+    15.84,
+    16.0,
+    24.06
    ],
-   "tris": 5382,
+   "tris": 14550,
+   "tris_source": 48347,
    "materials": [
-    "P_JpStoneBase",
-    "P_JpPlaster",
-    "P_JpVermilion",
-    "P_JpInterior",
-    "P_JpBracket",
-    "P_JpRoofTile",
-    "P_JpBronze",
-    "P_JpGold"
+    "P_ai_Material_0"
    ],
    "emissive": [],
    "source": [
     {
-     "pack": "自製（build_props.py 程式產生）",
-     "file": "",
-     "license": "同本 repo",
-     "url": ""
+     "pack": "AI 生成（Flux 參考圖＋TRELLIS.2 轉 3D，提示詞見素材目錄 ai_gen/SOURCES.tsv）",
+     "file": "ai_gen/pagoda_s1.glb",
+     "license": "MIT（TRELLIS.2）；生成物無使用限制",
+     "url": "https://github.com/microsoft/TRELLIS.2"
     }
    ]
   },

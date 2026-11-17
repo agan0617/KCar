@@ -86,7 +86,7 @@ Kenney、Quaternius 的素材都是 **CC0 1.0**（公眾領域），可商用、
 | `house_a` | 自製（build_props.py 程式產生） | — | 同本 repo | — |
 | `house_b` | 自製（build_props.py 程式產生） | — | 同本 repo | — |
 | `shrine_a` | 自製（build_props.py 程式產生） | — | 同本 repo | — |
-| `pagoda_a` | 自製（build_props.py 程式產生） | — | 同本 repo | — |
+| `pagoda_a` | AI 生成（Flux 參考圖＋TRELLIS.2 轉 3D，提示詞見素材目錄 ai_gen/SOURCES.tsv） | `ai_gen/pagoda_s1.glb` | MIT（TRELLIS.2）；生成物無使用限制 | https://github.com/microsoft/TRELLIS.2 |
 | `bridge_a` | 自製（build_props.py 程式產生） | — | 同本 repo | — |
 | `rock_a` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/Rock_Moss_3.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
 | `rock_b` | Kenney nature-kit | `kenney/nature-kit/Models/GLTF format/stone_tallB.glb` | CC0 1.0 | https://kenney.nl/assets/nature-kit |

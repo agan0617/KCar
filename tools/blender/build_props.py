@@ -100,6 +100,9 @@ def source_info(rel):
     p = rel.split('/')
     if p[0] == 'kenney':
         return dict(pack=f'Kenney {p[1]}', file=rel, license='CC0 1.0', url=f'https://kenney.nl/assets/{p[1]}')
+    if p[0] == 'ai_gen':
+        return dict(pack='AI 生成（Flux 參考圖＋TRELLIS.2 轉 3D，提示詞見素材目錄 ai_gen/SOURCES.tsv）', file=rel,
+                    license='MIT（TRELLIS.2）；生成物無使用限制', url='https://github.com/microsoft/TRELLIS.2')
     if p[0] == 'quaternius' and p[1] == 'polypizza':
         title, url = pp_sources().get(rel, ('', 'https://poly.pizza/u/Quaternius'))
         return dict(pack=f'Quaternius（poly.pizza 單件：{title}）', file=rel, license='CC0 1.0', url=url)
@@ -113,6 +116,8 @@ def kit_of(rel):
     camel = lambda s: ''.join(w[:1].upper() + w[1:] for w in re.split(r'[-_ ]', s) if w)  # noqa: E731
     if p[0] == 'kenney':
         return 'k' + camel(p[1].replace('-kit', '').replace('kit-', ''))
+    if p[0] == 'ai_gen':
+        return 'ai'
     if p[1] == 'polypizza':
         return 'qPP'
     return 'q' + camel(p[1].replace('-kit', ''))
@@ -1783,7 +1788,8 @@ def theme_sakura():
     add('house_a', 'building', 'roadside', D(per_100m=1), '二層町家（格子門面、暖簾）', machiya())
     add('house_b', 'building', 'roadside', D(per_100m=0.6), '和風平房（緣側、障子、四坡瓦頂）', hiraya())
     add('shrine_a', 'landmark', 'landmark', D(per_track=1), '神社拜殿（銅綠屋頂、千木鰹木、注連縄）', shrine())
-    add('pagoda_a', 'landmark', 'landmark', D(per_track=1), '五重塔（遠景地標）', pagoda())
+    # 2026-11-17 起換成 AI 生成的模型（Ken 要提升模型質感）；程式畫的 pagoda() 留著備用
+    add('pagoda_a', 'landmark', 'landmark', D(per_track=1), '佛塔（遠景地標，AI 生成）', imp('ai_gen/pagoda_s1.glb', maxtex=1024), h=24)
     add('bridge_a', 'landmark', 'roadside', D(per_track=1), '朱紅太鼓橋（12 m，裝飾用，車不能走）', taiko_bridge())
     add('rock_a', 'rock', 'roadside', D(per_ha=10), '青苔石', imp('quaternius/ultimate-nature/FBX/Rock_Moss_3.fbx', sat=1.2), h=1.3)
     add('rock_b', 'rock', 'roadside', D(per_ha=8), '庭石（立石）',

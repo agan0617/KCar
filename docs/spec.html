@@ -166,8 +166,8 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
   <h1>KCar 企劃規格</h1>
   <p class="sub">抓進彎時機、控甩尾角度的 3D 卡丁車競速網頁遊戲</p>
   <dl class="meta">
-    <dt>規格版本</dt><dd>2.2</dd>
-    <dt>對應遊戲版本</dt><dd>2.0.1（<code>js/version.js</code>）</dd>
+    <dt>規格版本</dt><dd>2.3</dd>
+    <dt>對應遊戲版本</dt><dd>2.0.2（<code>js/version.js</code>）</dd>
     <dt>最後更新</dt><dd>2026-11-17</dd>
     <dt>負責人</dt><dd>Ken</dd>
     <dt>狀態</dt><dd><span class="tag ok">現行</span></dd>
@@ -861,7 +861,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
   <li><strong>立體交叉</strong>：兩段路上下交叉時分上下層，物理各算各的（橋上橋下的車不會互撞）。</li>
   <li><strong>隧道</strong>：只有外觀，不影響物理。</li>
   <li><strong>地圖邊界</strong>：可行駛範圍外緣一圈都有牆；掉到賽道最低高度以下就重生。</li>
-  <li><strong>場景物件</strong>：樹、石頭、房子等依主題撒在路旁；車開得到的範圍內的物件有碰撞。</li>
+  <li><strong>場景物件</strong>：樹、石頭、房子等依主題撒在路旁；車開得到的範圍內的物件有碰撞。來源有三種：CC0 素材包（Kenney、Quaternius）、程式畫的、AI 生成的（參考圖用 Flux 產、TRELLIS.2 轉 3D，地標上限 15,000 面）；逐件來源見 <code>assets_src/props/LICENSE.md</code>。</li>
   <li>首頁卡片的順序依難度：椰林海灘、櫻花古都、雪國山道、霓虹夜城、熔岩火山。</li>
 </ul>
 
@@ -1560,6 +1560,9 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <div class="table-wrap"><table>
 <thead><tr><th>規格版本</th><th>日期</th><th>遊戲版本</th><th>狀態</th><th>章節</th><th>改了什麼、為什麼</th></tr></thead>
 <tbody>
+<tr><td>2.3</td><td>2026-11-17</td><td>2.0.2</td><td><span class="tag ok">已實作</span></td><td>6.1</td><td>
+  <p><strong>櫻花古都的五重塔換成 AI 生成的模型</strong>（Ken 2026-11-17 指定先上線）：場景美術的關鍵是模型品質，程式畫的物件質感不夠；免費素材包沒有夠好的日式建築，改用 AI 生成（Flux 產參考圖 → TRELLIS.2 轉 3D，4.8 萬面減到 1.46 萬面、貼圖 1024）。這一版參考圖畫成三層，之後會用「五層」重產。6.1 補上場景物件的三種來源。天空、光線、調色不變（試過三種風格，Ken 判定沒有比較好）。</p>
+</td></tr>
 <tr><td>2.2</td><td>2026-11-17</td><td>2.0.1</td><td><span class="tag ok">已實作</span></td><td>4.1、4.10、8.3、8.4、8.5、8.7、13.4、13.8</td><td>
   <p><strong>起步噴併進氮氣鍵、甩尾改 J、氮氣改空白鍵</strong>（Ken 2026-11-17 指定）：起步噴不再有專用鍵，倒數 GO 的瞬間按氮氣鍵；預設鍵位改成甩尾 J、氮氣空白鍵（4.1、4.10、8.3）。觸控拿掉「噴」鈕，改按「氮氣」（8.4）。按鍵設定與操作說明剩八個動作（8.5、8.7）。按鍵存檔換新名字，舊的自訂鍵位不沿用、回到新預設。</p>
 </td></tr>
