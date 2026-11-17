@@ -186,7 +186,10 @@ export class AutoDriver {
       const remain = wrap(headAt(s + 25) - k.phi);
       if (k.drift && Math.abs(turnAhead) < 0.35 && Math.abs(remain) < 0.25) {
         this.set('drift', false);
-        this.set(key, false);
+        // 放開甩尾的同時就照走線按方向（回正只吃真的按著的方向鍵，先全放掉會晚一拍轉不過去）
+        this.set('down', false);
+        this.set('left', err > 0.04);
+        this.set('right', err < -0.04);
         st.drifting = false;
       }
     } else {

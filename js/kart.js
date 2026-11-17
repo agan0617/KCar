@@ -196,8 +196,10 @@ export class Kart {
       if (this.straighten && this.spd >= 0) {
         // 回正中：方向鍵轉的是路線，車頭往路線方向收；反打方向（往甩尾的反方向）收得更快
         const counter = steerIn * this.driftDir < 0 ? P.counterSteer : 1;
-        pathTurn = yaw;
-        wT = yaw - wrap(this.h - this.phi) * P.driftRecover * counter;
+        // 只有現在真的按著往彎內的方向鍵，路線才往彎內轉；放開方向鍵後轉向值慢慢歸零的殘留不算（規格 3.1）
+        const yawR = steerIn * this.driftDir <= 0 && yaw * this.driftDir < 0 ? 0 : yaw;
+        pathTurn = yawR;
+        wT = yawR - wrap(this.h - this.phi) * P.driftRecover * counter;
       } else {
         this.straighten = false;
         wT = yaw;
@@ -233,7 +235,8 @@ export class Kart {
         this.driftScore += dt;
         if (this.nitroT <= 0) this.charge(dt);
       }
-      const keep = (control && inp.driftHeld) || steerIn * this.driftDir > 0;
+      // 放開甩尾鍵就結束（規格 3.1）：出彎時手指還壓著方向鍵很自然，不能因此繼續內切、往彎心鑽
+      const keep = control && inp.driftHeld;
       if (!keep) this.endDrift(true, 'release');
       else if (this.spd < P.driftMinSpeed * 0.6) this.endDrift(true, 'slow');
     } else this.driftEff = false;
