@@ -1,8 +1,8 @@
 // 輸入：鍵盤＋觸控按鈕，整理成每一幀的狀態與「這一幀剛按下」的邊緣事件。
 //
 // 油門一律自動（鍵盤、觸控都一樣），按住煞車時不給油；小噴也是自動的（放開甩尾時依甩尾分觸發）。
-// 鍵盤預設：A D 轉向、Space 甩尾、J 起步噴、K 煞車／倒車、L 氮氣、R 回到賽道、Esc／P 暫停、T 調參面板
-// 觸控：◀ ▶、甩尾、噴（只用在起步噴，倒數時才顯示）、氮氣、煞車。按鍵可在設定裡改（controls.js）。
+// 鍵盤預設：A D 轉向、J 甩尾、K 煞車／倒車、Space 氮氣（倒數時＝起步噴）、R 回到賽道、Esc／P 暫停、T 調參面板
+// 觸控：◀ ▶、甩尾、氮氣（倒數時＝起步噴）、煞車。按鍵可在設定裡改（controls.js）。
 
 import { codeMap, onKeysChange } from './controls.js';
 
@@ -38,7 +38,7 @@ export class Input {
     addEventListener('blur', () => { this.keys.clear(); this.touch.clear(); this.down.clear(); });
   }
 
-  /** 觸控按鈕呼叫：name 是 left/right/drift/jet/nitro/down */
+  /** 觸控按鈕呼叫：name 是 left/right/drift/nitro/down */
   setTouch(name, down) {
     if (down && !this.touch.has(name)) this.edges.add(name);
     if (down) this.touch.add(name); else this.touch.delete(name);
@@ -52,8 +52,8 @@ export class Input {
   get throttle() { return this.held('down') ? 0 : 1; }
   get braking() { return this.held('down'); }
   get driftHeld() { return this.held('drift'); }
-  /** 起步噴觸發：鍵盤是起步噴鍵（動作 up）剛按下，觸控是「噴」鈕 */
-  get jet() { return this.pressed('up') || this.pressed('jet'); }
+  /** 起步噴觸發：氮氣鍵（鍵盤或觸控）剛按下；只在倒數到 GO 後 0.2 秒內有作用，那段時間手上不會有氮氣 */
+  get jet() { return this.pressed('nitro'); }
 
   endFrame() { this.edges.clear(); }
 }

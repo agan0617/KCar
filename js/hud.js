@@ -184,7 +184,7 @@ export class Hud {
   // ------------------------------------------------------------ 觸控按鈕（自己做多點觸控判定，手指可以在 ◀ ▶ 之間滑）
   buildTouch() {
     const defs = [
-      ['left', '◀'], ['right', '▶'], ['drift', '甩尾'], ['jet', '噴'], ['nitro', '氮氣'], ['down', '煞'],
+      ['left', '◀'], ['right', '▶'], ['drift', '甩尾'], ['nitro', '氮氣'], ['down', '煞'],
     ];
     for (const [name, label] of defs) {
       const c = new Container();
@@ -199,7 +199,7 @@ export class Hud {
   }
 
   drawTouch(b) {
-    const col = { drift: 0xff9f1c, jet: 0x2ec4b6, nitro: 0x3a86ff, down: 0xe63946 }[b.name] ?? 0xffffff;
+    const col = { drift: 0xff9f1c, nitro: 0x3a86ff, down: 0xe63946 }[b.name] ?? 0xffffff;
     b.g.clear();
     b.g.circle(0, 0, b.r).fill({ color: col, alpha: b.down ? 0.75 : 0.28 }).stroke({ width: 3, color: 0xffffff, alpha: b.down ? 1 : 0.6 });
     if (b.glow) b.g.circle(0, 0, b.r + 7).stroke({ width: 5, color: 0x9ff7ff, alpha: 0.9 });
@@ -289,7 +289,6 @@ export class Hud {
       left: [16 + r * 1.25, H - r * 1.45, r * 1.05],
       right: [16 + r * 3.65, H - r * 1.45, r * 1.05],
       drift: [W - 16 - r * 1.3, H - r * 1.4, r * 1.15],
-      jet: [W - 16 - r * 3.75, H - r * 1.15, r * 0.88],
       nitro: [W - 16 - r * 1.3, H - r * 3.85, r * 0.88],
       down: [W - 16 - r * 3.7, H - r * 3.35, r * 0.62],
     };
@@ -374,10 +373,6 @@ export class Hud {
       if (k.drift && this.scrapeFlash > 0) m.rect(mx, sy, mw, sh).fill({ color: 0xff6b6b, alpha: this.scrapeFlash });
     }
     this.scrapeFlash = Math.max(0, (this.scrapeFlash || 0) - dt * 3);
-    // 觸控「噴」鈕只剩起步噴：倒數到 GO 後 0.2 秒內才顯示
-    const jb = this.touchButtons.find((b) => b.name === 'jet');
-    if (jb) jb.c.visible = !!st.startWindow;
-
     this.tWarn.visible = !!st.wrongWay;
     this.drawMiniDot(k, st.others || []);
 

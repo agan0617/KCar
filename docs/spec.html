@@ -166,8 +166,8 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
   <h1>KCar 企劃規格</h1>
   <p class="sub">抓進彎時機、控甩尾角度的 3D 卡丁車競速網頁遊戲</p>
   <dl class="meta">
-    <dt>規格版本</dt><dd>2.1</dd>
-    <dt>對應遊戲版本</dt><dd>2.0.0（<code>js/version.js</code>）</dd>
+    <dt>規格版本</dt><dd>2.2</dd>
+    <dt>對應遊戲版本</dt><dd>2.0.1（<code>js/version.js</code>）</dd>
     <dt>最後更新</dt><dd>2026-11-17</dd>
     <dt>負責人</dt><dd>Ken</dd>
     <dt>狀態</dt><dd><span class="tag ok">現行</span></dd>
@@ -412,11 +412,10 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <thead><tr><th>動作</th><th>鍵盤預設</th><th>觸控</th><th>說明</th></tr></thead>
 <tbody>
 <tr><td>油門</td><td>無（自動）</td><td>無（自動）</td><td>鍵盤與觸控都一律自動給油，含甩尾中；按住煞車時不給油</td></tr>
-<tr><td>起步噴</td><td>J</td><td>「噴」</td><td>倒數時「剛按下」＝起步噴（4.10）；其他時間按了沒有作用</td></tr>
 <tr><td>煞車／倒車</td><td>K</td><td>「煞」</td><td>甩尾中按＝點煞</td></tr>
 <tr><td>左轉、右轉</td><td>A、D</td><td>◀、▶</td><td>數位輸入：左＝−1、右＝+1、同時按＝0</td></tr>
-<tr><td>甩尾</td><td>空白鍵</td><td>「甩尾」</td><td>按住＋方向起甩</td></tr>
-<tr><td>氮氣</td><td>L</td><td>「氮氣」</td><td>有氮氣時使用</td></tr>
+<tr><td>甩尾</td><td>J</td><td>「甩尾」</td><td>按住＋方向起甩</td></tr>
+<tr><td>氮氣</td><td>空白鍵</td><td>「氮氣」</td><td>有氮氣時使用；倒數到 GO 後 0.2 秒內「剛按下」＝起步噴（4.10）</td></tr>
 <tr><td>回到賽道</td><td>R</td><td>無</td><td>卡住時重生（4.17）；只在比賽中有效，倒數中無效</td></tr>
 <tr><td>暫停</td><td>Esc、P</td><td>右上暫停鈕</td><td>2.5</td></tr>
 <tr><td>操控調參面板</td><td>T</td><td>設定 → 操控調參</td><td>第 5 章</td></tr>
@@ -424,7 +423,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 </table></div>
 <ul>
   <li><strong>剛按下</strong>：該動作這一幀從沒按變成按下。同一動作綁兩個鍵時，另一個還按著就不算放開。</li>
-  <li><strong>自動油門</strong>：不分鍵盤或觸控，油門一律視為按著；按住煞車時不給油。小噴也是自動的（4.8），整場不需要按油門類的鍵，只有倒數時的起步噴要按。</li>
+  <li><strong>自動油門</strong>：不分鍵盤或觸控，油門一律視為按著；按住煞車時不給油。小噴也是自動的（4.8），整場不需要按油門類的鍵；起步噴沒有專用鍵，倒數時按氮氣鍵。</li>
   <li><strong>方向平滑</strong>：車子實際用的方向值以每秒 10（<code>steerResponse</code>）的速率追按鍵值，不會瞬間打滿；但判斷「有沒有按方向」（起甩、反打）看的是按鍵值本身。</li>
   <li>網頁失去焦點時所有按鍵與觸控放開。</li>
 </ul>
@@ -600,7 +599,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 
 <h3 id="drv-start">4.10 起步噴</h3>
 <div class="table-wrap"><table>
-<thead><tr><th>按「起步噴」鍵（J）或觸控「噴」的時刻</th><th>結果</th></tr></thead>
+<thead><tr><th>按氮氣鍵（空白鍵）或觸控「氮氣」的時刻</th><th>結果</th></tr></thead>
 <tbody>
 <tr><td>倒數剩 0.25 秒以上</td><td>太早：這場的起步噴機會用掉，沒有起步噴</td></tr>
 <tr><td>倒數最後 0.25 秒內</td><td>GO 的瞬間觸發起步噴</td></tr>
@@ -608,7 +607,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <tr><td>GO 之後 0.2 秒以上</td><td>沒有作用</td></tr>
 </tbody>
 </table></div>
-<p>每場只有一次機會。效果：加速量 8 m/s（<code>startBoost</code>）、持續 1.0 秒（規則同 4.11）；彈出綠字「起步噴！」。電腦的起步噴見 7.6。</p>
+<p>每場只有一次機會。起步噴判定期間手上不會有氮氣（每場從 0 顆開始），所以這段時間按氮氣鍵只算起步噴、不會用掉氮氣。效果：加速量 8 m/s（<code>startBoost</code>）、持續 1.0 秒（規則同 4.11）；彈出綠字「起步噴！」。電腦的起步噴見 7.6。</p>
 
 <h3 id="drv-boost">4.11 加速的疊加規則</h3>
 <p>小噴、加速帶、起步噴共用一組「噴射」狀態（加速量、剩餘時間、種類），氮氣另外一組、可以同時作用：</p>
@@ -1099,16 +1098,15 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 </table></div>
 
 <h3>8.3 預設按鍵</h3>
-<p>左手 A、D 轉向、空白鍵甩尾；右手 J 起步噴、K 煞車、L 氮氣；油門是自動的。</p>
+<p>左手 A、D 轉向、空白鍵氮氣（倒數時＝起步噴）；右手 J 甩尾、K 煞車；油門是自動的。</p>
 <div class="table-wrap"><table>
 <thead><tr><th>動作</th><th>主要</th><th>次要</th></tr></thead>
 <tbody>
-<tr><td>起步噴</td><td>J</td><td>—</td></tr>
 <tr><td>煞車／倒車</td><td>K</td><td>—</td></tr>
 <tr><td>左轉</td><td>A</td><td>—</td></tr>
 <tr><td>右轉</td><td>D</td><td>—</td></tr>
-<tr><td>甩尾</td><td>空白鍵</td><td>—</td></tr>
-<tr><td>氮氣</td><td>L</td><td>—</td></tr>
+<tr><td>甩尾</td><td>J</td><td>—</td></tr>
+<tr><td>氮氣</td><td>空白鍵</td><td>—</td></tr>
 <tr><td>回到賽道</td><td>R</td><td>—</td></tr>
 <tr><td>暫停</td><td>Esc</td><td>P</td></tr>
 <tr><td>操控調參面板</td><td>T</td><td>—</td></tr>
@@ -1122,9 +1120,8 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <tbody>
 <tr><td>◀、▶</td><td>左下，並排</td><td>1.05r</td><td>左轉、右轉；手指按著可以在兩鍵之間滑動換向（只有這兩顆可以滑）</td></tr>
 <tr><td>甩尾</td><td>右下角</td><td>1.15r</td><td>按住起甩</td></tr>
-<tr><td>噴</td><td>甩尾鈕左邊</td><td>0.88r</td><td>起步噴；只在倒數中到 GO 後 0.2 秒內顯示，之後隱藏</td></tr>
-<tr><td>氮氣</td><td>甩尾鈕上方</td><td>0.88r</td><td>使用氮氣</td></tr>
-<tr><td>煞</td><td>噴鈕上方</td><td>0.62r</td><td>煞車、倒車、點煞</td></tr>
+<tr><td>氮氣</td><td>甩尾鈕上方</td><td>0.88r</td><td>使用氮氣；倒數 GO 的瞬間按＝起步噴</td></tr>
+<tr><td>煞</td><td>甩尾鈕左上方</td><td>0.62r</td><td>煞車、倒車、點煞</td></tr>
 </tbody>
 </table></div>
 <ul>
@@ -1137,7 +1134,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <p>從首頁「設定」或暫停選單「設定（按鍵／調參）」開啟，標題「設定」：</p>
 <ul>
   <li><strong>畫質</strong>：兩個選項「高畫質」（泛光、反鋸齒、高解析陰影）與「省電」（手機跑不順時用），點了立即切換並記住（8.8）。</li>
-  <li><strong>按鍵</strong>：表格每列一個動作（8.3 的九個動作），兩格「主要」「次要」。
+  <li><strong>按鍵</strong>：表格每列一個動作（8.3 的八個動作），兩格「主要」「次要」。
     <ul>
       <li>點一格 → 格子顯示「按下新按鍵…」→ 下一個按的鍵就是新設定（包括 Esc）。</li>
       <li>同一個鍵只能屬於一個動作：設定的鍵原本屬於別的動作時，自動從原動作拿掉，並在說明列顯示「「X」原本是「Y」的鍵，已改給「Z」」。</li>
@@ -1154,9 +1151,9 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <h3>8.7 操作說明對話框</h3>
 <p>從首頁「操作說明」或暫停選單「操作說明」開啟，內容依目前的按鍵設定顯示：</p>
 <ul>
-  <li><strong>鍵盤（目前的設定）</strong>：九個動作與按鍵的對照表，部分動作附一行小字提示（起步噴：倒數 GO 的瞬間按，油門是自動的；煞車：甩尾中點一下＝點煞；甩尾：按住＋方向起甩；氮氣：集滿氣後使用；回到賽道：卡住時用）。</li>
-  <li><strong>技巧</strong>：六條說明——甩尾與甜蜜區間（看甩尾表，指針留在綠區）、進彎時機（太早要外拉、太晚要點煞，都會掉出綠區）、小噴（放開甩尾自動噴，綠區待越久段數越高）、氮氣（綠區甩尾時集氣）、起步噴、路外減速與回到賽道。</li>
-  <li><strong>手機觸控</strong>：自動油門與六顆按鈕的說明（「噴」只用在起步）。非觸控裝置另加一行「按鍵可以在首頁或暫停選單的「設定」裡改」。</li>
+  <li><strong>鍵盤（目前的設定）</strong>：八個動作與按鍵的對照表，部分動作附一行小字提示（煞車：甩尾中點一下＝點煞；甩尾：按住＋方向起甩；氮氣：集滿氣後使用、倒數 GO 的瞬間按＝起步噴；回到賽道：卡住時用）。</li>
+  <li><strong>技巧</strong>：六條說明——甩尾與甜蜜區間（看甩尾表，指針留在綠區）、進彎時機（太早要外拉、太晚要點煞，都會掉出綠區）、小噴（放開甩尾自動噴，綠區待越久段數越高）、氮氣（綠區甩尾時集氣）、起步噴（GO 的瞬間按氮氣鍵）、路外減速與回到賽道。</li>
+  <li><strong>手機觸控</strong>：自動油門與五顆按鈕的說明（GO 的瞬間按「氮氣」＝起步噴）。非觸控裝置另加一行「按鍵可以在首頁或暫停選單的「設定」裡改」。</li>
   <li>按鈕「知道了」關閉。</li>
 </ul>
 
@@ -1472,7 +1469,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
   <li>甩尾中按煞車，車頭明顯往彎內多甩、車速下降。</li>
   <li>在綠區甩尾可以集滿氣（滿速約 1.7 秒一條）、HUD 右側氮氣圓點亮起，第 3 顆不會出現（最多 2 顆，集氣條停在滿格）。</li>
   <li>按氮氣：氮氣數 −1、儀表變藍、排氣管藍火約 3 秒；作用中再按不消耗。</li>
-  <li>倒數剩 1 秒以上就按起步噴鍵，GO 時沒有起步噴；倒數最後一刻按，GO 時出現「起步噴！」；GO 後立刻按也有。</li>
+  <li>倒數剩 1 秒以上就按氮氣鍵，GO 時沒有起步噴；倒數最後一刻按，GO 時出現「起步噴！」；GO 後立刻按也有。</li>
   <li>開上草地、沙地明顯減速；開上捷徑土路小幅減速。</li>
   <li>碰到加速帶車速明顯提升並有咻聲。</li>
   <li>正面撞牆掉速並被彈開；甩尾中重撞牆，甩尾結束且沒有小噴。</li>
@@ -1510,11 +1507,11 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <ul class="check">
   <li>HUD 各元素位置與內容符合 8.1；計時賽與自由練習沒有名次與排行。</li>
   <li>小地圖上玩家三角形方向與車頭一致，對手點顏色正確。</li>
-  <li>設定裡把起步噴改成 W 後，倒數時按 W 有起步噴、按 J 沒有；操作說明顯示 W。</li>
+  <li>設定裡把氮氣改成 W 後，倒數時按 W 有起步噴、按空白鍵沒有；操作說明顯示 W。</li>
   <li>甩尾表的角度條、甩尾分條、刻度與顏色符合 8.1；甩尾結束後停留約 0.6 秒再淡出。</li>
-  <li>把 J 設給甩尾時，出現「原本是「起步噴」的鍵」提示，起步噴那格變空。</li>
+  <li>把 J 設給氮氣時，出現「原本是「甩尾」的鍵」提示，甩尾那格變空。</li>
   <li>「恢復預設」後按鍵回到 8.3。</li>
-  <li>觸控裝置：按「煞」時不給油；◀ ▶ 可以滑動換向；「噴」鈕只在倒數到 GO 後 0.2 秒內出現，之後隱藏。</li>
+  <li>觸控裝置：按「煞」時不給油；◀ ▶ 可以滑動換向；沒有「噴」鈕，倒數 GO 的瞬間按「氮氣」有起步噴。</li>
   <li>切換高畫質／省電立即生效且重新整理後保留；高畫質下刻意壓低效能時會自動切到省電並提示。</li>
 </ul>
 
@@ -1563,6 +1560,9 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <div class="table-wrap"><table>
 <thead><tr><th>規格版本</th><th>日期</th><th>遊戲版本</th><th>狀態</th><th>章節</th><th>改了什麼、為什麼</th></tr></thead>
 <tbody>
+<tr><td>2.2</td><td>2026-11-17</td><td>2.0.1</td><td><span class="tag ok">已實作</span></td><td>4.1、4.10、8.3、8.4、8.5、8.7、13.4、13.8</td><td>
+  <p><strong>起步噴併進氮氣鍵、甩尾改 J、氮氣改空白鍵</strong>（Ken 2026-11-17 指定）：起步噴不再有專用鍵，倒數 GO 的瞬間按氮氣鍵；預設鍵位改成甩尾 J、氮氣空白鍵（4.1、4.10、8.3）。觸控拿掉「噴」鈕，改按「氮氣」（8.4）。按鍵設定與操作說明剩八個動作（8.5、8.7）。按鍵存檔換新名字，舊的自訂鍵位不沿用、回到新預設。</p>
+</td></tr>
 <tr><td>2.1</td><td>2026-11-17</td><td>2.0.0</td><td><span class="tag ok">已實作</span></td><td>4.1、4.10、5.3、6.2、7.2、7.3、8.3、8.7、13.2、13.4、13.8</td><td>
   <p><strong>鍵盤也改成自動油門</strong>（Ken 2026-11-17 指定）：網頁版跟手機一樣不用按油門，按住煞車時不給油；原本的油門鍵 J 改成「起步噴」鍵（4.1、4.10、8.3、8.7）。</p>
   <p><strong>2.0 實作後的校準</strong>：</p>
@@ -1592,7 +1592,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 </table></div>
 </section>
 
-<footer>KCar 企劃規格 · 規格版本 2.1（現行）· 2026-11-17</footer>
+<footer>KCar 企劃規格 · 規格版本 2.2（現行）· 2026-11-17</footer>
 </main>
 </div>
 </body>

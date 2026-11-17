@@ -56,7 +56,7 @@ export const NEUTRAL = [0, 0, 0, 0, 0, 0];
 export function stepKart(k, inp, tick, goTick) {
   const control = tick >= goTick;
   if (!control) {
-    // 起步噴：GO 前 0.25 秒內按 ↑／噴才算，太早按就沒了
+    // 起步噴：GO 前 0.25 秒內按氮氣鍵才算，太早按就沒了
     if (inp.jet && !k.sbUsed) {
       k.sbUsed = true;
       if ((goTick - tick) * STEP < 0.25) k.sbPend = true;

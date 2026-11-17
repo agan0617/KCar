@@ -546,7 +546,7 @@ async function main() {
     const race = G.race, me = race.player, k = me.kart;
     if (G.state === 'countdown') {
       G.countT -= dt;
-      // 起步噴：GO 前 0.25 秒到 GO 後 0.2 秒之間按下 ↑／噴
+      // 起步噴：GO 前 0.25 秒到 GO 後 0.2 秒之間按下氮氣鍵
       if (input.jet && !G.startBoostUsed) {
         G.startBoostUsed = true;
         if (G.countT < 0.25) G.pendingStart = true;
@@ -793,7 +793,6 @@ async function main() {
         standings: G.mode === 'race' ? st.map((r) => ({ name: r.name, color: r.color, isPlayer: r.isPlayer })) : null,
         others: race.racers.filter((r) => !r.isPlayer).map((r) => ({ x: r.kart.x, z: r.kart.z, color: r.color })),
         tags: nameTags(),
-        startWindow: G.state === 'countdown' || race.clock < 0.2, // 觸控「噴」鈕只在起步噴有用的這段時間顯示
       }, k, dt);
     }
     sfx.update(k, G.state === 'race' || G.state === 'countdown' || !!G.online);
