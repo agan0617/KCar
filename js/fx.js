@@ -1,6 +1,7 @@
 // 特效：甩尾火花、輪胎痕、煙塵、排氣管噴火。
 
 import * as THREE from 'three';
+import { jetTier } from './kart.js';
 
 function softDot() {
   const c = document.createElement('canvas');
@@ -168,8 +169,8 @@ export class Wind {
   }
 }
 
-const C_SPARK = new THREE.Color('#ffb03a');
-const C_READY = new THREE.Color('#7fe0ff');
+// 甩尾火花顏色＝目前小噴段數：未達一段白、一段黃、二段橘、三段藍（跟 HUD 甩尾表同色）
+const C_TIER = ['#ffffff', '#ffd23f', '#ff9f1c', '#5fb8ff'].map((c) => new THREE.Color(c));
 const C_SMOKE = new THREE.Color('#e9ecef');
 const C_DUST = new THREE.Color('#b8a27a');
 const C_NITRO = new THREE.Color('#5fb8ff');
@@ -216,7 +217,8 @@ export class Fx {
     const sin = Math.sin(k.h), cos = Math.cos(k.h);
     const rx = -cos, rz = sin; // 右手邊
     const fwdx = sin, fwdz = cos;
-    const ready = k.drift && k.driftT >= 0.35;
+    const sparkCol = C_TIER[k.drift ? jetTier(k.driftScore || 0) : 0];
+    const sparkRate = k.driftEff ? 70 : 18; // 有效甩尾火花旺，掉出甜蜜區間（或貼牆）火花稀疏
     this.acc += dt;
     const p = this.tmp;
     // 甩尾火花＋白煙＋胎痕
@@ -225,14 +227,14 @@ export class Fx {
       const slipping = k.drift || (Math.abs(k.slip) > 0.12 && k.spd > 8);
       this.skid.add(wi, p, rx, rz, slipping && !k.onGrass);
       if (k.drift && !k.onGrass) {
-        const n = Math.random() < dt * 70 ? 2 : 0;
+        const n = Math.random() < dt * sparkRate ? 2 : 0;
         for (let s = 0; s < n; s++) {
           const side = wi === 0 ? 1 : -1;
           this.sparks.emit(p.x, p.y + 0.1, p.z,
             -fwdx * (2 + Math.random() * 3) + rx * side * (Math.random() * 2) + (Math.random() - 0.5),
             2 + Math.random() * 3,
             -fwdz * (2 + Math.random() * 3) + rz * side * (Math.random() * 2) + (Math.random() - 0.5),
-            ready ? C_READY : C_SPARK, 0.25 + Math.random() * 0.2);
+            sparkCol, 0.25 + Math.random() * 0.2);
         }
         if (Math.random() < dt * 14) this.smoke.emit(p.x, p.y + 0.3, p.z, -fwdx * 2, 0.8, -fwdz * 2, C_SMOKE, 0.9);
       }
@@ -247,7 +249,9 @@ export class Fx {
     const nitro = k.nitroT > 0;
     const boost = k.boostT > 0;
     const on = nitro || boost;
-    const strength = nitro ? 1.6 : boost ? (k.boostKind === 'dj' ? 1.3 : 1.0) : 0;
+    // 小噴火焰長度依段數 1.0／1.15／1.3；加速帶、起步噴 1.0；氮氣 1.6
+    const jt = /^jet[1-3]$/.test(k.boostKind) ? +k.boostKind[3] : 1;
+    const strength = nitro ? 1.6 : boost ? [1, 1, 1.15, 1.3][jt] : 0;
     for (const f of this.flames) {
       f.g.visible = on;
       if (!on) continue;

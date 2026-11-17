@@ -1,8 +1,8 @@
 // 輸入：鍵盤＋觸控按鈕，整理成每一幀的狀態與「這一幀剛按下」的邊緣事件。
 //
-// 鍵盤預設：A D 轉向、Space 甩尾、J 油門、K 煞車／倒車、L 氮氣、R 回到賽道、Esc／P 暫停、T 調參面板
-// 小噴＝甩尾放開後在時機內「再按一次油門」（所以甩尾時要先鬆油門）。按鍵可在設定裡改（controls.js）。
-// 觸控：自動油門；◀ ▶、甩尾、噴（小噴／雙噴／起步噴）、氮氣、煞車
+// 油門一律自動（鍵盤、觸控都一樣），按住煞車時不給油；小噴也是自動的（放開甩尾時依甩尾分觸發）。
+// 鍵盤預設：A D 轉向、Space 甩尾、J 起步噴、K 煞車／倒車、L 氮氣、R 回到賽道、Esc／P 暫停、T 調參面板
+// 觸控：◀ ▶、甩尾、噴（只用在起步噴，倒數時才顯示）、氮氣、煞車。按鍵可在設定裡改（controls.js）。
 
 import { codeMap, onKeysChange } from './controls.js';
 
@@ -47,14 +47,12 @@ export class Input {
   held(a) { return this.keys.has(a) || this.touch.has(a); }
   pressed(a) { return this.edges.has(a); }
 
-  /** 觸控模式（最近沒用鍵盤）：自動油門 */
-  get autoThrottle() { return this.isTouch && performance.now() - this.lastKeyboard > 5000; }
-
   get steer() { return (this.held('right') ? 1 : 0) - (this.held('left') ? 1 : 0); }
-  get throttle() { return this.held('up') || (this.autoThrottle && !this.held('down')) ? 1 : 0; }
+  /** 自動油門：一律給油，按住煞車時不給 */
+  get throttle() { return this.held('down') ? 0 : 1; }
   get braking() { return this.held('down'); }
   get driftHeld() { return this.held('drift'); }
-  /** 小噴觸發：鍵盤是油門鍵剛按下，觸控是「噴」鈕 */
+  /** 起步噴觸發：鍵盤是起步噴鍵（動作 up）剛按下，觸控是「噴」鈕 */
   get jet() { return this.pressed('up') || this.pressed('jet'); }
 
   endFrame() { this.edges.clear(); }

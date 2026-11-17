@@ -30,19 +30,22 @@ export const DEFS = [
     ['brakeYaw', '點煞：按住時多轉 (rad/s)', 0, 3, 0.05, 1.1],
     ['brakeDrag', '點煞：按住時掉速', 0, 40, 1, 12],
   ]],
-  ['小噴／雙噴', [
-    ['jetMinDrift', '甩尾多久才有小噴 (s)', 0, 1.5, 0.05, 0.35],
-    ['jetWindow', '小噴時機窗 (s)', 0.1, 1.5, 0.05, 0.55],
-    ['jetPerfect', '完美：車身偏角 < (°)', 1, 20, 0.5, 7],
-    ['jetGood', '普通：車身偏角 < (°)', 5, 40, 0.5, 16],
-    ['jetSpeed', '小噴加速 (m/s)', 0, 20, 0.5, 8],
-    ['jetTime', '小噴持續 (s)', 0.1, 2, 0.05, 0.7],
-    ['djMin', '雙噴最早 (s)', 0, 0.6, 0.01, 0.12],
-    ['djMax', '雙噴最晚 (s)', 0.1, 1.2, 0.01, 0.5],
-    ['djSpeed', '雙噴加速 (m/s)', 0, 20, 0.5, 5],
+  ['甩尾分／小噴', [
+    ['driftBandMin', '甜蜜區下限 (°)', 5, 30, 0.5, 14],
+    ['driftBandMax', '甜蜜區上限 (°)', 20, 60, 0.5, 38],
+    ['scrapeKeep', '擦牆保留甩尾分', 0, 1, 0.05, 0.5],
+    ['jetTier1', '一段門檻 (s)', 0.1, 2, 0.05, 0.6],
+    ['jetTier2', '二段門檻 (s)', 0.2, 3, 0.05, 1.1],
+    ['jetTier3', '三段門檻 (s)', 0.3, 4, 0.05, 1.8],
+    ['jetSpeed1', '一段加速 (m/s)', 0, 20, 0.5, 4],
+    ['jetSpeed2', '二段加速 (m/s)', 0, 20, 0.5, 7],
+    ['jetSpeed3', '三段加速 (m/s)', 0, 20, 0.5, 10],
+    ['jetTime1', '一段持續 (s)', 0.1, 2, 0.05, 0.5],
+    ['jetTime2', '二段持續 (s)', 0.1, 2, 0.05, 0.8],
+    ['jetTime3', '三段持續 (s)', 0.1, 3, 0.05, 1.2],
   ]],
   ['集氣／氮氣', [
-    ['chargeRate', '集氣速度', 0.05, 1.5, 0.01, 0.5],
+    ['chargeRate', '集氣速度', 0.05, 1.5, 0.01, 0.6],
     ['nitroTime', '氮氣持續 (s)', 0.5, 6, 0.1, 3],
     ['nitroSpeed', '氮氣加速 (m/s)', 0, 25, 0.5, 13],
     ['boostAccel', '噴射推力', 5, 80, 1, 34],
@@ -81,7 +84,8 @@ export const DEFS = [
   ]],
 ];
 
-const KEY = 'kcar.tuning.v1';
+// v1 存的是整份參數（連沒改過的預設值也存），2.0 改了預設值與甩尾系統，換新的 key 重來
+const KEY = 'kcar.tuning.v2';
 export const P = {};
 export const DEFAULTS = {};
 for (const [, items] of DEFS) for (const [k, , , , , d] of items) { P[k] = d; DEFAULTS[k] = d; }
@@ -91,8 +95,11 @@ try {
   for (const k in saved) if (k in P && typeof saved[k] === 'number') P[k] = saved[k];
 } catch (e) { /* 沒有 localStorage 就用預設值 */ }
 
+// 只存跟預設不同的值：預設值改版後，沒動過的參數會跟著新的預設走
 function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) { /* 忽略 */ }
+  const diff = {};
+  for (const k in P) if (P[k] !== DEFAULTS[k]) diff[k] = P[k];
+  try { localStorage.setItem(KEY, JSON.stringify(diff)); } catch (e) { /* 忽略 */ }
 }
 
 // ------------------------------------------------------------ 調參面板（HTML，不跟 Pixi 搶）

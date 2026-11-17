@@ -1,8 +1,9 @@
-// 2D 介面（PixiJS）：首頁、HUD、小噴時機表、觸控按鈕、暫停與成績。
+// 2D 介面（PixiJS）：首頁、HUD、甩尾表、觸控按鈕、暫停與成績。
 // 疊在 three.js 畫布上面，透明背景。
 
 import { Application, Container, Graphics, Text, TextStyle } from 'pixi.js';
 import { P } from './tuning.js';
+import { jetTier } from './kart.js';
 import { keysOf } from './controls.js';
 
 const FONT = ['"Noto Sans TC"', '"Microsoft JhengHei"', '"PingFang TC"', '"Heiti TC"', 'sans-serif'];
@@ -211,6 +212,7 @@ export class Hud {
       if (!this.touchLayer.visible) return null;
       let best = null, bd = Infinity;
       for (const b of this.touchButtons) {
+        if (!b.c.visible) continue;
         const d = Math.hypot(x - b.c.x, y - b.c.y);
         if (d < b.r * 1.35 && d < bd) { bd = d; best = b; }
       }
@@ -332,40 +334,49 @@ export class Hud {
       if (i < k.nitros) g.circle(cx - 3 * s, gp.y - 3 * s, 4 * s).fill({ color: 0xffffff, alpha: 0.7 });
     }
 
-    // 小噴時機表
+    // 甩尾表：上＝甩尾分條（三段刻度），下＝側滑角條（綠區＝甜蜜區間）
     const m = this.meter, mp = this.meterPos;
     m.clear();
     this.tMeter.text = '';
-    const w = k.jetWin;
-    if (w) {
-      const mw = mp.w, mh = 16 * s, mx = mp.x - mw / 2, my = mp.y;
-      m.roundRect(mx - 4, my - 4, mw + 8, mh + 8, 8).fill({ color: 0x0b1733, alpha: 0.55 });
-      if (w.stage === 1) {
-        // 左邊 30°、右邊 0°：車身越正越往右，綠區＝完美
-        const span = 30;
-        const xp = (deg) => mx + mw * (1 - Math.min(span, deg) / span);
-        m.rect(mx, my, xp(P.jetGood) - mx, mh).fill({ color: 0xff6b6b, alpha: 0.75 });
-        m.rect(xp(P.jetGood), my, xp(P.jetPerfect) - xp(P.jetGood), mh).fill({ color: 0xffd23f, alpha: 0.85 });
-        m.rect(xp(P.jetPerfect), my, mx + mw - xp(P.jetPerfect), mh).fill({ color: 0x4cd964, alpha: 0.95 });
-        const cx = xp(k.slipDeg);
-        m.roundRect(cx - 3, my - 7, 6, mh + 14, 3).fill(0xffffff).stroke({ width: 2, color: 0x14244a });
-        const left = 1 - w.t / P.jetWindow;
-        m.rect(mx, my + mh + 6, mw * Math.max(0, left), 4 * s).fill({ color: 0xffffff, alpha: 0.8 });
-        this.tMeter.text = `按 ${this.input.autoThrottle ? '噴' : keysOf('up')}：小噴（車身回正到綠區最完美）`;
-      } else {
-        const span = P.djMax + 0.1;
-        const xp = (t) => mx + mw * Math.min(1, t / span);
-        m.rect(mx, my, xp(P.djMin) - mx, mh).fill({ color: 0xff6b6b, alpha: 0.75 });
-        m.rect(xp(P.djMin), my, xp(P.djMax) - xp(P.djMin), mh).fill({ color: 0x4cd964, alpha: 0.95 });
-        const cx = xp(w.t);
-        m.roundRect(cx - 3, my - 7, 6, mh + 14, 3).fill(0xffffff).stroke({ width: 2, color: 0x14244a });
-        this.tMeter.text = `再按一次：雙噴`;
+    const showEnd = !k.drift && k.driftEndT < 0.6;
+    if (k.drift || showEnd) {
+      const fade = k.drift ? 1 : 1 - k.driftEndT / 0.6;
+      const mw = mp.w, mx = mp.x - mw / 2, my = mp.y;
+      const sh = 12 * s, ah = 14 * s, gap = 8 * s; // 甩尾分條高、角度條高、間距
+      const sy = my, ay = my + sh + gap;
+      m.roundRect(mx - 5, sy - 5, mw + 10, sh + gap + ah + 10, 8).fill({ color: 0x0b1733, alpha: 0.55 * fade });
+      // 甩尾分條
+      const score = k.drift ? k.driftScore : k.lastScore;
+      const tier = k.drift ? jetTier(score) : k.lastTier;
+      const tierCol = [0xffffff, 0xffd23f, 0xff9f1c, 0x5fb8ff][tier];
+      const full = P.jetTier3;
+      m.rect(mx, sy, mw, sh).fill({ color: 0xffffff, alpha: 0.12 * fade });
+      const sw = mw * Math.min(1, score / full);
+      if (sw > 0.5) m.rect(mx, sy, sw, sh).fill({ color: tierCol, alpha: 0.95 * fade });
+      for (const t of [P.jetTier1, P.jetTier2]) {
+        const tx = mx + mw * Math.min(1, t / full);
+        m.rect(tx - 1, sy - 3, 2, sh + 6).fill({ color: 0xffffff, alpha: 0.85 * fade });
       }
-      this.tMeter.position.set(mp.x, my - 10 * s);
+      // 側滑角條：0°（左）到 45°（右），綠區＝甜蜜區間
+      const span = 45;
+      const xp = (deg) => mx + mw * Math.min(1, Math.max(0, deg) / span);
+      m.rect(mx, ay, mw, ah).fill({ color: 0x8a94a6, alpha: 0.35 * fade });
+      m.rect(xp(P.driftBandMin), ay, xp(P.driftBandMax) - xp(P.driftBandMin), ah).fill({ color: 0x4cd964, alpha: 0.85 * fade });
+      if (k.drift) {
+        const cx = xp(k.slipDeg);
+        m.roundRect(cx - 3, ay - 6, 6, ah + 12, 3).fill(k.driftEff ? 0xffffff : 0xff4d4d).stroke({ width: 2, color: 0x14244a });
+      } else if (tier) {
+        this.tMeter.text = ['', '一段', '二段', '三段'][tier];
+        this.tMeter.alpha = fade;
+        this.tMeter.position.set(mp.x, sy - 6 * s);
+      }
+      // 擦牆時整條閃一下
+      if (k.drift && this.scrapeFlash > 0) m.rect(mx, sy, mw, sh).fill({ color: 0xff6b6b, alpha: this.scrapeFlash });
     }
+    this.scrapeFlash = Math.max(0, (this.scrapeFlash || 0) - dt * 3);
+    // 觸控「噴」鈕只剩起步噴：倒數到 GO 後 0.2 秒內才顯示
     const jb = this.touchButtons.find((b) => b.name === 'jet');
-    const glow = !!w;
-    if (jb && jb.glow !== glow) { jb.glow = glow; this.drawTouch(jb); }
+    if (jb) jb.c.visible = !!st.startWindow;
 
     this.tWarn.visible = !!st.wrongWay;
     this.drawMiniDot(k, st.others || []);
@@ -522,9 +533,9 @@ export class Hud {
     bestT.anchor.set(0.5);
     const help = new Text({
       text: touch
-        ? '◀ ▶ 轉向（自動油門）．按住「甩尾」＋方向起甩．放開回正時按「噴」＝小噴，再按一次＝雙噴．集滿氣按「氮氣」'
-        : `${keysOf('left')} ${keysOf('right')} 轉向．${keysOf('up')} 油門．${keysOf('down')} 煞車．${keysOf('drift')}＋方向 甩尾．`
-          + `甩尾時鬆 ${keysOf('up')}，回正時再按 ${keysOf('up')}＝小噴，再按一次＝雙噴．${keysOf('nitro')} 氮氣`,
+        ? '◀ ▶ 轉向（自動油門）．按住「甩尾」＋方向起甩，角度留在綠區，放開自動小噴．集滿氣按「氮氣」'
+        : `${keysOf('left')} ${keysOf('right')} 轉向（自動油門）．${keysOf('down')} 煞車．${keysOf('drift')}＋方向 甩尾．`
+          + `甩尾角度留在綠區越久，放開時小噴越強．${keysOf('nitro')} 氮氣`,
       style: style(14, '#ffffff', { wordWrap: true, wordWrapWidth: 900, align: 'center' }),
     });
     help.anchor.set(0.5, 1);

@@ -32,12 +32,14 @@ KCar 的賽道目標是「玩起來像主機級卡丁車遊戲」：每一圈都
 ```
 python tools/check_layout2.py <id>                      # 長度、彎道半徑、坡度、交叉高差、跳台需要的速度、俯視圖 tmp_layout/<id>_v2.png
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_assets.ps1 -V2 -NoKart -Track <id>
-node tools/sim.mjs tt <id>                               # 電腦自動駕駛：甩尾＋完美小噴 vs 不甩尾的圈速、撞牆次數
+node tools/sim.mjs tt <id>                               # 電腦自動駕駛：每彎甩（顧／不顧甜蜜區間） vs 不甩尾的圈速、撞牆次數、小噴段數
+node tools/sim.mjs timing <id>                           # 起甩提早／延後對總時間與小噴段數的影響
 node tools/sim.mjs race <id> 6                           # 對 3 台電腦的名次分布
 ```
 
 驗收標準：
 - `check_layout2.py` 沒有錯誤
 - 完美自動駕駛三圈都跑完、沒有掉落重生、撞牆少（一圈 ≤ 3 次）
-- 「甩尾＋完美小噴」比「不甩尾」快 8% 以上（技術有回報）；難度越高差越多
+- 「每彎甩、顧甜蜜區間」比「不甩尾」快 8% 以上（技術有回報）；難度越高差越多
+- 彎的角度要有變化：短彎拿一段、90° 左右拿二段、長彎才拿得到三段（看 `tt` 的段數分布）
 - 渲預覽圖自己看（Blender 背景渲染，參考 `tmp_layout/render_preview.py`）：俯視全圖＋每個地標一張低角度近景

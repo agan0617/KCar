@@ -32,7 +32,7 @@ for (let i = 0; i < N; i++) {
   net.on('go', (m) => {
     p.race = new OnlineRace(track, net, { seats: p.prep.seats, laps: p.prep.laps, goTick: m.goTick, myId: net.id });
     // 自己那台用自動駕駛開（開的是預測的 sim，跟真人看著畫面開一樣）
-    p.driver = new AutoDriver(p.race.player.sim, { ...PERFECT_SKILL, perfect: 0.6, dj: 0.5, lane: i * 2 - 1 });
+    p.driver = new AutoDriver(p.race.player.sim, { ...PERFECT_SKILL, angle: 0.6, lane: i * 2 - 1 });
   });
   net.on('snap', (m) => {
     const r = p.race;
@@ -87,7 +87,7 @@ while (!players.every((p) => p.result || p.closed) && performance.now() - t0 < 3
 
 for (const p of players) {
   const r = p.result;
-  console.log(`${p.name}：快照 ${p.snaps}、回滾修正 平均 ${(p.sumCorr / Math.max(1, p.nCorr) * 100).toFixed(1)} cm／最大 ${(p.maxCorr * 100).toFixed(1)} cm、rate ${p.race && p.race.rate.toFixed(3)}、延遲 ${Math.round(p.net.rtt)}ms${p.closed ? '、斷線' : ''}`);
+  console.log(`${p.name}：快照 ${p.snaps}、回滾修正 平均 ${(p.sumCorr / Math.max(1, p.nCorr) * 100).toFixed(1)} cm／最大 ${(p.maxCorr * 100).toFixed(1)} cm、rate ${p.race && p.race.rate.toFixed(3)}、延遲 ${Math.round(p.net.rtt)}ms、自動駕駛卡住自己重生 ${(p.driver && p.driver.stuckN) || 0} 次（server 不知道，會被拉回）${p.closed ? '、斷線' : ''}`);
 }
 const res = players[0].result;
 if (res) console.log('名次：' + res.order.map((o, i) => `${i + 1}.${o.name}${o.bot ? '(電腦)' : ''} ${o.t.toFixed(2)}${o.done ? '' : '≈'}`).join('  '));

@@ -166,11 +166,11 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
   <h1>KCar 企劃規格</h1>
   <p class="sub">抓進彎時機、控甩尾角度的 3D 卡丁車競速網頁遊戲</p>
   <dl class="meta">
-    <dt>規格版本</dt><dd>2.0</dd>
-    <dt>對應遊戲版本</dt><dd>2.0.0（預定，尚未實作；目前上線的 1.0.0 對應規格 1.0，見〈版本歷史〉）</dd>
+    <dt>規格版本</dt><dd>2.1</dd>
+    <dt>對應遊戲版本</dt><dd>2.0.0（<code>js/version.js</code>）</dd>
     <dt>最後更新</dt><dd>2026-11-17</dd>
     <dt>負責人</dt><dd>Ken</dd>
-    <dt>狀態</dt><dd><span class="tag">已確認，待實作</span></dd>
+    <dt>狀態</dt><dd><span class="tag ok">現行</span></dd>
   </dl>
 </header>
 
@@ -411,12 +411,12 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <div class="table-wrap"><table>
 <thead><tr><th>動作</th><th>鍵盤預設</th><th>觸控</th><th>說明</th></tr></thead>
 <tbody>
-<tr><td>油門</td><td>J</td><td>自動油門</td><td>按住加速（甩尾中也照按）；倒數時「剛按下」＝起步噴</td></tr>
+<tr><td>油門</td><td>無（自動）</td><td>無（自動）</td><td>鍵盤與觸控都一律自動給油，含甩尾中；按住煞車時不給油</td></tr>
+<tr><td>起步噴</td><td>J</td><td>「噴」</td><td>倒數時「剛按下」＝起步噴（4.10）；其他時間按了沒有作用</td></tr>
 <tr><td>煞車／倒車</td><td>K</td><td>「煞」</td><td>甩尾中按＝點煞</td></tr>
 <tr><td>左轉、右轉</td><td>A、D</td><td>◀、▶</td><td>數位輸入：左＝−1、右＝+1、同時按＝0</td></tr>
 <tr><td>甩尾</td><td>空白鍵</td><td>「甩尾」</td><td>按住＋方向起甩</td></tr>
 <tr><td>氮氣</td><td>L</td><td>「氮氣」</td><td>有氮氣時使用</td></tr>
-<tr><td>噴</td><td>（＝油門剛按下）</td><td>「噴」</td><td>觸控專用：起步噴（觸控是自動油門，沒有「剛按下」可用）。小噴是自動的，不用按</td></tr>
 <tr><td>回到賽道</td><td>R</td><td>無</td><td>卡住時重生（4.17）；只在比賽中有效，倒數中無效</td></tr>
 <tr><td>暫停</td><td>Esc、P</td><td>右上暫停鈕</td><td>2.5</td></tr>
 <tr><td>操控調參面板</td><td>T</td><td>設定 → 操控調參</td><td>第 5 章</td></tr>
@@ -424,7 +424,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 </table></div>
 <ul>
   <li><strong>剛按下</strong>：該動作這一幀從沒按變成按下。同一動作綁兩個鍵時，另一個還按著就不算放開。</li>
-  <li><strong>自動油門</strong>：觸控裝置、且最近 5 秒沒用過鍵盤時，油門一律視為按著；按住「煞」時不自動給油。</li>
+  <li><strong>自動油門</strong>：不分鍵盤或觸控，油門一律視為按著；按住煞車時不給油。小噴也是自動的（4.8），整場不需要按油門類的鍵，只有倒數時的起步噴要按。</li>
   <li><strong>方向平滑</strong>：車子實際用的方向值以每秒 10（<code>steerResponse</code>）的速率追按鍵值，不會瞬間打滿；但判斷「有沒有按方向」（起甩、反打）看的是按鍵值本身。</li>
   <li>網頁失去焦點時所有按鍵與觸控放開。</li>
 </ul>
@@ -600,7 +600,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 
 <h3 id="drv-start">4.10 起步噴</h3>
 <div class="table-wrap"><table>
-<thead><tr><th>按「油門剛按下」或「噴」的時刻</th><th>結果</th></tr></thead>
+<thead><tr><th>按「起步噴」鍵（J）或觸控「噴」的時刻</th><th>結果</th></tr></thead>
 <tbody>
 <tr><td>倒數剩 0.25 秒以上</td><td>太早：這場的起步噴機會用掉，沒有起步噴</td></tr>
 <tr><td>倒數最後 0.25 秒內</td><td>GO 的瞬間觸發起步噴</td></tr>
@@ -834,7 +834,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <ul>
   <li>按 T（或設定對話框的「操控調參」、暫停選單→設定→操控調參）開關，蓋在畫面右側；標題「操控調參」，旁邊註明「T 開關．改了立即生效」。</li>
   <li>依 5.1 的分組列出每個參數：名稱、滑桿、目前數值。跟預設值不同的數值會標成已修改的樣式。</li>
-  <li>改了立即生效，並存在這台裝置；下次開啟沿用。</li>
+  <li>改了立即生效，並存在這台裝置（只存跟預設不同的值，預設改版後沒動過的參數跟著新預設走）；下次開啟沿用。</li>
   <li>底部按鈕：「複製參數」（把跟預設不同的參數以 JSON 複製到剪貼簿，無法複製時跳出文字框讓人手動複製；按鈕暫時變「已複製」）、「全部重設」（全部回到預設）、「關閉」。</li>
   <li>面板開著時，在面板上的按鍵與點擊不會漏給遊戲；按暫停鍵先關面板。</li>
   <li>多人連線比賽中不能開（3.5）。</li>
@@ -870,15 +870,15 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <div class="table-wrap"><table>
 <thead><tr><th>賽道</th><th>代號</th><th>難度</th><th>主題</th><th class="num">一圈（m）</th><th class="num">圈數</th><th class="num">路面半寬（m）</th><th class="num">高低差（m）</th><th class="num">每圈總爬升（m）</th><th class="num">跳台</th><th class="num">捷徑省（m）</th><th class="num">參考圈速（秒）</th></tr></thead>
 <tbody>
-<tr><td>椰林海灘</td><td><code>beach</code></td><td>★</td><td>熱帶海島（白天）</td><td class="num">1716.7</td><td class="num">3</td><td class="num">7.5～10</td><td class="num">7.9</td><td class="num">12.1</td><td class="num">1</td><td class="num">約 42</td><td class="num">42～48</td></tr>
-<tr><td>櫻花古都</td><td><code>sakura</code></td><td>★★</td><td>春天和風（傍晚）</td><td class="num">1807.1</td><td class="num">3</td><td class="num">7～8.5</td><td class="num">14.2</td><td class="num">14.5</td><td class="num">0</td><td class="num">約 27</td><td class="num">39～46</td></tr>
-<tr><td>雪國山道</td><td><code>snow</code></td><td>★★★</td><td>雪山（陰天）</td><td class="num">2085.6</td><td class="num">3</td><td class="num">6.5～10</td><td class="num">41.4</td><td class="num">42.7</td><td class="num">1</td><td class="num">約 219</td><td class="num">50～55</td></tr>
-<tr><td>霓虹夜城</td><td><code>city</code></td><td>★★★★</td><td>夜晚城市</td><td class="num">1919.8</td><td class="num">3</td><td class="num">7～9</td><td class="num">16.4</td><td class="num">16.8</td><td class="num">0</td><td class="num">約 25</td><td class="num">45～52</td></tr>
-<tr><td>熔岩火山</td><td><code>volcano</code></td><td>★★★★★</td><td>火山（火燒雲）</td><td class="num">2153.4</td><td class="num">3</td><td class="num">5.5～7</td><td class="num">29.3</td><td class="num">36.6</td><td class="num">2</td><td class="num">約 132</td><td class="num">52～55</td></tr>
+<tr><td>椰林海灘</td><td><code>beach</code></td><td>★</td><td>熱帶海島（白天）</td><td class="num">1716.7</td><td class="num">3</td><td class="num">7.5～10</td><td class="num">7.9</td><td class="num">12.1</td><td class="num">1</td><td class="num">約 42</td><td class="num">43～45</td></tr>
+<tr><td>櫻花古都</td><td><code>sakura</code></td><td>★★</td><td>春天和風（傍晚）</td><td class="num">1807.1</td><td class="num">3</td><td class="num">7～8.5</td><td class="num">14.2</td><td class="num">14.5</td><td class="num">0</td><td class="num">約 27</td><td class="num">39～45</td></tr>
+<tr><td>雪國山道</td><td><code>snow</code></td><td>★★★</td><td>雪山（陰天）</td><td class="num">2085.6</td><td class="num">3</td><td class="num">6.5～10</td><td class="num">41.4</td><td class="num">42.7</td><td class="num">1</td><td class="num">約 219</td><td class="num">49～50</td></tr>
+<tr><td>霓虹夜城</td><td><code>city</code></td><td>★★★★</td><td>夜晚城市</td><td class="num">1919.8</td><td class="num">3</td><td class="num">7～9</td><td class="num">16.4</td><td class="num">16.8</td><td class="num">0</td><td class="num">約 25</td><td class="num">48～53</td></tr>
+<tr><td>熔岩火山</td><td><code>volcano</code></td><td>★★★★★</td><td>火山（火燒雲）</td><td class="num">2153.4</td><td class="num">3</td><td class="num">5.5～7</td><td class="num">29.3</td><td class="num">36.6</td><td class="num">2</td><td class="num">約 132</td><td class="num">55～60</td></tr>
 </tbody>
 </table></div>
 <div class="note">「參考圈速」是無頭模擬（<code>node tools/sim.mjs tt</code>）中完美自動駕駛（每彎甩尾、時機剛好、全程在甜蜜區間）跑 3 圈的圈速範圍，給驗收時對照量級用，不是硬性目標。高低差＝中心線最高點減最低點。</div>
-<div class="warn">表中參考圈速是用規格 1.0 的操控量的；規格 2.0 實作後要重跑模擬更新這一欄。</div>
+
 
 <h3 id="trk-beach">6.3 椰林海灘（★）</h3>
 <p>新手第一條。繞著小島跑一圈，路寬、彎緩，開放路肩多，失誤的代價是開進沙灘減速或掉進海裡。</p>
@@ -973,7 +973,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <div class="table-wrap"><table>
 <thead><tr><th>參數</th><th>意義</th><th>公式</th></tr></thead>
 <tbody>
-<tr><td>極速倍率</td><td>乘在基本極速 40 m/s 上</td><td>0.92 ＋ 0.085t − 0.015i</td></tr>
+<tr><td>極速倍率</td><td>乘在基本極速 40 m/s 上</td><td>0.905 ＋ 0.09t − 0.015i</td></tr>
 <tr><td>甩尾率</td><td>遇到該甩的彎會甩的機率</td><td>0.88 ＋ 0.12t − 0.03i</td></tr>
 <tr><td>控角率</td><td>甩尾中要修正方向時，優先把側滑角留在甜蜜區間的機率（7.3）</td><td>0.35 ＋ 0.6t − 0.1i</td></tr>
 <tr><td>氮氣率</td><td>有氮氣時每秒判一次會用的機率</td><td>0.7 ＋ 0.3t</td></tr>
@@ -986,11 +986,11 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <div class="table-wrap"><table>
 <thead><tr><th>賽道（d）</th><th>極速倍率</th><th>甩尾率</th><th>控角率</th><th>氮氣率</th><th>走線準度</th><th>捷徑率</th></tr></thead>
 <tbody>
-<tr><td>椰林海灘（1）</td><td>0.920／0.905／0.890</td><td>0.88／0.85／0.82</td><td>0.35／0.25／0.15</td><td>0.70</td><td>0.70／0.64／0.58</td><td>0.20／0.08／0</td></tr>
-<tr><td>櫻花古都（2）</td><td>0.941／0.926／0.911</td><td>0.91／0.88／0.85</td><td>0.50／0.40／0.30</td><td>0.775</td><td>0.775／0.715／0.655</td><td>0.35／0.23／0.11</td></tr>
-<tr><td>雪國山道（3）</td><td>0.963／0.948／0.933</td><td>0.94／0.91／0.88</td><td>0.65／0.55／0.45</td><td>0.85</td><td>0.85／0.79／0.73</td><td>0.50／0.38／0.26</td></tr>
-<tr><td>霓虹夜城（4）</td><td>0.984／0.969／0.954</td><td>0.97／0.94／0.91</td><td>0.80／0.70／0.60</td><td>0.925</td><td>0.925／0.865／0.805</td><td>0.65／0.53／0.41</td></tr>
-<tr><td>熔岩火山（5）</td><td>1.005／0.990／0.975</td><td>1.00／0.97／0.94</td><td>0.95／0.85／0.75</td><td>1.00</td><td>1.00／0.94／0.88</td><td>0.80／0.68／0.56</td></tr>
+<tr><td>椰林海灘（1）</td><td>0.905／0.890／0.875</td><td>0.88／0.85／0.82</td><td>0.35／0.25／0.15</td><td>0.70</td><td>0.70／0.64／0.58</td><td>0.20／0.08／0</td></tr>
+<tr><td>櫻花古都（2）</td><td>0.928／0.913／0.898</td><td>0.91／0.88／0.85</td><td>0.50／0.40／0.30</td><td>0.775</td><td>0.775／0.715／0.655</td><td>0.35／0.23／0.11</td></tr>
+<tr><td>雪國山道（3）</td><td>0.950／0.935／0.920</td><td>0.94／0.91／0.88</td><td>0.65／0.55／0.45</td><td>0.85</td><td>0.85／0.79／0.73</td><td>0.50／0.38／0.26</td></tr>
+<tr><td>霓虹夜城（4）</td><td>0.973／0.958／0.943</td><td>0.97／0.94／0.91</td><td>0.80／0.70／0.60</td><td>0.925</td><td>0.925／0.865／0.805</td><td>0.65／0.53／0.41</td></tr>
+<tr><td>熔岩火山（5）</td><td>0.995／0.980／0.965</td><td>1.00／0.97／0.94</td><td>0.95／0.85／0.75</td><td>1.00</td><td>1.00／0.94／0.88</td><td>0.80／0.68／0.56</td></tr>
 </tbody>
 </table></div>
 <p>設計目標：簡單賽道上打得好的玩家能贏；最難的賽道要接近每彎都拿到該彎能拿的最高段小噴才贏得了。強度公式的係數在規格 2.0 實作後依 13.7 的模擬驗收再校準。</p>
@@ -1001,7 +1001,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <tbody>
 <tr><td>瞄準點</td><td>沿中心線往前看 8 ＋ 車速 ×（0.4 ＋ 0.08 ×（1 − 走線準度））公尺，加上自己的車道偏移；轉向誤差超過 0.04 rad 才按方向。走線準度不滿 1 時方向誤差會加上 ±（1 − 走線準度）× 0.06 rad 的週期擺動。</td></tr>
 <tr><td>判斷要不要甩</td><td>看前方 8 公尺到（28 ＋ 車速 × 0.45）公尺之間的賽道轉角；轉角 &gt; 0.75 rad 且車速 &gt; 18 m/s、不在捷徑上時，以甩尾率決定甩：按住甩尾＋彎的方向（油門照按）。決定不甩就這個彎都不甩，直到前方轉角小於 0.3 rad。</td></tr>
-<tr><td>甩尾中</td><td>預估要的路線轉速，換算成內切或外拉：需要比基準多（換算值 &gt; 0.3）就壓彎內、少（&lt; −0.4）就往外拉；換算值 &gt; 1.6 且走線準度 &gt; 0.7 時點煞。每次要外拉或點煞前，以控角率決定要不要先顧甜蜜區間：要顧時，側滑角低於下限 ＋ 2° 就不外拉（改不按）、高於上限 − 2° 就不點煞（改內切），撞牆風險由走線準度承擔。</td></tr>
+<tr><td>甩尾中</td><td>預估要的路線轉速，換算成內切或外拉：需要比基準多（換算值 &gt; 0.3）就壓彎內、少（&lt; −0.4）就往外拉；換算值 &gt; 1.6 且走線準度 &gt; 0.7 時點煞。每次起甩時以控角率決定這次甩尾要不要顧甜蜜區間：要顧時，側滑角低於下限 ＋ 2° 就不外拉（改不按）、高於上限 − 2° 就不點煞（改內切），撞牆風險由走線準度承擔。</td></tr>
 <tr><td>放開甩尾</td><td>前方轉角 &lt; 0.35 rad 且路線跟 25 公尺外的賽道方向差 &lt; 0.25 rad 時放開。</td></tr>
 <tr><td>小噴</td><td>放開甩尾時依甩尾分自動觸發（4.8），不另外決策。</td></tr>
 <tr><td>油門</td><td>一律按油門，含甩尾中（在捷徑上超過安全車速時放開）。</td></tr>
@@ -1099,11 +1099,11 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 </table></div>
 
 <h3>8.3 預設按鍵</h3>
-<p>左手 A、D 轉向、空白鍵甩尾；右手 J 油門、K 煞車、L 氮氣。</p>
+<p>左手 A、D 轉向、空白鍵甩尾；右手 J 起步噴、K 煞車、L 氮氣；油門是自動的。</p>
 <div class="table-wrap"><table>
 <thead><tr><th>動作</th><th>主要</th><th>次要</th></tr></thead>
 <tbody>
-<tr><td>油門</td><td>J</td><td>—</td></tr>
+<tr><td>起步噴</td><td>J</td><td>—</td></tr>
 <tr><td>煞車／倒車</td><td>K</td><td>—</td></tr>
 <tr><td>左轉</td><td>A</td><td>—</td></tr>
 <tr><td>右轉</td><td>D</td><td>—</td></tr>
@@ -1154,7 +1154,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <h3>8.7 操作說明對話框</h3>
 <p>從首頁「操作說明」或暫停選單「操作說明」開啟，內容依目前的按鍵設定顯示：</p>
 <ul>
-  <li><strong>鍵盤（目前的設定）</strong>：九個動作與按鍵的對照表，部分動作附一行小字提示（油門：倒數 GO 時按＝起步噴；煞車：甩尾中點一下＝點煞；甩尾：按住＋方向起甩；氮氣：集滿氣後使用；回到賽道：卡住時用）。</li>
+  <li><strong>鍵盤（目前的設定）</strong>：九個動作與按鍵的對照表，部分動作附一行小字提示（起步噴：倒數 GO 的瞬間按，油門是自動的；煞車：甩尾中點一下＝點煞；甩尾：按住＋方向起甩；氮氣：集滿氣後使用；回到賽道：卡住時用）。</li>
   <li><strong>技巧</strong>：六條說明——甩尾與甜蜜區間（看甩尾表，指針留在綠區）、進彎時機（太早要外拉、太晚要點煞，都會掉出綠區）、小噴（放開甩尾自動噴，綠區待越久段數越高）、氮氣（綠區甩尾時集氣）、起步噴、路外減速與回到賽道。</li>
   <li><strong>手機觸控</strong>：自動油門與六顆按鈕的說明（「噴」只用在起步）。非觸控裝置另加一行「按鍵可以在首頁或暫停選單的「設定」裡改」。</li>
   <li>按鈕「知道了」關閉。</li>
@@ -1439,7 +1439,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <ul class="check">
   <li>點不同的賽道卡片，背景換成該賽道，載入中模式按鈕變半透明且按了不會開始。</li>
   <li>重新整理後，首頁停在上次選的賽道。</li>
-  <li>開始比賽後倒數依序顯示 3、2、1，各響一聲，GO! 顯示約 0.8 秒；倒數中按油門車子不動。</li>
+  <li>開始比賽後倒數依序顯示 3、2、1，各響一聲，GO! 顯示約 0.8 秒；倒數中車子不動。</li>
   <li>比賽中按 Esc、P、右上暫停鈕、或切到別的分頁，都會進暫停選單；單機暫停時總時間停止。</li>
   <li>暫停選單五顆按鈕各自行為符合 2.5。</li>
   <li>競賽完成 3 圈立即進成績頁，標題依名次正確，未完賽的對手時間前有「≈」。</li>
@@ -1459,11 +1459,11 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 
 <h3>13.4 操控與駕駛（第 4 章）</h3>
 <ul class="check">
-  <li>平地全油門，儀表最高穩定在 259 km/h 左右。</li>
+  <li>不按任何鍵車子就會加速（鍵盤、觸控都一樣），平地直線儀表最高穩定在 259 km/h 左右；按住煞車時不給油。</li>
   <li>車速 9 m/s（儀表約 58 km/h）以下按甩尾＋方向不會起甩；以上會起甩，且按下甩尾時車子小跳一下。</li>
   <li>甩尾中放開甩尾鍵但方向繼續壓彎內，甩尾不結束；兩者都放開才結束。</li>
   <li>甩尾中出現甩尾表；不按方向或內切時指針穩定在綠區、甩尾分條持續增加；外拉或點煞時指針離開綠區變紅、甩尾分條停住。</li>
-  <li>甩尾中一直按著油門，放開甩尾時照樣自動小噴；整個甩尾過程不用按油門以外的鍵也能拿到小噴。</li>
+  <li>整個甩尾過程只用甩尾鍵與方向鍵，放開甩尾時就自動小噴。</li>
   <li>甩尾分未達 0.6 就放開，沒有小噴、不彈字；達到一、二、三段門檻時放開，分別彈出「小噴」「二段小噴！」「三段小噴！！」，火焰長度與甩尾表顯示的段數一致。</li>
   <li>椰林海灘時機剛好、全程在綠區時：約 90° 的彎拿到二段、燈塔大彎拿到三段；同一個彎起甩太早（要外拉）或太晚（要點煞）時段數較低。</li>
   <li>甩尾中擦牆彈出「擦牆」、甩尾分條減半；甩尾中重撞牆，甩尾結束且沒有小噴。</li>
@@ -1472,7 +1472,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
   <li>甩尾中按煞車，車頭明顯往彎內多甩、車速下降。</li>
   <li>在綠區甩尾可以集滿氣（滿速約 1.7 秒一條）、HUD 右側氮氣圓點亮起，第 3 顆不會出現（最多 2 顆，集氣條停在滿格）。</li>
   <li>按氮氣：氮氣數 −1、儀表變藍、排氣管藍火約 3 秒；作用中再按不消耗。</li>
-  <li>倒數剩 1 秒以上就按油門，GO 時沒有起步噴；倒數最後一刻按，GO 時出現「起步噴！」；GO 後立刻按也有。</li>
+  <li>倒數剩 1 秒以上就按起步噴鍵，GO 時沒有起步噴；倒數最後一刻按，GO 時出現「起步噴！」；GO 後立刻按也有。</li>
   <li>開上草地、沙地明顯減速；開上捷徑土路小幅減速。</li>
   <li>碰到加速帶車速明顯提升並有咻聲。</li>
   <li>正面撞牆掉速並被彈開；甩尾中重撞牆，甩尾結束且沒有小噴。</li>
@@ -1510,11 +1510,11 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <ul class="check">
   <li>HUD 各元素位置與內容符合 8.1；計時賽與自由練習沒有名次與排行。</li>
   <li>小地圖上玩家三角形方向與車頭一致，對手點顏色正確。</li>
-  <li>設定裡把油門改成 W 後，W 可加速、J 不再加速；首頁提示、操作說明都顯示 W。</li>
+  <li>設定裡把起步噴改成 W 後，倒數時按 W 有起步噴、按 J 沒有；操作說明顯示 W。</li>
   <li>甩尾表的角度條、甩尾分條、刻度與顏色符合 8.1；甩尾結束後停留約 0.6 秒再淡出。</li>
-  <li>把 J 設給甩尾時，出現「原本是「油門」的鍵」提示，油門那格變空。</li>
+  <li>把 J 設給甩尾時，出現「原本是「起步噴」的鍵」提示，起步噴那格變空。</li>
   <li>「恢復預設」後按鍵回到 8.3。</li>
-  <li>觸控裝置：自動油門有效、按「煞」時不給油；◀ ▶ 可以滑動換向；「噴」鈕只在倒數到 GO 後 0.2 秒內出現，之後隱藏。</li>
+  <li>觸控裝置：按「煞」時不給油；◀ ▶ 可以滑動換向；「噴」鈕只在倒數到 GO 後 0.2 秒內出現，之後隱藏。</li>
   <li>切換高畫質／省電立即生效且重新整理後保留；高畫質下刻意壓低效能時會自動切到省電並提示。</li>
 </ul>
 
@@ -1559,11 +1559,22 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 
 <section id="changelog">
 <h2>附錄. 版本歷史</h2>
-<p>新的版本排在最上面。每次改規格加一列；Ken 確認後狀態改成「已確認」，實作發版後改成「已實作」並填上遊戲版本。</p>
+<p>新的版本排在最上面。每次改規格加一列；Ken 確認後狀態改成「已確認」，實作發版後改成「已實作」並填上遊戲版本；被新版取代的舊版標「已取代」。</p>
 <div class="table-wrap"><table>
 <thead><tr><th>規格版本</th><th>日期</th><th>遊戲版本</th><th>狀態</th><th>章節</th><th>改了什麼、為什麼</th></tr></thead>
 <tbody>
-<tr><td>2.0</td><td>2026-11-17</td><td>2.0.0（未實作）</td><td><span class="tag">已確認</span></td><td>1、4.1、4.2、4.4～4.9、4.11、4.12、4.14、4.17、5.1、5.2、6.2、7.1～7.3、7.7、8.1～8.5、8.7、10.1、10.2、11、13.4、13.6、13.8、13.11</td><td>
+<tr><td>2.1</td><td>2026-11-17</td><td>2.0.0</td><td><span class="tag ok">已實作</span></td><td>4.1、4.10、5.3、6.2、7.2、7.3、8.3、8.7、13.2、13.4、13.8</td><td>
+  <p><strong>鍵盤也改成自動油門</strong>（Ken 2026-11-17 指定）：網頁版跟手機一樣不用按油門，按住煞車時不給油；原本的油門鍵 J 改成「起步噴」鍵（4.1、4.10、8.3、8.7）。</p>
+  <p><strong>2.0 實作後的校準</strong>：</p>
+  <ul>
+    <li>電腦極速倍率 0.92 ＋ 0.085t → 0.905 ＋ 0.09t：電腦甩尾中改成照踩油門、小噴自動後變強，★1 普通玩家贏不了；調整後 ★1 普通玩家 8 場全勝、★5 普通玩家多數贏不了（7.2）。</li>
+    <li>電腦的控角率改成每次起甩決定一次（7.3）。</li>
+    <li>6.2 參考圈速依新操控重跑模擬更新。</li>
+    <li>調參面板只存跟預設不同的值，預設改版後自動跟上（5.3）。</li>
+  </ul>
+  <p>小噴門檻與加速量、集氣速度沿用 2.0 的初始值：模擬顯示直線蛇行沒有好處、甩尾比不甩尾快 10 秒以上。</p>
+</td></tr>
+<tr><td>2.0</td><td>2026-11-17</td><td>2.0.0</td><td><span class="tag ok">已實作</span></td><td>1、4.1、4.2、4.4～4.9、4.11、4.12、4.14、4.17、5.1、5.2、6.2、7.1～7.3、7.7、8.1～8.5、8.7、10.1、10.2、11、13.4、13.6、13.8、13.11</td><td>
   <p><strong>甩尾系統改版</strong>：核心技巧收斂成「進彎時按甩尾鍵的時機」與「彎中方向鍵的控制」兩項。</p>
   <ul>
     <li>新增甜蜜區間（側滑角 14°～38°）與甩尾分（4.7）：留在區間的時間才累積；擦牆減半、撞牆作廢、草地與空中不算。</li>
@@ -1574,14 +1585,14 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
     <li>連帶修改：參數表（5.1、5.2）、電腦車手改用「控角率」取代完美率與雙噴率、甩尾中也按油門（第 7 章）、小噴時機表改成甩尾表（8.1、8.5）、彈出文字、觸控「噴」鈕只留起步噴、操作說明（第 8 章）、重播欄位（第 10 章）、火花與火焰表現（第 11 章）、驗收標準（第 13 章）。</li>
   </ul>
   <p><strong>原因</strong>：舊設計的出彎技巧（回正時抓小噴時機、接雙噴）是另一組按鍵時機，會把注意力從彎中拉走。改成小噴與氮氣都由彎中表現兌現，玩家只要專心在進彎與控角；集氣不再獎勵「甩越多越好」，避免刻意多甩來刷氣。依據市場調研 <a href="research-drift.html">research-drift.html</a>。</p>
-  <p><strong>待實作後校準</strong>：小噴門檻與加速量、集氣速度、電腦強度係數、6.2 參考圈速。</p>
+  <p><strong>待實作後校準</strong>：小噴門檻與加速量、集氣速度、電腦強度係數、6.2 參考圈速（結果見 2.1）。</p>
 </td></tr>
-<tr><td>1.0</td><td>2026-11-17</td><td>1.0.0</td><td><span class="tag ok">已實作</span></td><td>全部</td><td>依現行遊戲整理成第一版正式規格（基準版）。</td></tr>
+<tr><td>1.0</td><td>2026-11-17</td><td>1.0.0</td><td><span class="tag">已取代</span></td><td>全部</td><td>依現行遊戲整理成第一版正式規格（基準版）。</td></tr>
 </tbody>
 </table></div>
 </section>
 
-<footer>KCar 企劃規格 · 規格版本 2.0（已確認，待實作）· 2026-11-17</footer>
+<footer>KCar 企劃規格 · 規格版本 2.1（現行）· 2026-11-17</footer>
 </main>
 </div>
 </body>

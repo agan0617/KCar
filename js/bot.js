@@ -1,11 +1,11 @@
 // 電腦車手：用跟玩家完全相同的 Kart 物理，只是把「按鍵」交給程式決定。
-// 也給 tools/sim.mjs 當自動駕駛用（skill 開滿＝每個彎都甩、每次都完美小噴＋雙噴）。
+// 也給 tools/sim.mjs 當自動駕駛用（skill 開滿＝每個彎都甩、甩尾中盡量把側滑角留在甜蜜區間）。
+// 小噴是自動的（放開甩尾時依甩尾分觸發），電腦不用決定。
 //
 // skill 欄位（0..1 越大越強，除非另註）：
 //   speed     極速倍率（乘在 P.maxSpeed 上，約 0.9～1.02）
 //   drift     遇到彎會甩尾的機率
-//   perfect   小噴打到完美的機率（其餘是普通或太早）
-//   dj        接雙噴的機率
+//   angle     控角率：這次甩尾要不要顧甜蜜區間（顧的話，快掉出區間就不外拉、不點煞）
 //   nitro     有氮氣就會用的機率（每秒判一次）
 //   line      走線準度：越低越常偏離理想路線、彎前判斷越晚
 //   lane      偏好的橫向位置（公尺，右正），避免四台車疊成一條線
@@ -18,7 +18,7 @@ const wrap = (a) => {
   return a;
 };
 
-export const PERFECT_SKILL = { speed: 1, drift: 1, perfect: 1, dj: 1, nitro: 1, line: 1, lane: 0 };
+export const PERFECT_SKILL = { speed: 1, drift: 1, angle: 1, nitro: 1, line: 1, lane: 0 };
 
 export class AutoDriver {
   constructor(kart, skill, rng = Math.random) {
@@ -27,7 +27,7 @@ export class AutoDriver {
     this.rng = rng;
     this.keys = new Set();
     this.edges = new Set();
-    this.st = { drifting: false, dir: 0, t0: 0, wantJet: null, nitroWait: 0, stuck: 0, laneT: 0 };
+    this.st = { drifting: false, dir: 0, t0: 0, care: false, nitroWait: 0, stuck: 0, laneT: 0 };
     this.lane = this.skill.lane;
     this.t = 0;
     this.decide = 0;
@@ -55,8 +55,7 @@ export class AutoDriver {
     this.decide -= dt;
     if (this.decide > 0) return;
     this.decide = 1 / 60;
-    const k = this.kart, tr = k.track, sk = this.skill, st = this.st;
-    const headAt = (s) => { const p = tr.pointAt(s); return Math.atan2(p.tx, p.tz); };
+    const k = this.kart, tr = k.track, sk = this.skill, st = this.st;    const headAt = (s) => { const p = tr.pointAt(s); return Math.atan2(p.tx, p.tz); };
     const s = k.lastS, v = Math.max(5, k.spd);
 
     // 卡住（撞牆停下、倒退）就重生
@@ -64,11 +63,11 @@ export class AutoDriver {
     if (!control) { st.stuck = 0; st.progD = k.dist; }
     else if (k.dist > (st.progD ?? k.dist) + 6) { st.stuck = 0; st.progD = k.dist; }
     else st.stuck += 1 / 60;
-    if (st.stuck > 3) { k.respawn(); st.stuck = 0; st.progD = k.dist; }
-    // 剛重生（卡住、掉進熔岩或缺口）：甩尾、捷徑、小噴的狀態全部清掉，不然會帶著舊方向再開進去
+    if (st.stuck > 3) { k.respawn(); st.stuck = 0; st.progD = k.dist; this.stuckN = (this.stuckN || 0) + 1; }
+    // 剛重生（卡住、掉進熔岩或缺口）：甩尾、捷徑的狀態全部清掉，不然會帶著舊方向再開進去
     if ((k.respawns || 0) !== (st.respawns || 0)) {
       st.respawns = k.respawns;
-      st.drifting = false; st.sc = null; st.scWait = false; st.scOn = false; st.wantJet = null; st.skipCorner = false;
+      st.drifting = false; st.sc = null; st.scWait = false; st.scOn = false; st.skipCorner = false;
       for (const a of ['drift', 'left', 'right', 'down']) this.set(a, false);
     }
 
@@ -138,14 +137,18 @@ export class AutoDriver {
     }
     const wobble = (1 - sk.line) * 0.06 * Math.sin(this.t * 1.7 + sk.lane);
     const err = wrap(Math.atan2(tx - k.x, tz - k.z) - (k.spd > 3 ? k.phi : k.h)) + wobble; // 用路線方向（回正中車頭還歪著）
-    const turnAhead = wrap(headAt(s + 28 + v * 0.45) - headAt(s + 8)); // 車速越快看越遠（路線跟上車頭要時間）
+    // 車速越快看越遠（路線跟上車頭要時間）；entry（公尺，給 sim 用）＞0 起甩提早、＜0 延後
+    const turnAhead = wrap(headAt(s + 28 + v * 0.45) - headAt(s + 8));
+    const ent = sk.entry || 0;
+    const turnIn = ent ? wrap(headAt(s + 28 + v * 0.45 + ent) - headAt(s + 8 + ent)) : turnAhead;
 
-    if (!onSc && !k.drift && !st.drifting && Math.abs(turnAhead) > 0.75 && k.spd > 18 && !st.skipCorner) {
+    if (!onSc && !k.drift && !st.drifting && Math.abs(turnIn) > 0.75 && k.spd > 18 && !st.skipCorner) {
       if (this.rng() < sk.drift) {
         st.drifting = true;
-        st.dir = turnAhead < 0 ? 1 : -1;
+        st.dir = turnIn < 0 ? 1 : -1;
         st.t0 = this.t;
-        this.set('up', false);
+        st.care = this.rng() < (sk.angle ?? 1);
+        this.set('up', true); // 甩尾中照踩油門
         this.set('drift', true);
       } else st.skipCorner = true;
     }
@@ -166,19 +169,22 @@ export class AutoDriver {
         const pathNow = P.driftGrip * wrap(k.phi - k.h) * st.dir; // 往彎內為正
         const want = wantPath + 1.6 * (wantPath - pathNow);
         const rel = (want - P.driftTurn) / Math.max(0.05, P.driftTurnSteer);
-        this.set(key, rel > 0.3);
-        this.set(other, rel < -0.4);
-        this.set('down', rel > 1.6 && sk.line > 0.7);
+        let inn = rel > 0.3, out = rel < -0.4, brk = rel > 1.6 && sk.line > 0.7;
+        if (st.care) {
+          // 顧甜蜜區間：快掉出下限就不外拉（改不按），快超過上限就不點煞（改內切）；撞牆風險由走線準度承擔
+          const sd = k.slipDeg;
+          if (out && sd < P.driftBandMin + 2) out = false;
+          if (brk && sd > P.driftBandMax - 2) { brk = false; inn = true; }
+        }
+        this.set(key, inn);
+        this.set(other, out);
+        this.set('down', brk);
       }
       const remain = wrap(headAt(s + 25) - k.phi);
       if (k.drift && Math.abs(turnAhead) < 0.35 && Math.abs(remain) < 0.25) {
         this.set('drift', false);
         this.set(key, false);
         st.drifting = false;
-        // 這次小噴要打多準：完美／普通／太早
-        const r = this.rng();
-        st.wantJet = r < sk.perfect ? P.jetPerfect * 0.8 : r < sk.perfect + (1 - sk.perfect) * 0.6 ? P.jetGood * 0.9 : 99;
-        st.wantDj = this.rng() < sk.dj;
       }
     } else {
       this.set('drift', false);
@@ -186,19 +192,8 @@ export class AutoDriver {
       // 空中路線不會變，壓方向只會把車頭轉歪、落地斜著衝出去
       this.set('left', !k.air && err > 0.04);
       this.set('right', !k.air && err < -0.04);
-      const w = k.jetWin;
-      if (st.wantJet != null && w) {
-        if (w.stage === 1) {
-          if (k.slipDeg < st.wantJet) this.set('up', true);
-        } else if (st.wantDj && w.t > (P.djMin + P.djMax) / 2) {
-          if (this.keys.has('up')) this.set('up', false);
-          else { this.set('up', true); st.wantJet = null; }
-        } else if (!st.wantDj) { st.wantJet = null; this.set('up', true); } else this.set('up', false);
-      } else {
-        st.wantJet = null;
-        // 捷徑又窄又彎：放慢一點才不會衝出去
-        this.set('up', !(onSc && k.spd > (st.scVmax ?? 99)));
-      }
+      // 捷徑又窄又彎：放慢一點才不會衝出去
+      this.set('up', !(onSc && k.spd > (st.scVmax ?? 99)));
       st.nitroWait -= 1 / 60;
       if (k.nitros > 0 && Math.abs(turnAhead) < 0.2 && st.nitroWait <= 0) {
         st.nitroWait = 1;

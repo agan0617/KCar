@@ -4,8 +4,9 @@
 // 正常行駛抓地力高，phi 幾乎等於 h；甩尾時抓地力降低，車頭先轉、路線慢半拍跟上，側滑角（slip）是自然甩出來的：
 // 往彎內壓＝車頭轉得急、偏角變大、路線跟著收緊；往外拉＝車頭轉得緩、偏角變小、走大圈。
 // 按甩尾鍵先小跳一下（hop）；有上下速度 vy、重力、離地（air）與落地；上下坡會影響車速。
-// 側滑角 × 車速 → 集氣；甩尾放開後車頭轉回路線方向（回正，反打方向更快），在時機窗內「再按 ↑」＝小噴，
-// 回正得越正（側滑角越小）越完美；小噴後再按一次＝雙噴。集滿氣得到一顆氮氣（最多兩顆）。
+// 甩尾分（2.0 起）：甩尾中側滑角留在甜蜜區間、在路面上、沒貼牆的時間才累積（有效甩尾）；擦牆減半、重撞牆作廢。
+// 放開甩尾時依甩尾分自動小噴（一～三段），不用按鍵；有效甩尾時同時集氣，集滿得到一顆氮氣（最多兩顆）。
+// 甩尾放開後車頭轉回路線方向（回正，反打方向更快）。規格見 docs/spec.html 第 4 章。
 //
 // 座標：three.js，Y 朝上。前方 = (sin h, cos h)，右手邊 = (-cos h, sin h)，右轉 = h 變小。
 
@@ -23,9 +24,14 @@ const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
 // 多人連線：一台車的完整物理狀態（快照下傳、client 回滾重放都靠它）。
 // 加了會影響 step() 的欄位，一定要補進這裡，不然連線時預測會一直被校正。
-const STATE_KEYS = ['x', 'y', 'z', 'h', 'phi', 'spd', 'steer', 'hint', 'drift', 'driftDir', 'driftT', 'driftMaxSlip',
-  'driftArm', 'recoverT', 'straighten', 'boostT', 'boostAdd', 'boostKind', 'nitroT', 'gauge', 'nitros', 'onGrass', 'onCurb',
-  'pitch', 'yawRate', 'lastS', 'dist', 'topMul', 'sbUsed', 'sbPend', 'w', 'vy', 'air', 'surf', 'roll'];
+const STATE_KEYS = ['x', 'y', 'z', 'h', 'phi', 'spd', 'steer', 'hint', 'drift', 'driftDir', 'driftT', 'driftScore',
+  'driftEff', 'wallTouch', 'driftArm', 'recoverT', 'straighten', 'boostT', 'boostAdd', 'boostKind', 'nitroT', 'gauge', 'nitros',
+  'onGrass', 'onCurb', 'pitch', 'yawRate', 'lastS', 'dist', 'topMul', 'sbUsed', 'sbPend', 'w', 'vy', 'air', 'surf', 'roll'];
+
+/** 甩尾分 → 小噴段數（0＝沒有） */
+export function jetTier(score) {
+  return score >= P.jetTier3 ? 3 : score >= P.jetTier2 ? 2 : score >= P.jetTier1 ? 1 : 0;
+}
 
 export class Kart {
   constructor(track) {
@@ -40,15 +46,11 @@ export class Kart {
   }
 
   getState() {
-    const s = STATE_KEYS.map((k) => this[k]);
-    s.push(this.jetWin ? [this.jetWin.t, this.jetWin.stage] : 0);
-    return s;
+    return STATE_KEYS.map((k) => this[k]);
   }
 
   setState(s) {
     for (let i = 0; i < STATE_KEYS.length; i++) this[STATE_KEYS[i]] = s[i];
-    const w = s[STATE_KEYS.length];
-    this.jetWin = w ? { t: w[0], stage: w[1] } : null;
   }
 
   /** 放到沿線距離 s、橫向偏移 lateral（右正）的地方，靜止 */
@@ -65,11 +67,15 @@ export class Kart {
     this.drift = false;
     this.driftDir = 0;
     this.driftT = 0;
-    this.driftMaxSlip = 0;
+    this.driftScore = 0; // 甩尾分（有效甩尾的秒數）
+    this.driftEff = false; // 這一步是不是有效甩尾（HUD、火花用）
+    this.wallTouch = false; // 這一步有沒有碰到牆（判斷「開始接觸」＝擦牆一次）
+    this.lastTier = 0; // 上一次甩尾結束拿到的段數（HUD 結束後顯示用，不影響物理）
+    this.lastScore = 0;
+    this.driftEndT = 99; // 上一次甩尾結束後過了幾秒（HUD 用）
     this.driftArm = false;
     this.recoverT = 99;
     this.straighten = false;
-    this.jetWin = null;
     this.boostT = 0;
     this.boostAdd = 0;
     this.boostKind = '';
@@ -159,10 +165,9 @@ export class Kart {
       this.driftArm = false;
       this.driftDir = Math.sign(steerIn);
       this.driftT = 0;
-      this.driftMaxSlip = 0;
+      this.driftScore = 0;
       this.straighten = false;
       this.w -= this.driftDir * P.driftKick * P.yawResp; // 起甩：車頭被甩進彎一下
-      this.jetWin = null;
       ev.push({ type: 'driftStart', dir: this.driftDir });
     }
 
@@ -216,43 +221,21 @@ export class Kart {
       this.phi += wrap(this.h - this.phi) * (1 - Math.exp(-P.grip * dt));
     }
 
+    this.driftEndT += dt;
     if (this.drift) {
       const s = Math.abs(this.slip);
-      this.driftMaxSlip = Math.max(this.driftMaxSlip, s);
       if (this.spd > 0 && !this.air) this.spd -= P.driftDrag * Math.sin(s) * dt;
+      // 有效甩尾：側滑角在甜蜜區間、在地面上、腳下是路面類、沒貼牆（貼牆看上一步的碰撞結果）
+      const sd = s / DEG;
+      this.driftEff = !this.air && !this.onGrass && !this.wallTouch && sd >= P.driftBandMin && sd <= P.driftBandMax;
+      if (this.driftEff) {
+        this.driftScore += dt;
+        if (this.nitroT <= 0) this.charge(dt);
+      }
       const keep = (control && inp.driftHeld) || steerIn * this.driftDir > 0;
       if (!keep) this.endDrift(true, 'release');
       else if (this.spd < P.driftMinSpeed * 0.6) this.endDrift(true, 'slow');
-    }
-
-    // ---------------------------------------------------------- 小噴／雙噴時機
-    if (this.jetWin) {
-      const w = this.jetWin;
-      w.t += dt;
-      if (w.stage === 1) {
-        if (control && inp.jet) {
-          const sd = this.slipDeg;
-          const q = sd < P.jetPerfect ? 'perfect' : sd < P.jetGood ? 'good' : 'early';
-          const mul = q === 'perfect' ? 1 : q === 'good' ? 0.7 : 0.4;
-          this.addBoost(P.jetSpeed * mul, P.jetTime, 'jet');
-          ev.push({ type: 'jet', q, slip: sd, t: w.t });
-          this.jetWin = { t: 0, stage: 2 };
-        } else if (w.t > P.jetWindow) {
-          ev.push({ type: 'jetMiss' });
-          this.jetWin = null;
-        }
-      } else if (control && inp.jet) {
-        if (w.t >= P.djMin && w.t <= P.djMax) {
-          this.addBoost(P.jetSpeed * 0.5 + P.djSpeed, P.jetTime, 'dj');
-          ev.push({ type: 'dj', t: w.t });
-        } else {
-          ev.push({ type: 'djEarly', t: w.t });
-        }
-        this.jetWin = null;
-      } else if (w.t > P.djMax) {
-        this.jetWin = null;
-      }
-    }
+    } else this.driftEff = false;
 
     // ---------------------------------------------------------- 氮氣
     if (control && inp.pressed('nitro') && this.nitros > 0 && this.nitroT <= 0) {
@@ -260,18 +243,6 @@ export class Kart {
       this.nitroT = P.nitroTime;
       this.spd += 3;
       ev.push({ type: 'nitro' });
-    }
-    if (this.drift && this.nitroT <= 0) {
-      const sf = clamp(Math.abs(this.slip) / (30 * DEG), 0.3, 1.3);
-      const vf = clamp(this.spd / P.maxSpeed, 0, 1.2);
-      this.gauge += dt * P.chargeRate * sf * vf * (this.onGrass ? 0.4 : 1);
-      if (this.gauge >= 1) {
-        if (this.nitros < 2) {
-          this.nitros++;
-          this.gauge = 0;
-          ev.push({ type: 'nitroReady' });
-        } else this.gauge = 1;
-      }
     }
 
     // ---------------------------------------------------------- 速度
@@ -295,7 +266,7 @@ export class Kart {
         const a = boosting ? P.boostAccel : P.accel * Math.max(0.2, 1 - r * r);
         this.spd = Math.min(top, this.spd + a * dt);
       } else if (!thr && !boosting && !this.drift) {
-        // 甩尾時鬆 ↑ 是基本動作（為了等一下小噴），不額外掉速，只算甩尾本身的損失
+        // 甩尾中沒踩油門不額外掉速，只算甩尾本身的損失
         this.spd -= Math.sign(this.spd) * Math.min(Math.abs(this.spd), P.coastDrag * dt);
       }
       if (this.spd > top) this.spd = Math.max(top, this.spd - ((this.spd - top) * 1.5 + 2) * dt);
@@ -317,6 +288,7 @@ export class Kart {
     let gy;
     const g0 = this.gnd || (this.gnd = { y: 0, nx: 0, ny: 1, nz: 0, surf: 0 });
     let g = null;
+    this.wallNow = false;
     if (tr.col) {
       // v2：護牆是線段、地面是三角形（橋上橋下分得開）
       tr.col.eachWallHit(this.x, this.z, this.y + 0.3, KART_R, this.wallFn || (this.wallFn = (nx, nz, depth) => this.wallHit(nx, nz, depth)));
@@ -339,6 +311,7 @@ export class Kart {
       this.surf = this.onGrass ? SURF.GRASS : this.onCurb ? SURF.CURB : SURF.ROAD;
       gy = pr.y;
     }
+    this.wallTouch = this.wallNow;
 
     // ---------------------------------------------------------- 上下：重力、離地、落地
     if (this.air) {
@@ -403,6 +376,8 @@ export class Kart {
   wallHit(nx, nz, depth) {
     this.x += nx * depth;
     this.z += nz * depth;
+    const first = !this.wallTouch && !this.wallNow; // 這一下是「開始接觸」（上一步沒碰牆）
+    this.wallNow = true;
     let vx = Math.sin(this.phi) * this.spd, vz = Math.cos(this.phi) * this.spd;
     const vn = -(vx * nx + vz * nz); // 往牆裡衝的速度
     if (vn <= 0) return;
@@ -417,16 +392,44 @@ export class Kart {
     const side = nx * -Math.cos(this.h) + nz * Math.sin(this.h); // 法向量在車右手方向的分量：牆在右邊時為負
     this.w = this.w * (1 - Math.min(1, impact * 1.5)) - Math.sign(side) * impact * P.wallSpin;
     if (this.drift && impact > 0.25) this.endDrift(false, 'wall');
+    else if (this.drift && first && impact >= 0.05) {
+      // 擦牆：甩尾分打折（每次開始接觸算一次）
+      this.driftScore *= P.scrapeKeep;
+      this.events.push({ type: 'scrape' });
+    }
     if (vn > 1.5) this.events.push({ type: 'wall', impact: vn });
   }
 
+  /** 有效甩尾時集氣 */
+  charge(dt) {
+    const vf = clamp(this.spd / P.maxSpeed, 0, 1.2);
+    this.gauge += dt * P.chargeRate * vf;
+    if (this.gauge >= 1) {
+      if (this.nitros < 2) {
+        this.nitros++;
+        this.gauge = 0;
+        this.events.push({ type: 'nitroReady' });
+      } else this.gauge = 1;
+    }
+  }
+
+  /** 甩尾結束：allowJet＝放開或太慢（依甩尾分自動小噴）；撞牆結束時甩尾分作廢 */
   endDrift(allowJet, reason) {
     if (!this.drift) return;
     this.drift = false;
+    this.driftEff = false;
     this.recoverT = 0;
     this.straighten = true;
-    const can = allowJet && this.driftT >= P.jetMinDrift && this.driftMaxSlip > 8 * DEG;
-    this.jetWin = can ? { t: 0, stage: 1 } : null;
-    this.events.push({ type: 'driftEnd', canJet: can, reason });
+    const score = allowJet ? this.driftScore : 0;
+    const tier = jetTier(score);
+    this.lastScore = score;
+    this.lastTier = tier;
+    this.driftEndT = 0;
+    this.driftScore = 0;
+    if (tier) {
+      this.addBoost(P['jetSpeed' + tier], P['jetTime' + tier], 'jet' + tier);
+      this.events.push({ type: 'jet', tier, score });
+    }
+    this.events.push({ type: 'driftEnd', tier, score, reason });
   }
 }

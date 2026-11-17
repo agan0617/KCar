@@ -4,12 +4,13 @@
 
 import { Kart } from './kart.js';
 
-// 記哪些欄位（車的外觀、特效、聲音會讀到的；布林存 0／1，boostKind 只分「雙噴」與其他）
-const F = ['x', 'y', 'z', 'h', 'phi', 'spd', 'steer', 'drift', 'driftDir', 'driftT', 'boostT', 'nitroT',
-  'onGrass', 'onCurb', 'pitch', 'yawRate', 'dist', 'gauge', 'nitros', 'dj', 'roll', 'vy', 'air'];
+// 記哪些欄位（車的外觀、特效、聲音會讀到的；布林存 0／1，boostKind 只記小噴段數 jt：1～3＝jet1～3、0＝其他）
+const F = ['x', 'y', 'z', 'h', 'phi', 'spd', 'steer', 'drift', 'driftDir', 'driftT', 'driftScore', 'driftEff', 'boostT', 'nitroT',
+  'onGrass', 'onCurb', 'pitch', 'yawRate', 'dist', 'gauge', 'nitros', 'jt', 'roll', 'vy', 'air'];
 const ANGLE = new Set(['h', 'phi']);
-const BOOL = new Set(['drift', 'onGrass', 'onCurb', 'air']);
-const STEPPED = new Set(['drift', 'onGrass', 'onCurb', 'driftDir', 'nitros', 'dj', 'air']); // 不內插，取較近的那筆
+const BOOL = new Set(['drift', 'driftEff', 'onGrass', 'onCurb', 'air']);
+const STEPPED = new Set(['drift', 'driftEff', 'onGrass', 'onCurb', 'driftDir', 'nitros', 'jt', 'air']); // 不內插，取較近的那筆
+const tierOf = (kind) => (/^jet[1-3]$/.test(kind) ? +kind[3] : 0);
 const N = F.length;
 const RATE = 1 / 30;
 const MAX_SAMPLES = 30 * 60 * 20; // 20 分鐘
@@ -44,7 +45,7 @@ export class Recorder {
       const k = r.kart, o = i * N;
       for (let j = 0; j < N; j++) {
         const f = F[j];
-        a[o + j] = f === 'dj' ? (k.boostKind === 'dj' ? 1 : 0) : BOOL.has(f) ? (k[f] ? 1 : 0) : k[f] || 0;
+        a[o + j] = f === 'jt' ? tierOf(k.boostKind) : BOOL.has(f) ? (k[f] ? 1 : 0) : k[f] || 0;
       }
     });
     this.times.push(this.time);
@@ -121,7 +122,7 @@ export class Replay {
         if (STEPPED.has(f)) v = u < 0.5 ? a : b;
         else if (ANGLE.has(f)) v = wrap(a + wrap(b - a) * u);
         else v = a + (b - a) * u;
-        if (f === 'dj') k.boostKind = v ? 'dj' : 'jet';
+        if (f === 'jt') k.boostKind = v ? 'jet' + v : 'pad';
         else k[f] = BOOL.has(f) ? v > 0.5 : v;
       }
     });

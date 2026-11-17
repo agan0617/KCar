@@ -518,15 +518,14 @@ async function main() {
     for (const e of k.events) {
       switch (e.type) {
         case 'jet': {
-          const txt = { perfect: '完美小噴！', good: '小噴', early: '小噴（太早）' }[e.q];
-          const col = { perfect: '#4cd964', good: '#ffd23f', early: '#ff9f6b' }[e.q];
-          hud.popup(txt, col, e.q === 'perfect' ? 50 : 40, 1.0, 0);
-          sfx.whoosh(e.q === 'perfect' ? 1 : 0.7);
+          // 放開甩尾時依甩尾分自動小噴（一～三段）
+          const txt = ['', '小噴', '二段小噴！', '三段小噴！！'][e.tier];
+          const col = ['', '#ffd23f', '#ff9f1c', '#5fb8ff'][e.tier];
+          hud.popup(txt, col, [0, 38, 46, 54][e.tier], 1.0, 0);
+          sfx.whoosh([0, 0.7, 0.95, 1.2][e.tier]);
           break;
         }
-        case 'dj': hud.popup('雙噴！', '#7fe0ff', 52, 1.0, 50); sfx.whoosh(1.1); break;
-        case 'djEarly': hud.popup(e.t < P.djMin ? '雙噴太快' : '雙噴太慢', '#ff9f6b', 30, 0.8, 50); break;
-        case 'jetMiss': hud.popup('錯過小噴', 'rgba(255,255,255,0.75)', 26, 0.7, 0); break;
+        case 'scrape': hud.popup('擦牆', '#ff9f6b', 28, 0.7, 50); hud.scrapeFlash = 0.8; break;
         case 'nitro': hud.popup('氮氣！', '#7fd3ff', 56, 0.9, -40); sfx.whoosh(1.4); G.shake = 0.25; break;
         case 'nitroReady': hud.popup('集氣完成 +1 氮氣', '#34d6ff', 28, 0.9, 100); sfx.beep(1320, 0.12, 'sine', 0.2); break;
         case 'wall': sfx.bump(e.impact); G.shake = Math.min(0.6, e.impact * 0.05); break;
@@ -794,6 +793,7 @@ async function main() {
         standings: G.mode === 'race' ? st.map((r) => ({ name: r.name, color: r.color, isPlayer: r.isPlayer })) : null,
         others: race.racers.filter((r) => !r.isPlayer).map((r) => ({ x: r.kart.x, z: r.kart.z, color: r.color })),
         tags: nameTags(),
+        startWindow: G.state === 'countdown' || race.clock < 0.2, // 觸控「噴」鈕只在起步噴有用的這段時間顯示
       }, k, dt);
     }
     sfx.update(k, G.state === 'race' || G.state === 'countdown' || !!G.online);

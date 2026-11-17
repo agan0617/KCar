@@ -14,16 +14,15 @@ export const RIVALS = [
 
 /**
  * 電腦強度：賽道難度 d（1～5）× 第幾位對手（0 最強、2 最弱）。
- * 數字用 tools/sim.mjs race 校準過：簡單賽道上打得好的玩家能贏，最難的賽道要接近每彎完美小噴才贏得了。
+ * 數字用 tools/sim.mjs race 校準過：簡單賽道上打得好的玩家能贏，最難的賽道要接近每彎都拿到該彎最高段小噴才贏得了。
  */
 export function rivalSkill(d, idx) {
   const t = (d - 1) / 4; // 0..1
   const lane = [-2.2, 2.2, 0][idx];
   return {
-    speed: 0.92 + 0.085 * t - idx * 0.015,
+    speed: 0.905 + 0.09 * t - idx * 0.015,
     drift: 0.88 + 0.12 * t - idx * 0.03, // 1.0 的賽道急彎不甩就撞牆，強弱改由下面幾項拉開
-    perfect: 0.25 + 0.6 * t - idx * 0.1,
-    dj: 0.15 + 0.7 * t - idx * 0.1,
+    angle: 0.35 + 0.6 * t - idx * 0.1, // 控角率
     nitro: 0.7 + 0.3 * t,
     line: 0.7 + 0.3 * t - idx * 0.06,
     lane,
