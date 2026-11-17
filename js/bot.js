@@ -117,13 +117,16 @@ export class AutoDriver {
       st.scI = bi;
       if (bd < 36) st.scOn = true; // 已經開上捷徑
       if (st.scOn && bd > 15 * 15) { st.sc = null; st.scOn = false; bi = n; } // 開上去後又離捷徑太遠（被撞開）：放棄，回主線
-      const ti = bi + Math.round((5 + v * 0.18) / sc.spacing); // 捷徑窄又彎，看近一點才不會切到草地
       // 前方 25m 的彎度決定能開多快（側向加速度約 28 m/s²）
       const j = Math.min(n - 1, bi + Math.round(25 / sc.spacing)), j0 = Math.min(n - 2, bi + 1);
       const ha = Math.atan2(P3[(j0 + 1) * 3] - P3[j0 * 3], P3[(j0 + 1) * 3 + 2] - P3[j0 * 3 + 2]);
       const hb = Math.atan2(P3[j * 3] - P3[(j - 1) * 3], P3[j * 3 + 2] - P3[(j - 1) * 3 + 2]);
       const bend = Math.abs(wrap(hb - ha));
       st.scVmax = bend < 0.05 ? 99 : Math.sqrt(28 * 25 / bend);
+      // 看多遠：捷徑彎的地方看近一點才不會切到草地；直的地方跟主線一樣看遠，不然轉向一直過頭、左右擺盪
+      // 窄捷徑（半寬 < 4.5，像雪國山道的土堤）看遠的上限也收小：切線切到水裡比擺盪更糟
+      const near = 5 + v * 0.18, far = Math.min(look, near + Math.max(0, sc.hw - 3) * 6), wB = Math.min(1, bend / 0.35);
+      const ti = bi + Math.round((far + (near - far) * wB) / sc.spacing);
       if (bi >= n - 3) { st.sc = null; st.scOn = false; } // 出捷徑了（或放棄）
       else if (ti < n) { tx = P3[ti * 3]; tz = P3[ti * 3 + 2]; onSc = true; }
       else {

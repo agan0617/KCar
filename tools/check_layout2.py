@@ -631,8 +631,8 @@ def check(name, out_dir):
     N = main.n
     print(f"== {name}（{lay.get('name', '')}，主題 {lay.get('theme', 'hills')}）")
     print(f"  長度 {main.length:.0f} m（取樣 {N} 點，間距 {main.step:.3f}）")
-    if not 1000 <= main.length <= 2600:
-        print('  ⚠ 一圈長度不在 1.0～2.6 km')
+    if not 1000 <= main.length <= 4500:
+        print('  ⚠ 一圈長度不在 1.0～4.5 km')
     # 彎道半徑
     radii = [(1 / max(abs(c), 1e-6), i) for i, c in enumerate(main.curv) if not main.gap[i]]
     rmin, ri = min(radii)

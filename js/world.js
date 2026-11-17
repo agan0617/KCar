@@ -493,11 +493,13 @@ export async function createWorld(renderer, onProgress = () => {}) {
     // v2 賽道（有逐點路寬 hw）另有碰撞資料
     if (path.hw) path.col = await fetch(`assets/${id}_col.json`).then((r) => r.json());
     // 主題的天空與照片材質（第一次載入要下載，之後走快取）
-    const th = THEMES[path.theme] || THEMES.hills;
+    // look：沿用 theme 的物件，換一套天空與光線（3.0 的長賽道用）；天空圖檔名＝look id
+    const lookId = (path.look && THEMES[path.look]) ? path.look : (path.theme || 'hills');
+    const th = THEMES[lookId] || THEMES.hills;
     const need = new Set(Object.values(DETAIL_MAT).map((v) => v[0]));
     if (th.ground.tex) need.add(th.ground.tex);
     if (th.ground.tex2) need.add(th.ground.tex2);
-    const [skyMap, aImg, rN, ...ds] = await Promise.all([loadSky(path.theme || 'hills'), asphaltP, roadNorP, ...[...need].map(loadDetail)]);
+    const [skyMap, aImg, rN, ...ds] = await Promise.all([loadSky(lookId), asphaltP, roadNorP, ...[...need].map(loadDetail)]);
     asphaltImg = aImg; roadNor = rN;
     for (const k of Object.keys(detail)) delete detail[k];
     [...need].forEach((k, i) => { if (ds[i]) detail[k] = ds[i]; });

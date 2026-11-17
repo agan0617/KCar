@@ -74,6 +74,31 @@ export const THEMES = {
     ground: { base: '#b39b4c', dots: ['rgba(205,85,40,0.6)', 'rgba(235,150,40,0.6)', 'rgba(140,110,50,0.5)'], tex: 'leaves' },
     road: { base: '#6a6560', speck: [95, 140], edge: '#fff3e0', center: 'rgba(255,235,200,0.85)' },
   },
+  // ---- 3.0 長賽道的 look（layout 的 look 欄位）：沿用某個主題的物件，換這裡的天空與光線；天空圖檔名＝look id
+  // sky：kloofendal_48d_partly_cloudy_puresky（斷崖海岸：午後、雲多一點）
+  coast: {
+    env: 0.6, exposure: 1.0, bloom: [0.3, 0.4, 1.0],
+    skyTop: '#8fbdf3', horizon: '#c3c8d6', fog: [520, 2200],
+    hemi: ['#eef7ff', '#c9b98a', 1.3], sun: ['#fff1dc', 2.8], sunDir: [0.62, 0.62, 0.48],
+    ground: { base: '#d9c48a', dots: ['rgba(255,240,200,0.6)', 'rgba(200,170,110,0.5)', 'rgba(150,170,90,0.45)'], tex: 'sand' },
+    road: { base: '#727884', speck: [100, 150], edge: '#ffffff', center: 'rgba(255,255,255,0.85)' },
+  },
+  // sky：kloofendal_43d_clear_puresky（雪峰速降：晴天）
+  alpine: {
+    env: 0.75, exposure: 1.0, bloom: [0.25, 0.4, 1.05],
+    skyTop: '#5e8fda', horizon: '#c6e3f8', fog: [520, 2200],
+    hemi: ['#eef6ff', '#c3d2e6', 1.45], sun: ['#fffaf0', 2.6], sunDir: [-0.42, 0.82, 0.38],
+    ground: { base: '#f2f6fb', dots: ['rgba(210,225,245,0.7)', 'rgba(255,255,255,0.8)', 'rgba(190,210,235,0.5)'], tex: 'snow' },
+    road: { base: '#5d6472', speck: [85, 130], edge: '#ffffff', center: 'rgba(255,255,255,0.85)' },
+  },
+  // sky：belfast_sunset_puresky（雲海絕嶺：清晨，太陽剛出來）
+  summit: {
+    env: 0.65, exposure: 1.0, bloom: [0.4, 0.45, 0.92],
+    skyTop: '#8d95c7', horizon: '#b8aab0', fog: [480, 2100],
+    hemi: ['#e8e4ff', '#6f8f4f', 1.25], sun: ['#ffd6a8', 2.5], sunDir: [0.72, 0.42, 0.3],
+    ground: { base: '#86b85a', dots: ['rgba(100,150,70,0.55)', 'rgba(150,200,100,0.5)', 'rgba(120,110,90,0.5)'], blade: true, tex: 'grass', tex2: 'dirt' },
+    road: { base: '#676d7a', speck: [90, 140], edge: '#f4f4f4', center: 'rgba(255,255,255,0.85)' },
+  },
   // sky：kloofendal_48d_partly_cloudy_puresky（調成粉紫）
   candy: {
     env: 0.65, exposure: 1.0, bloom: [0.32, 0.4, 1.0],

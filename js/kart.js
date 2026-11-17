@@ -15,6 +15,7 @@ import { SURF } from './collision.js';
 
 const DEG = Math.PI / 180;
 const KART_R = 0.85; // 車子碰撞半徑
+const MAX_CLIMB_VY = 12; // 貼地時往上速度的上限（m/s）：最陡 18% 坡以 53 m/s 爬也才約 9.5，超過的是碰撞面凸起
 const wrap = (a) => {
   while (a > Math.PI) a -= 2 * Math.PI;
   while (a < -Math.PI) a += 2 * Math.PI;
@@ -332,10 +333,12 @@ export class Kart {
         this.air = true;
         this.vy -= P.gravity * dt;
         this.y += this.vy * dt;
-        if (this.y < gy) { this.y = gy; this.air = false; this.vy = need; }
+        if (this.y < gy) { this.y = gy; this.air = false; this.vy = Math.min(need, MAX_CLIMB_VY); }
       } else {
         this.y = gy;
-        this.vy = need; // 貼地時上下速度就是地面的（只有地面突然往下掉得比重力快才會飛起來）
+        // 貼地時上下速度就是地面的（只有地面突然往下掉得比重力快才會飛起來）。
+        // 往上限速：地面一幀內突然高出幾十公分（碰撞面的小凸起）時，不能換算成幾十 m/s 的往上速度把車彈上天
+        this.vy = Math.min(need, MAX_CLIMB_VY);
       }
     }
     if (g) {

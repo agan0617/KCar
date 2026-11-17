@@ -17,6 +17,10 @@ T = {
     'candy':   dict(src='kloofendal_48d_partly_cloudy_puresky', lum=0.48, sat=1.0, top=(1.0, 0.95, 1.12), hor=(1.18, 0.92, 1.06), az=az_of([0.3, 1, 0.4]), cut=0.0),
     'sakura':  dict(src='kloppenheim_06_puresky', lum=0.40, sat=1.15, top=(0.96, 0.95, 1.06), hor=(1.08, 0.94, 1.0), az=az_of([0.4, 1, 0.25]), cut=0.0),
     'autumn':  dict(src='autumn_field_puresky', lum=0.36, sat=1.2, top=(0.98, 1.0, 1.04), hor=(1.18, 1.0, 0.8), az=az_of([-0.5, 0.75, 0.35]), cut=0.0),
+    # 3.0 長賽道的天空（look：沿用既有主題的物件，換天空與光線）
+    'coast':   dict(src='kloofendal_48d_partly_cloudy_puresky', lum=0.42, sat=1.4, top=(0.8, 0.98, 1.16), hor=(1.06, 1.02, 0.96), az=az_of([0.62, 0.62, 0.48]), cut=0.0),
+    'alpine':  dict(src='kloofendal_43d_clear_puresky', lum=0.42, sat=1.3, top=(0.76, 0.94, 1.22), hor=(0.94, 1.02, 1.12), az=az_of([-0.42, 0.82, 0.38]), cut=0.0),
+    'summit':  dict(src='belfast_sunset_puresky', lum=0.34, sat=1.12, top=(0.9, 0.95, 1.1), hor=(1.18, 1.0, 0.86), az=az_of([0.72, 0.42, 0.3]), cut=0.0),
     'snow':    dict(src='kloofendal_overcast_puresky', lum=0.62, sat=1.1, top=(0.88, 0.96, 1.12), hor=(0.96, 1.0, 1.06), az=az_of([0.3, 0.8, -0.5]), cut=0.0),
     'city':    dict(src='rooftop_night', lum=0.06, sat=1.4, top=(0.55, 0.45, 1.35), hor=(1.25, 0.55, 1.15), az=az_of([0.3, 1, 0.6]), cut=0.0, clamp=4.0, stars=700, zen_dark=0.35,
                     clean=24.0, glow=(1.7, 0.75, 1.45), glow_pow=0.7),

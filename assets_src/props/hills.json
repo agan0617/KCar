@@ -1,0 +1,471 @@
+{
+ "theme": "hills",
+ "glb": "hills.glb",
+ "generator": "tools/blender/build_props.py",
+ "generated": "2026-11-17",
+ "legend": {
+  "size": "[寬(x), 深(z), 高(y)]，公尺；原點在底部中心，正面朝 +Z",
+  "category": "tree 樹／rock 岩石／building 建築／landmark 地標／deco 點綴／trackside 賽道設施",
+  "use": "far 遠景撒／roadside 路邊（護牆外）／landmark 地標（一條賽道放一兩個）／track 跨在或貼在路面上",
+  "density": "per_ha＝撒的區域裡每公頃幾個；per_100m＝沿賽道每 100 公尺幾個（兩側合計）；per_track＝一條賽道放幾個",
+  "emissive": "發光材質（three.js 端用 bloom 發光；名稱以 P_ 開頭）"
+ },
+ "objects": [
+  {
+   "name": "pine_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 45
+   },
+   "desc": "高山松",
+   "size": [
+    7.86,
+    7.1,
+    12.0
+   ],
+   "tris": 2392,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_DarkGreen"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/PineTree_3.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "pine_b",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "高山松（矮）",
+   "size": [
+    6.52,
+    6.05,
+    9.0
+   ],
+   "tris": 1920,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_DarkGreen"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/PineTree_1.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "pine_c",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 30
+   },
+   "desc": "高山松（細高）",
+   "size": [
+    7.65,
+    6.97,
+    14.0
+   ],
+   "tris": 1576,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_DarkGreen"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/PineTree_5.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "birch_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 20
+   },
+   "desc": "白樺",
+   "size": [
+    3.64,
+    4.2,
+    10.0
+   ],
+   "tris": 1568,
+   "materials": [
+    "P_qUltimateNature_White",
+    "P_qUltimateNature_Black",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_DarkGreen"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/BirchTree_2.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "tree_a",
+   "category": "tree",
+   "use": "roadside",
+   "density": {
+    "per_ha": 20
+   },
+   "desc": "闊葉樹",
+   "size": [
+    4.79,
+    7.32,
+    9.0
+   ],
+   "tris": 2952,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_DarkGreen"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/CommonTree_2.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "pine_far_a",
+   "category": "tree",
+   "use": "far",
+   "density": {
+    "per_ha": 50
+   },
+   "desc": "卡通尖松（遠景大量撒）",
+   "size": [
+    2.78,
+    2.82,
+    11.0
+   ],
+   "tris": 78,
+   "materials": [
+    "P_kNature_woodBarkDark",
+    "P_kNature_leafsDark"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/tree_pineTallA.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  },
+  {
+   "name": "pine_far_b",
+   "category": "tree",
+   "use": "far",
+   "density": {
+    "per_ha": 40
+   },
+   "desc": "卡通圓錐松（遠景）",
+   "size": [
+    3.33,
+    3.33,
+    9.0
+   ],
+   "tris": 132,
+   "materials": [
+    "P_kNature_woodBark",
+    "P_kNature_leafsGreen"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Kenney nature-kit",
+     "file": "kenney/nature-kit/Models/GLTF format/tree_cone.glb",
+     "license": "CC0 1.0",
+     "url": "https://kenney.nl/assets/nature-kit"
+    }
+   ]
+  },
+  {
+   "name": "rock_a",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 14
+   },
+   "desc": "山岩",
+   "size": [
+    1.39,
+    1.4,
+    1.6
+   ],
+   "tris": 80,
+   "materials": [
+    "P_qUltimateNature_Rock"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Rock_2.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "rock_b",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 10
+   },
+   "desc": "山岩（大）",
+   "size": [
+    3.05,
+    4.2,
+    3.0
+   ],
+   "tris": 90,
+   "materials": [
+    "P_qUltimateNature_Rock"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Rock_5.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "rock_c",
+   "category": "rock",
+   "use": "far",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "巨岩（遠景）",
+   "size": [
+    6.18,
+    7.76,
+    6.0
+   ],
+   "tris": 94,
+   "materials": [
+    "P_qUltimateNature_Rock"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Rock_7.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "rock_moss_a",
+   "category": "rock",
+   "use": "roadside",
+   "density": {
+    "per_ha": 8
+   },
+   "desc": "青苔岩",
+   "size": [
+    1.86,
+    2.02,
+    1.4
+   ],
+   "tris": 68,
+   "materials": [
+    "P_qUltimateNature_Rock",
+    "P_qUltimateNature_Green"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Rock_Moss_3.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "bush_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 25
+   },
+   "desc": "灌木",
+   "size": [
+    1.28,
+    1.63,
+    1.2
+   ],
+   "tris": 364,
+   "materials": [
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_Berry"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Bush_1.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "bush_b",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 15
+   },
+   "desc": "莓果灌木",
+   "size": [
+    1.2,
+    1.48,
+    1.1
+   ],
+   "tris": 892,
+   "materials": [
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_Berry"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/BushBerries_1.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "flowers_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 30
+   },
+   "desc": "野花",
+   "size": [
+    0.3,
+    0.37,
+    0.5
+   ],
+   "tris": 408,
+   "materials": [
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_Cyan",
+    "P_qUltimateNature_Yellow"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/Flowers.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "log_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 6
+   },
+   "desc": "倒木",
+   "size": [
+    1.04,
+    3.1,
+    0.8
+   ],
+   "tris": 614,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_Green",
+    "P_qUltimateNature_Mushroom_Top",
+    "P_qUltimateNature_Mushroom_Bottom",
+    "P_qUltimateNature_DarkGreen"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/WoodLog_Moss.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  },
+  {
+   "name": "stump_a",
+   "category": "deco",
+   "use": "roadside",
+   "density": {
+    "per_ha": 6
+   },
+   "desc": "樹樁",
+   "size": [
+    1.97,
+    1.49,
+    0.9
+   ],
+   "tris": 232,
+   "materials": [
+    "P_qUltimateNature_Wood",
+    "P_qUltimateNature_LightWood",
+    "P_qUltimateNature_Green"
+   ],
+   "emissive": [],
+   "source": [
+    {
+     "pack": "Quaternius ultimate-nature",
+     "file": "quaternius/ultimate-nature/FBX/TreeStump.fbx",
+     "license": "CC0 1.0",
+     "url": "https://quaternius.com/packs/ultimatenature.html"
+    }
+   ]
+  }
+ ]
+}

@@ -206,3 +206,24 @@ Kenney、Quaternius 的素材都是 **CC0 1.0**（公眾領域），可商用、
 | `pumpkin_a` | Kenney graveyard-kit | `kenney/graveyard-kit/Models/GLB format/pumpkin.glb` | CC0 1.0 | https://kenney.nl/assets/graveyard-kit |
 | `leaf_pile_a` | 自製（build_props.py 程式產生） | — | 同本 repo | — |
 | `bridge_a` | Kenney nature-kit | `kenney/nature-kit/Models/GLTF format/bridge_wood.glb` | CC0 1.0 | https://kenney.nl/assets/nature-kit |
+
+## hills（`hills.glb`）
+
+| 物件 | 素材包 | 原檔 | 授權 | 來源網址 |
+|---|---|---|---|---|
+| `pine_a` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/PineTree_3.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `pine_b` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/PineTree_1.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `pine_c` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/PineTree_5.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `birch_a` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/BirchTree_2.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `tree_a` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/CommonTree_2.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `pine_far_a` | Kenney nature-kit | `kenney/nature-kit/Models/GLTF format/tree_pineTallA.glb` | CC0 1.0 | https://kenney.nl/assets/nature-kit |
+| `pine_far_b` | Kenney nature-kit | `kenney/nature-kit/Models/GLTF format/tree_cone.glb` | CC0 1.0 | https://kenney.nl/assets/nature-kit |
+| `rock_a` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/Rock_2.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `rock_b` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/Rock_5.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `rock_c` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/Rock_7.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `rock_moss_a` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/Rock_Moss_3.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `bush_a` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/Bush_1.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `bush_b` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/BushBerries_1.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `flowers_a` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/Flowers.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `log_a` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/WoodLog_Moss.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| `stump_a` | Quaternius ultimate-nature | `quaternius/ultimate-nature/FBX/TreeStump.fbx` | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |

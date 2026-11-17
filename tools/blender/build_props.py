@@ -44,7 +44,7 @@ REPO = os.path.normpath(os.path.join(HERE, '..', '..'))
 OUT = os.path.join(REPO, 'assets_src', 'props')
 TMP = os.path.join(REPO, 'tmp_layout')
 TEXD = os.path.join(TMP, 'props_tex')
-ALL_THEMES = ['common', 'beach', 'sakura', 'snow', 'city', 'volcano', 'autumn']
+ALL_THEMES = ['common', 'beach', 'sakura', 'snow', 'city', 'volcano', 'autumn', 'hills']
 
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 SRC = r'D:\GameResources\Art\KCar'
@@ -1941,8 +1941,31 @@ def theme_autumn():
     add('bridge_a', 'landmark', 'roadside', D(per_track=1), '木橋（6 m，裝飾）', imp(KN + 'bridge_wood.glb', recolor={'stone': ('AutumnStone', '#9c978d')}), s=6)
 
 
+def theme_hills():
+    """高山草原（雲海絕嶺）：綠松、白樺、闊葉樹、岩石、灌木、野花。全部來自現成素材包。"""
+    QN = 'quaternius/ultimate-nature/FBX/'
+    KN = 'kenney/nature-kit/Models/GLTF format/'
+    qn = dict(sat=1.15, val=1.05)
+    add('pine_a', 'tree', 'roadside', D(per_ha=45), '高山松', imp(QN + 'PineTree_3.fbx', **qn), h=12)
+    add('pine_b', 'tree', 'roadside', D(per_ha=40), '高山松（矮）', imp(QN + 'PineTree_1.fbx', **qn), h=9)
+    add('pine_c', 'tree', 'roadside', D(per_ha=30), '高山松（細高）', imp(QN + 'PineTree_5.fbx', **qn), h=14)
+    add('birch_a', 'tree', 'roadside', D(per_ha=20), '白樺', imp(QN + 'BirchTree_2.fbx', **qn), h=10)
+    add('tree_a', 'tree', 'roadside', D(per_ha=20), '闊葉樹', imp(QN + 'CommonTree_2.fbx', **qn), h=9)
+    add('pine_far_a', 'tree', 'far', D(per_ha=50), '卡通尖松（遠景大量撒）', imp(KN + 'tree_pineTallA.glb'), h=11)
+    add('pine_far_b', 'tree', 'far', D(per_ha=40), '卡通圓錐松（遠景）', imp(KN + 'tree_cone.glb'), h=9)
+    add('rock_a', 'rock', 'roadside', D(per_ha=14), '山岩', imp(QN + 'Rock_2.fbx', **qn), h=1.6)
+    add('rock_b', 'rock', 'roadside', D(per_ha=10), '山岩（大）', imp(QN + 'Rock_5.fbx', **qn), h=3.0)
+    add('rock_c', 'rock', 'far', D(per_ha=8), '巨岩（遠景）', imp(QN + 'Rock_7.fbx', **qn), h=6.0)
+    add('rock_moss_a', 'rock', 'roadside', D(per_ha=8), '青苔岩', imp(QN + 'Rock_Moss_3.fbx', **qn), h=1.4)
+    add('bush_a', 'deco', 'roadside', D(per_ha=25), '灌木', imp(QN + 'Bush_1.fbx', **qn), h=1.2)
+    add('bush_b', 'deco', 'roadside', D(per_ha=15), '莓果灌木', imp(QN + 'BushBerries_1.fbx', **qn), h=1.1)
+    add('flowers_a', 'deco', 'roadside', D(per_ha=30), '野花', imp(QN + 'Flowers.fbx', **qn), h=0.5)
+    add('log_a', 'deco', 'roadside', D(per_ha=6), '倒木', imp(QN + 'WoodLog_Moss.fbx', **qn), h=0.8)
+    add('stump_a', 'deco', 'roadside', D(per_ha=6), '樹樁', imp(QN + 'TreeStump.fbx', **qn), h=0.9)
+
+
 BUILDERS = dict(common=theme_common, beach=theme_beach, sakura=theme_sakura, snow=theme_snow,
-                city=theme_city, volcano=theme_volcano, autumn=theme_autumn)
+                city=theme_city, volcano=theme_volcano, autumn=theme_autumn, hills=theme_hills)
 
 # ================================================================ 輸出
 

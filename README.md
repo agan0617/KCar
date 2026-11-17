@@ -2,15 +2,20 @@
 
 抓進彎時機、控甩尾角度的卡丁車競速遊戲。網頁版：<https://agan0617.github.io/KCar/>（Android App 外殼在 [KCarApp](https://github.com/agan0617/KCarApp)）
 
-五條賽道、四種模式：**競賽**（對 3 位電腦車手 Mochi、Azuki、Kinako，3 圈）、**計時賽**（3 圈）、**自由練習**、**多人連線**（最多 4 人，空位電腦補；server 架在自己的電腦，見〈多人連線〉）。
+十條賽道、四種模式：**競賽**（對 3 位電腦車手 Mochi、Azuki、Kinako）、**計時賽**、**自由練習**、**多人連線**（最多 4 人，空位電腦補；server 架在自己的電腦，見〈多人連線〉）。一圈 2.2 km 以下的賽道跑 3 圈，3 km 以上的長賽道跑 2 圈。
 
-| 賽道 | 難度 | 主題 | 特色 |
-|---|---|---|---|
-| 椰林海灘 | ★ | 熱帶海島 | 繞著小島跑一圈：海岸傾斜掃彎（衝出去就掉進海裡）、水上木棧道、繞燈塔的大甩尾、飛越小溪的跳台、穿過椰林的沙地捷徑 |
-| 櫻花古都 | ★★ | 春天和風 | 甩尾天堂：四個半徑不同的長甩彎、S 彎練換向甩；8 字路線先從城下河邊穿過、再從拱橋上跨回來；千本鳥居、五重塔、神社參道捷徑 |
-| 雪國山道 | ★★★ | 雪山 | 之字爬坡兩個髮夾彎、山頂盲彎接大跳台、傾斜的下山掃彎、穿山冰隧道；橫越結冰湖的捷徑 |
-| 霓虹夜城 | ★★★★ | 夜晚城市 | 270° 圓環匝道爬上高架、8 字立體交叉、直角街區與直角 S 彎、下坡大直線接急彎、地下道；窄巷捷徑 |
-| 熔岩火山 | ★★★★★ | 火山 | 路窄、路旁就是熔岩：兩個飛越熔岩的跳台、連續髮夾彎爬上火山口、岩石拱橋、熔岩湖上的窄石橋捷徑 |
+| 賽道 | 難度 | 一圈 | 主題 | 特色 |
+|---|---|---|---|---|
+| 椰林海灘 | ★ | 1.7 km | 熱帶海島 | 繞著小島跑一圈：海岸傾斜掃彎（衝出去就掉進海裡）、水上木棧道、繞燈塔的大甩尾、飛越小溪的跳台、穿過椰林的沙地捷徑 |
+| 櫻花古都 | ★★ | 1.8 km | 春天和風 | 甩尾天堂：四個半徑不同的長甩彎、S 彎練換向甩；8 字路線先從城下河邊穿過、再從拱橋上跨回來；千本鳥居、五重塔、神社參道捷徑 |
+| 斷崖海岸 | ★★★ | 3.1 km | 海岸懸崖（午後） | 8 字形：懸崖邊爬坡 S 彎與海蝕洞、海角燈塔 180° 大甩、三連下坡髮夾、從高處棧橋跨過起跑直線、飛越海灣的跳台、漁村直角巷 |
+| 雪國山道 | ★★★ | 2.1 km | 雪山 | 之字爬坡兩個髮夾彎、山頂盲彎接大跳台、傾斜的下山掃彎、穿山冰隧道；橫越結冰湖的捷徑 |
+| 楓紅峽谷 | ★★★ | 3.5 km | 秋天峽谷 | 溪邊高速掃彎、三連髮夾爬上斷崖、從 58 m 高的吊橋跨過溪邊路、瀑布下坡、岩洞、飛越溪流 |
+| 霓虹夜城 | ★★★★ | 1.9 km | 夜晚城市 | 270° 圓環匝道爬上高架、8 字立體交叉、直角街區與直角 S 彎、下坡大直線接急彎、地下道；窄巷捷徑 |
+| 天際高架 | ★★★★ | 3.7 km | 夜晚城市高架 | 720° 螺旋匝道、六處立體交叉、34 m 高架上的直角連續彎、大樓之間的跳台、360° 下坡螺旋、地下隧道 |
+| 雪峰速降 | ★★★★ | 4.1 km | 雪山（晴天） | 從 110 m 山頂一路高速下坡：傾斜彎、兩個滑雪跳台、冰洞、冰湖；再沿 1.5 圈露天螺旋高架與之字髮夾爬回山頂 |
+| 熔岩火山 | ★★★★★ | 2.2 km | 火山 | 路窄、路旁就是熔岩：兩個飛越熔岩的跳台、連續髮夾彎爬上火山口、岩石拱橋、熔岩湖上的窄石橋捷徑 |
+| 雲海絕嶺 | ★★★★★ | 4.4 km | 高山（清晨雲海） | 最長最難：五連髮夾山道、隧道、稜線與盲坡爬上 140 m 的雲海觀景台，飛越峽谷，傾斜掃彎衝下山，石拱橋跨回湖畔 |
 
 電腦車手用跟玩家同一套物理，也會甩尾、點煞、放氮氣、走捷徑（走線越準越常走），小噴跟玩家一樣自動；賽道越難，牠們越強（極速、甩尾角度的控制、走線都會提高），另有輕微追趕機制（落後玩家太多會稍微加速）。
 
@@ -119,6 +124,7 @@ node tools/sim.mjs zigzag                  # 直線上左右連續短甩（蛇�
 node tools/sim.mjs race volcano 10         # 競賽：玩家自動駕駛（完美／普通）對電腦的名次分布
 node tools/sim.mjs tt sakura driftTurn=0.9 # 臨時改參數看效果
 node tools/sim.mjs tt city sc=0           # sc=0／sc=1：自動駕駛不走／一定走捷徑
+node tools/sim_walls.mjs summit race sc=1  # 完美自動駕駛在哪一段撞牆、重摔、掉落、卡住（race：跟電腦一起跑）
 ```
 
 電腦強度在 [js/race.js](js/race.js) 的 `rivalSkill`（賽道難度 × 第幾位對手）；賽道難度用 [js/tracks.js](js/tracks.js) 的 `ai`（沒寫就是星等 `difficulty`，可以有小數）。電腦怎麼開在 [js/bot.js](js/bot.js)。
@@ -150,7 +156,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\build_assets.ps1 -V2 -
 blender -b --factory-startup -P tools/blender/build_props.py -- [主題...]                          # 重產場景物件庫（素材原檔預設在 D:\GameResources\Art\KCar，別處用 --src 指定）
 ```
 
-新增賽道：照 [TRACK_DESIGN.md](tools/blender/TRACK_DESIGN.md) 寫一個 `<id>_layout.json`、在 [js/tracks.js](js/tracks.js) 加一列、跑上面的指令，再用 `node tools/sim.mjs tt <id>` 與 `race <id>` 驗收。
+新增賽道：寫一支設計腳本 `tools/tracks/<id>.py`（用 [tools/layout_lib.py](tools/layout_lib.py) 以「直線、轉彎、段尾高度」描述一圈，產生 `<id>_layout.json`；做法與踩過的坑見 [TRACK_DESIGN.md](tools/blender/TRACK_DESIGN.md)），在 [js/tracks.js](js/tracks.js) 加一列，跑上面的指令，再用 `node tools/sim.mjs tt <id>`、`race <id>` 與 `node tools/sim_walls.mjs <id>` 驗收。
+舊的五條是手寫 layout；3.0 的五條長賽道（coast、canyon、skyway、alpine、summit）都由 `tools/tracks/` 的腳本產生，改它們要改腳本、不要手改 layout。
+長賽道可以用 layout 的 `look` 欄位沿用某個主題的物件、換一套天空與光線（[js/themes.js](js/themes.js) 的 coast、alpine、summit）。
 `testbed_layout.json` 是用到所有功能的測試賽道（不在遊戲清單裡）。
 
 App 圖示：`blender -b --factory-startup -P tools\blender\render_icon.py -- . icons\icon-512.png`

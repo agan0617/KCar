@@ -782,6 +782,11 @@ for iz in range(gnz - 1):
                 if tun_portal(gx, gz):
                     nhole += 1
                     continue
+                # 隧道頂上的地形（蓋到外殼頂的那座「山」）車開不到，只留畫面、不進碰撞：
+                # 不然疊在上方的路（螺旋、交叉）查地面時會被吸到這層地形上、彈飛（3.0 雪峰速降、天際高架踩到）
+                if tun_cover(gx, gz) is not None:
+                    terrain.tri(*tri, m_ground, surf=None)
+                    continue
             terrain.tri(*tri, m_ground, surf=TERRAIN_SURF if inr else None)
             ncol_terrain += 1 if inr else 0
 t_ob = terrain.build()
@@ -1151,7 +1156,11 @@ for tr in TUN_RUNS:
                     q = (rows[k][m], rows[k][m + 1], rows[k + 1][m + 1], rows[k + 1][m])
                     if (zone > 0) == (outward > 0):
                         q = (q[1], q[0], q[3], q[2])
-                    tcov.quad(*q, m_ground, surf=TERRAIN_SURF if zone == outward else None)
+                    # 跟路面（含路緣石）重疊的格子不進碰撞：路面自己有碰撞，2 m 格的補片在傾斜彎上會凸出路面幾十公分，
+                    # 車壓過去會被彈飛（3.0 雪峰速降的螺旋隧道踩到）
+                    lo = -int(wide) + 2 * m
+                    on_road = lo < a_in and lo + 2 > -a_in
+                    tcov.quad(*q, m_ground, surf=TERRAIN_SURF if (zone == outward and not on_road) else None)
         # 擋土牆：洞口外殼外緣到隧道頂，兩側延伸到補片外
         pro = []
         for k in range(1, 10):
@@ -1184,9 +1193,10 @@ pitw = MB('PitWater')
 m_water = HZ_MAT['water']()
 for g in GAPS:
     _pi = int(math.floor(MAIN.U[g['g0']])) % len(MD['pts'])
-    g['fill'] = MD['pts'][_pi].get('gapFill') or ('lava' if THEME == 'volcano' else 'water')
+    # 缺口底下：火山填熔岩、夜晚城市是黑漆漆的深處（高架上的跳台底下不該有水）、其他填水
+    g['fill'] = MD['pts'][_pi].get('gapFill') or ('lava' if THEME == 'volcano' else 'void' if NIGHT else 'water')
 for g in GAPS:
-    m_fill = HZ_MAT.get(g['fill'], HZ_MAT['water'])()
+    m_fill = mat('PitVoid', '#0a0c12', rough=1.0) if g['fill'] == 'void' else HZ_MAT.get(g['fill'], HZ_MAT['water'])()
     for ii in (g['lip'], g['land']):
         ow = MAIN.eo(ii) + 0.8
         lat = (-ow, -MAIN.hw[ii], 0.0, MAIN.hw[ii], ow)
@@ -2020,6 +2030,7 @@ SPECIAL = {
     'snow': {'cabin_a', 'lantern_a', 'snowman_a', 'snowman_b', 'sled_a', 'ice_spikes_a'},
     'volcano': {'volcano_a', 'mountain_a', 'mountain_b', 'cliff_a', 'rock_pillar_a', 'lava_rock_a', 'lava_rock_b', 'brazier_a'},
     'autumn': {'bridge_a'},
+    'hills': set(),
 }
 RATE = {'tree_road': 0.16, 'tree_far': 12.0, 'rock_road': 0.35, 'rock_far': 0.3, 'deco_ha': 0.12, 'deco_100': 0.5, 'inside': 1.0}
 
@@ -2455,6 +2466,10 @@ def theme_autumn(rng):
     generic_nature(rng, SPECIAL['autumn'])
 
 
+def theme_hills(rng):
+    generic_nature(rng, SPECIAL['hills'], far_mul=1.4)
+
+
 NATURE_TRIS = 900_000  # 自然物件（樹、石、點綴）的面數上限
 
 
@@ -2524,7 +2539,7 @@ RNG = random.Random(9173 + sum(map(ord, TRACK)))  # 固定種子：同一份 lay
 layout_props()
 facilities(RNG)
 {'sakura': theme_sakura, 'beach': theme_beach, 'snow': theme_snow, 'volcano': theme_volcano,
- 'city': theme_city, 'autumn': theme_autumn}.get(THEME if HAS_THEME_LIB else None, lambda rng: scatter_placeholder())(RNG)
+ 'city': theme_city, 'autumn': theme_autumn, 'hills': theme_hills}.get(THEME if HAS_THEME_LIB else None, lambda rng: scatter_placeholder())(RNG)
 if THEME != 'volcano' or not HAS_THEME_LIB:
     mountains(TH['mountains'])
 props.build()
@@ -2559,6 +2574,7 @@ path = {
     'id': TRACK,
     'name': LAYOUT.get('name', TRACK),
     'theme': THEME,
+    **({'look': LAYOUT['look']} if LAYOUT.get('look') else {}),
     'difficulty': LAYOUT.get('difficulty', 1),
     'laps': LAYOUT.get('laps', 3),
     'step': round(MAIN.step, 5),
